@@ -98,6 +98,7 @@ function Lynk:CreateWindow(opts)
     Window._title = opts.Title or (opts.Name or "lynkUI v2.0")
     Window._subtitle = opts.Subtitle or "Universal Script Hub"
     Window._uiKey = opts.DefaultKeybind or Enum.KeyCode.RightControl
+    Window._shown = false
 
     -- Create ScreenGui with enhanced properties
     local screen = new("ScreenGui", {
@@ -1132,28 +1133,41 @@ function Lynk:CreateWindow(opts)
 
     -- Modified Show function to populate home tab by default
     function Window:Show()
-        if Window._screen then
-            Window._screen.Enabled = true
+        if not Window._shown then
+            Window._shown = true
+            MainFrame.Visible = true
             
-            -- Smooth entrance animation
-            Window._outline.Position = UDim2.new(0.5, 0, 0.5, 50)
-            Window._outline.Size = UDim2.new(0, 0, 0, 0)
+            -- Animate window appearance
+            MainFrame.Position = UDim2.new(0.5, 0, 0.4, 0)
+            MainFrame.Size = UDim2.new(0, 0, 0, 0)
             
-            local entranceTween = TweenService:Create(Window._outline, THEME.SlowTween, {
-                Position = UDim2.new(0.5, -500, 0.5, -300),
-                Size = UDim2.new(0, 1000, 0, 600)
-            })
-            entranceTween:Play()
+            TweenService:Create(MainFrame, THEME.MediumTween, {
+                Position = UDim2.new(0.5, -400, 0.5, -300),
+                Size = UDim2.new(0, 800, 0, 600)
+            }):Play()
             
-            -- Auto-select first tab and populate home tab
-            if #Window._tabs > 0 then
-                Window:SelectTab(Window._tabs[1].Name)
-                -- If the first tab is "Home", populate it with script cards
-                if Window._tabs[1].Name == "Home" then
-                    populateHomeTab(Window._tabs[1].Page)
+            -- Only auto-load script cards if user hasn't manually created tabs
+            if #Window._tabs == 0 then
+                -- Show first tab by default (if any exist)
+                if Window._tabs[1] then
+                    Window._tabs[1]:Show()
+                end
+                
+                -- Auto-load script cards for home tab
+                Window:LoadScriptCards()
+            else
+                -- User has manually created tabs, show the first one
+                if Window._tabs[1] then
+                    Window._tabs[1]:Show()
                 end
             end
         end
+    end
+
+    -- Added function to load script cards
+    function Window:LoadScriptCards()
+        local homeTab = Window:CreateTab("Home", "rbxassetid://17673929618")
+        populateHomeTab(homeTab.Page)
     end
 
     setmetatable(Window, {__index = Lynk})
