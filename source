@@ -350,8 +350,121 @@ function Lynk:CreateWindow(opts)
     end
     animateButton(CloseButton, Color3.fromRGB(220, 50, 50), THEME.Danger)
 
+    -- Create confirmation popup
+    local ConfirmationPopup = new("Frame", {
+        Name = "ConfirmationPopup",
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0, 0, 0, 0),
+        BackgroundColor3 = THEME.Background,
+        BorderSizePixel = 0,
+        Visible = false,
+        ZIndex = 100
+    })
+    ConfirmationPopup.Parent = BlurFrame
+    
+    local popupCorner = new("UICorner")
+    popupCorner.CornerRadius = THEME.CornerRadius
+    popupCorner.Parent = ConfirmationPopup
+
+    -- Popup outline
+    local PopupOutline = new("UIStroke", {
+        Color = THEME.Border,
+        Thickness = 2
+    })
+    PopupOutline.Parent = ConfirmationPopup
+
+    -- Popup title
+    local PopupTitle = new("TextLabel", {
+        Name = "PopupTitle",
+        Position = UDim2.new(0, 20, 0, 20),
+        Size = UDim2.new(1, -40, 0, 30),
+        BackgroundTransparency = 1,
+        Text = "Confirm Close",
+        Font = Enum.Font.GothamBold,
+        TextSize = 18,
+        TextColor3 = THEME.Text,
+        TextXAlignment = Enum.TextXAlignment.Left
+    })
+    PopupTitle.Parent = ConfirmationPopup
+
+    -- Popup message
+    local PopupMessage = new("TextLabel", {
+        Name = "PopupMessage",
+        Position = UDim2.new(0, 20, 0, 60),
+        Size = UDim2.new(1, -40, 0, 60),
+        BackgroundTransparency = 1,
+        Text = "Are you sure you want to close?\nInstead press RightCtrl to toggle the UI.",
+        Font = Enum.Font.Gotham,
+        TextSize = 14,
+        TextColor3 = THEME.TextSecondary,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextWrapped = true
+    })
+    PopupMessage.Parent = ConfirmationPopup
+
+    -- Yes button (green)
+    local YesButton = new("TextButton", {
+        Name = "YesButton",
+        Position = UDim2.new(0, 20, 1, -60),
+        Size = UDim2.new(0, 100, 0, 40),
+        BackgroundColor3 = Color3.fromRGB(46, 160, 67),
+        Text = "Yes",
+        Font = Enum.Font.GothamSemibold,
+        TextSize = 16,
+        TextColor3 = Color3.new(1, 1, 1),
+        AutoButtonColor = false
+    })
+    YesButton.Parent = ConfirmationPopup
+    
+    local yesCorner = new("UICorner")
+    yesCorner.CornerRadius = THEME.SmallCornerRadius
+    yesCorner.Parent = YesButton
+
+    -- No button (red)
+    local NoButton = new("TextButton", {
+        Name = "NoButton",
+        Position = UDim2.new(1, -120, 1, -60),
+        Size = UDim2.new(0, 100, 0, 40),
+        BackgroundColor3 = Color3.fromRGB(220, 50, 50),
+        Text = "No",
+        Font = Enum.Font.GothamSemibold,
+        TextSize = 16,
+        TextColor3 = Color3.new(1, 1, 1),
+        AutoButtonColor = false
+    })
+    NoButton.Parent = ConfirmationPopup
+    
+    local noCorner = new("UICorner")
+    noCorner.CornerRadius = THEME.SmallCornerRadius
+    noCorner.Parent = NoButton
+
+    -- Button hover effects for popup buttons
+    animateButton(YesButton, Color3.fromRGB(56, 180, 77), Color3.fromRGB(46, 160, 67))
+    animateButton(NoButton, Color3.fromRGB(240, 70, 70), Color3.fromRGB(220, 50, 50))
+
+    -- Modified close button to show popup instead of directly closing
     CloseButton.MouseButton1Click:Connect(function()
+        ConfirmationPopup.Visible = true
+        -- Animate popup appearance
+        ConfirmationPopup.Size = UDim2.new(0, 0, 0, 0)
+        TweenService:Create(ConfirmationPopup, THEME.MediumTween, {
+            Size = UDim2.new(0, 400, 0, 200)
+        }):Play()
+    end)
+
+    -- Yes button closes the entire UI
+    YesButton.MouseButton1Click:Connect(function()
         Window:Destroy()
+    end)
+
+    -- No button just hides the popup
+    NoButton.MouseButton1Click:Connect(function()
+        TweenService:Create(ConfirmationPopup, THEME.FastTween, {
+            Size = UDim2.new(0, 0, 0, 0)
+        }):Play()
+        wait(0.2)
+        ConfirmationPopup.Visible = false
     end)
 
     -- Pages container with smooth transitions
@@ -722,6 +835,22 @@ function Lynk:CreateWindow(opts)
 
     -- Initialize with opening animation
     setVisibility(true)
+
+    -- Auto-select first tab when window is created
+    function Window:Show()
+        BlurFrame.Visible = true
+        
+        -- Animate window appearance
+        Outline.Size = UDim2.new(0, 0, 0, 0)
+        TweenService:Create(Outline, THEME.SlowTween, {
+            Size = THEME.WindowSize
+        }):Play()
+        
+        -- Automatically show the first tab if no tab is currently active
+        if not Window._currentTab and #Window._tabs > 0 then
+            Window._tabs[1]:Show()
+        end
+    end
 
     setmetatable(Window, {__index = Lynk})
     return Window
