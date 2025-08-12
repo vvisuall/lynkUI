@@ -833,22 +833,326 @@ function Lynk:CreateWindow(opts)
         end
     end
 
-    -- Initialize with opening animation
-    setVisibility(true)
+    -- Script Database - You can replace this with your GitHub-hosted version
+    local SCRIPT_DATABASE = {
+        [1234567890] = { -- Example PlaceId
+            gameName = "Example Game",
+            scripts = {
+                {title = "Aimbot", description = "Advanced aimbot system", url = "https://raw.githubusercontent.com/...", hasKey = true},
+                {title = "ESP", description = "Player ESP with customization", url = "https://raw.githubusercontent.com/...", hasKey = false}
+            }
+        },
+        ["Universal"] = {
+            gameName = "Universal Scripts",
+            scripts = {
+                {title = "Fly Script", description = "Universal fly with speed control", url = "https://raw.githubusercontent.com/...", hasKey = false},
+                {title = "Noclip", description = "Walk through walls", url = "https://raw.githubusercontent.com/...", hasKey = false}
+            }
+        }
+    }
 
-    -- Auto-select first tab when window is created
+    -- Added function to get current game's PlaceId
+    local function getCurrentPlaceId()
+        return game.PlaceId
+    end
+
+    -- Added function to create script cards
+    local function createScriptCard(parent, gameData, script, position)
+        local placeId = gameData.placeId or "Universal"
+        
+        -- Card container
+        local Card = new("Frame", {
+            Name = "ScriptCard",
+            Position = position,
+            Size = UDim2.new(0, 280, 0, 200),
+            BackgroundColor3 = THEME.Card,
+            BorderSizePixel = 0
+        })
+        Card.Parent = parent
+        
+        local cardCorner = new("UICorner")
+        cardCorner.CornerRadius = THEME.SmallCornerRadius
+        cardCorner.Parent = Card
+        
+        -- Card shadow/glow effect
+        createGlow(Card, THEME.Primary, 0.8)
+        
+        -- Game thumbnail
+        local ThumbnailContainer = new("Frame", {
+            Name = "ThumbnailContainer",
+            Position = UDim2.new(0, 8, 0, 8),
+            Size = UDim2.new(1, -16, 0, 120),
+            BackgroundColor3 = THEME.Surface,
+            BorderSizePixel = 0
+        })
+        ThumbnailContainer.Parent = Card
+        
+        local thumbCorner = new("UICorner")
+        thumbCorner.CornerRadius = THEME.SmallCornerRadius
+        thumbCorner.Parent = ThumbnailContainer
+        
+        -- Game thumbnail image
+        local GameThumbnail = new("ImageLabel", {
+            Name = "GameThumbnail",
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundTransparency = 1,
+            Image = placeId ~= "Universal" and string.format("https://www.roblox.com/asset-thumbnail/image?assetId=%d&width=768&height=432&format=png", placeId) or "",
+            ScaleType = Enum.ScaleType.Crop
+        })
+        GameThumbnail.Parent = ThumbnailContainer
+        
+        local imageCorner = new("UICorner")
+        imageCorner.CornerRadius = THEME.SmallCornerRadius
+        imageCorner.Parent = GameThumbnail
+        
+        -- Universal scripts placeholder
+        if placeId == "Universal" then
+            local UniversalIcon = new("TextLabel", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Text = "🌐",
+                Font = Enum.Font.GothamBold,
+                TextSize = 48,
+                TextColor3 = THEME.Primary,
+                TextXAlignment = Enum.TextXAlignment.Center,
+                TextYAlignment = Enum.TextYAlignment.Center
+            })
+            UniversalIcon.Parent = ThumbnailContainer
+        end
+        
+        -- Key system indicator
+        if script.hasKey then
+            local KeyIndicator = new("Frame", {
+                Name = "KeyIndicator",
+                Position = UDim2.new(1, -30, 0, 8),
+                Size = UDim2.new(0, 22, 0, 22),
+                BackgroundColor3 = Color3.fromRGB(255, 193, 7),
+                BorderSizePixel = 0
+            })
+            KeyIndicator.Parent = ThumbnailContainer
+            
+            local keyCorner = new("UICorner")
+            keyCorner.CornerRadius = UDim.new(0.5, 0)
+            keyCorner.Parent = KeyIndicator
+            
+            local KeyIcon = new("TextLabel", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Text = "🔑",
+                Font = Enum.Font.GothamBold,
+                TextSize = 12,
+                TextColor3 = Color3.fromRGB(0, 0, 0),
+                TextXAlignment = Enum.TextXAlignment.Center,
+                TextYAlignment = Enum.TextYAlignment.Center
+            })
+            KeyIcon.Parent = KeyIndicator
+        end
+        
+        -- Game name
+        local GameName = new("TextLabel", {
+            Name = "GameName",
+            Position = UDim2.new(0, 12, 0, 135),
+            Size = UDim2.new(1, -24, 0, 16),
+            BackgroundTransparency = 1,
+            Text = gameData.gameName,
+            Font = Enum.Font.Gotham,
+            TextSize = 12,
+            TextColor3 = THEME.TextMuted,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextTruncate = Enum.TextTruncate.AtEnd
+        })
+        GameName.Parent = Card
+        
+        -- Script name (bigger and bolder)
+        local ScriptName = new("TextLabel", {
+            Name = "ScriptName",
+            Position = UDim2.new(0, 12, 0, 152),
+            Size = UDim2.new(1, -24, 0, 20),
+            BackgroundTransparency = 1,
+            Text = script.title,
+            Font = Enum.Font.GothamBold,
+            TextSize = 16,
+            TextColor3 = THEME.Text,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextTruncate = Enum.TextTruncate.AtEnd
+        })
+        ScriptName.Parent = Card
+        
+        -- Execute button
+        local ExecuteButton = new("TextButton", {
+            Name = "ExecuteButton",
+            Position = UDim2.new(0, 12, 0, 175),
+            Size = UDim2.new(1, -24, 0, 20),
+            BackgroundColor3 = THEME.Primary,
+            BorderSizePixel = 0,
+            Text = "Execute",
+            Font = Enum.Font.GothamSemibold,
+            TextSize = 12,
+            TextColor3 = Color3.fromRGB(255, 255, 255),
+            AutoButtonColor = false
+        })
+        ExecuteButton.Parent = Card
+        
+        local executeCorner = new("UICorner")
+        executeCorner.CornerRadius = THEME.SmallCornerRadius
+        executeCorner.Parent = ExecuteButton
+        
+        -- Execute button functionality
+        ExecuteButton.MouseButton1Click:Connect(function()
+            -- Add loading state
+            ExecuteButton.Text = "Loading..."
+            ExecuteButton.BackgroundColor3 = THEME.TextMuted
+            
+            -- Execute script (you'll need to implement the actual execution logic)
+            spawn(function()
+                local success, result = pcall(function()
+                    loadstring(game:HttpGet(script.url))()
+                end)
+                
+                wait(1) -- Brief delay for user feedback
+                
+                if success then
+                    ExecuteButton.Text = "Executed ✓"
+                    ExecuteButton.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
+                else
+                    ExecuteButton.Text = "Error ✗"
+                    ExecuteButton.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+                end
+                
+                wait(2)
+                ExecuteButton.Text = "Execute"
+                ExecuteButton.BackgroundColor3 = THEME.Primary
+            end)
+        end)
+        
+        -- Hover effects
+        ExecuteButton.MouseEnter:Connect(function()
+            TweenService:Create(ExecuteButton, THEME.FastTween, {
+                BackgroundColor3 = Color3.fromRGB(
+                    math.min(255, THEME.Primary.R * 255 + 20),
+                    math.min(255, THEME.Primary.G * 255 + 20),
+                    math.min(255, THEME.Primary.B * 255 + 20)
+                )
+            }):Play()
+        end)
+        
+        ExecuteButton.MouseLeave:Connect(function()
+            if ExecuteButton.Text == "Execute" then
+                TweenService:Create(ExecuteButton, THEME.FastTween, {
+                    BackgroundColor3 = THEME.Primary
+                }):Play()
+            end
+        end)
+        
+        return Card
+    end
+
+    -- Added function to populate home tab with script cards
+    local function populateHomeTab(homeTab)
+        -- Clear existing content
+        for _, child in pairs(homeTab:GetChildren()) do
+            if child:IsA("GuiObject") then
+                child:Destroy()
+            end
+        end
+        
+        -- Create scroll frame for cards
+        local ScrollFrame = new("ScrollingFrame", {
+            Name = "ScriptScrollFrame",
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ScrollBarThickness = 6,
+            ScrollBarImageColor3 = THEME.Primary,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y
+        })
+        ScrollFrame.Parent = homeTab
+        
+        -- Grid layout for cards
+        local GridLayout = new("UIGridLayout")
+        GridLayout.CellSize = UDim2.new(0, 280, 0, 200)
+        GridLayout.CellPadding = UDim2.new(0, 20, 0, 20)
+        GridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        GridLayout.Parent = ScrollFrame
+        
+        -- Padding for the scroll frame
+        local ScrollPadding = new("UIPadding")
+        ScrollPadding.PaddingTop = UDim.new(0, 20)
+        ScrollPadding.PaddingLeft = UDim.new(0, 20)
+        ScrollPadding.PaddingRight = UDim.new(0, 20)
+        ScrollPadding.PaddingBottom = UDim.new(0, 20)
+        ScrollPadding.Parent = ScrollFrame
+        
+        -- Get current game's scripts
+        local currentPlaceId = getCurrentPlaceId()
+        local currentGameData = SCRIPT_DATABASE[currentPlaceId]
+        
+        local cardIndex = 0
+        
+        -- Add current game's scripts first (if available)
+        if currentGameData then
+            for _, script in pairs(currentGameData.scripts) do
+                local card = createScriptCard(ScrollFrame, {
+                    placeId = currentPlaceId,
+                    gameName = currentGameData.gameName
+                }, script, UDim2.new(0, 0, 0, 0))
+                card.LayoutOrder = cardIndex
+                cardIndex = cardIndex + 1
+            end
+        end
+        
+        -- Add universal scripts
+        local universalData = SCRIPT_DATABASE["Universal"]
+        if universalData then
+            for _, script in pairs(universalData.scripts) do
+                local card = createScriptCard(ScrollFrame, {
+                    placeId = "Universal",
+                    gameName = universalData.gameName
+                }, script, UDim2.new(0, 0, 0, 0))
+                card.LayoutOrder = cardIndex
+                cardIndex = cardIndex + 1
+            end
+        end
+        
+        -- Add other games' scripts
+        for placeId, gameData in pairs(SCRIPT_DATABASE) do
+            if placeId ~= currentPlaceId and placeId ~= "Universal" then
+                for _, script in pairs(gameData.scripts) do
+                    local card = createScriptCard(ScrollFrame, {
+                        placeId = placeId,
+                        gameName = gameData.gameName
+                    }, script, UDim2.new(0, 0, 0, 0))
+                    card.LayoutOrder = cardIndex
+                    cardIndex = cardIndex + 1
+                end
+            end
+        end
+    end
+
+    -- Modified Show function to populate home tab by default
     function Window:Show()
-        BlurFrame.Visible = true
-        
-        -- Animate window appearance
-        Outline.Size = UDim2.new(0, 0, 0, 0)
-        TweenService:Create(Outline, THEME.SlowTween, {
-            Size = THEME.WindowSize
-        }):Play()
-        
-        -- Automatically show the first tab if no tab is currently active
-        if not Window._currentTab and #Window._tabs > 0 then
-            Window._tabs[1]:Show()
+        if Window._screen then
+            Window._screen.Enabled = true
+            
+            -- Smooth entrance animation
+            Window._outline.Position = UDim2.new(0.5, 0, 0.5, 50)
+            Window._outline.Size = UDim2.new(0, 0, 0, 0)
+            
+            local entranceTween = TweenService:Create(Window._outline, THEME.SlowTween, {
+                Position = UDim2.new(0.5, -500, 0.5, -300),
+                Size = UDim2.new(0, 1000, 0, 600)
+            })
+            entranceTween:Play()
+            
+            -- Auto-select first tab and populate home tab
+            if #Window._tabs > 0 then
+                Window:SelectTab(Window._tabs[1].Name)
+                -- If the first tab is "Home", populate it with script cards
+                if Window._tabs[1].Name == "Home" then
+                    populateHomeTab(Window._tabs[1].Page)
+                end
+            end
         end
     end
 
