@@ -1445,18 +1445,20 @@ function Lynk:CreateWindow(opts)
 
         ScrollFrame.Parent = homeTab
         
+        -- Fixed 2-column layout to display side by side instead of centered
         -- Calculate cell width to fit exactly 2 columns in available space
         wait() -- Wait for frame to render and get proper size
 
         local actualWidth = ScrollFrame.AbsoluteSize.X > 0 and ScrollFrame.AbsoluteSize.X or 580
-        -- Simplified calculation for exactly 2 columns with larger cards
-        local cellWidth = math.floor(actualWidth / 2) - 20 -- Account for padding and gaps
-        cellWidth = math.max(cellWidth, 270) -- Ensure cards are large enough
+        -- Calculate for exactly 2 columns with proper spacing
+        local totalPadding = 30 -- Account for left/right margins and center gap
+        local cellWidth = math.floor((actualWidth - totalPadding) / 2)
+        cellWidth = math.max(cellWidth, 260) -- Minimum card width
         
         local GridLayout = new("UIGridLayout", {
             CellSize = UDim2.new(0, cellWidth, 0, 200),
             CellPadding = UDim2.new(0, 10, 0, 15),
-            HorizontalAlignment = Enum.HorizontalAlignment.Center,
+            HorizontalAlignment = Enum.HorizontalAlignment.Left,
             VerticalAlignment = Enum.VerticalAlignment.Top,
             SortOrder = Enum.SortOrder.LayoutOrder,
             FillDirection = Enum.FillDirection.Horizontal,
