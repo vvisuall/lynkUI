@@ -1350,32 +1350,32 @@ end
         end
         
         -- Key system indicator
-    if script.hasKey then
-        local KeyIndicator = new("Frame", {
-            Name = "KeyIndicator",
-            Position = UDim2.new(1, -30, 0, 8),
-            Size = UDim2.new(0, 22, 0, 22),
-            BackgroundColor3 = Color3.fromRGB(255, 193, 7),
-            BorderSizePixel = 0
-        })
-        KeyIndicator.Parent = ThumbnailContainer
-        
-        local keyCorner = new("UICorner")
-        keyCorner.CornerRadius = UDim.new(0.5, 0)
-        keyCorner.Parent = KeyIndicator
-        
-        local KeyIcon = new("TextLabel", {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundTransparency = 1,
-            Text = "🔑",
-            Font = Enum.Font.GothamBold,
-            TextSize = 12,
-            TextColor3 = Color3.fromRGB(0, 0, 0),
-            TextXAlignment = Enum.TextXAlignment.Center,
-            TextYAlignment = Enum.TextYAlignment.Center
-        })
-        KeyIcon.Parent = KeyIndicator
-    end
+        if script.hasKey then
+            local KeyIndicator = new("Frame", {
+                Name = "KeyIndicator",
+                Position = UDim2.new(1, -30, 0, 8),
+                Size = UDim2.new(0, 22, 0, 22),
+                BackgroundColor3 = Color3.fromRGB(255, 193, 7),
+                BorderSizePixel = 0
+            })
+            KeyIndicator.Parent = ThumbnailContainer
+            
+            local keyCorner = new("UICorner")
+            keyCorner.CornerRadius = UDim.new(0.5, 0)
+            keyCorner.Parent = KeyIndicator
+            
+            local KeyIcon = new("TextLabel", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Text = "🔑",
+                Font = Enum.Font.GothamBold,
+                TextSize = 12,
+                TextColor3 = Color3.fromRGB(0, 0, 0),
+                TextXAlignment = Enum.TextXAlignment.Center,
+                TextYAlignment = Enum.TextYAlignment.Center
+            })
+            KeyIcon.Parent = KeyIndicator
+        end
         
         -- Game name
         local GameName = new("TextLabel", {
@@ -1393,18 +1393,18 @@ end
         GameName.Parent = Card
         
         -- Script name (bigger and bolder)
-    local ScriptName = new("TextLabel", {
-        Name = "ScriptName",
-        Position = UDim2.new(0, 12, 0, 152),
-        Size = UDim2.new(1, -24, 0, 20),
-        BackgroundTransparency = 1,
-        Text = script.title,
-        Font = Enum.Font.GothamBold,
-        TextSize = 16,
-        TextColor3 = THEME.Text,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        TextTruncate = Enum.TextTruncate.AtEnd
-    })
+        local ScriptName = new("TextLabel", {
+            Name = "ScriptName",
+            Position = UDim2.new(0, 12, 0, 152),
+            Size = UDim2.new(1, -24, 0, 20),
+            BackgroundTransparency = 1,
+            Text = script.title,
+            Font = Enum.Font.GothamBold,
+            TextSize = 16,
+            TextColor3 = THEME.Text,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextTruncate = Enum.TextTruncate.AtEnd
+        })
         ScriptName.Parent = Card
         
         -- Execute button
@@ -1594,8 +1594,22 @@ end
 
     -- Added function to load script cards
     function Window:LoadScriptCards()
-        local homeTab = Window:CreateTab("Home", "rbxassetid://17673929618")
+        -- Check if Home tab already exists and remove it
+        for i, tab in pairs(Window._tabs) do
+            if tab.Name == "Home" then
+                if tab.Button then tab.Button:Destroy() end
+                if tab.Page then tab.Page:Destroy() end
+                table.remove(Window._tabs, i)
+                break
+            end
+        end
+        
+        -- Create Home tab without logo icon and set as first tab
+        local homeTab = Window:CreateTab("Home", "", 1) -- Empty icon string and layout order 1
         populateHomeTab(homeTab.Page)
+        
+        -- Ensure home tab shows first
+        homeTab:Show()
     end
 
     -- Modified script card creation to use loadstrings and add click handler for sidebar
@@ -2335,8 +2349,22 @@ end
 
     -- Added function to load script cards
     function Window:LoadScriptCards()
-        local homeTab = Window:CreateTab("Home", "rbxassetid://17673929618")
+        -- Check if Home tab already exists and remove it
+        for i, tab in pairs(Window._tabs) do
+            if tab.Name == "Home" then
+                if tab.Button then tab.Button:Destroy() end
+                if tab.Page then tab.Page:Destroy() end
+                table.remove(Window._tabs, i)
+                break
+            end
+        end
+        
+        -- Create Home tab without logo icon and set as first tab
+        local homeTab = Window:CreateTab("Home", "", 1) -- Empty icon string and layout order 1
         populateHomeTab(homeTab.Page)
+        
+        -- Ensure home tab shows first
+        homeTab:Show()
     end
 
     setmetatable(Window, {__index = Lynk})
