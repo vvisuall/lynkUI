@@ -1445,9 +1445,10 @@ function Lynk:CreateWindow(opts)
 
         ScrollFrame.Parent = homeTab
         
-        -- Fixed cell width calculation to use proper sizing instead of AbsoluteSize
-        -- Fixed UIGridLayout with proper cell width calculation for 2 columns
-        local cellWidth = 280 -- Fixed width for each card
+        -- Calculate proper cell width to ensure 2 columns fit in available space
+        local availableWidth = 600 -- Approximate scroll frame width
+        local padding = 45 -- Total horizontal padding (15px * 3 gaps)
+        local cellWidth = math.floor((availableWidth - padding) / 2) -- Divide by 2 for 2 columns
         
         local GridLayout = new("UIGridLayout", {
             CellSize = UDim2.new(0, cellWidth, 0, 200),
