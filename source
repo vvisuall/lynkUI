@@ -1450,9 +1450,10 @@ function Lynk:CreateWindow(opts)
         local padding = 45 -- Total horizontal padding (15px * 3 gaps)
         local cellWidth = math.floor((availableWidth - padding) / 2) -- Divide by 2 for 2 columns
         
+        -- Fixed cell width calculation to properly fit 2 columns of 280px cards
         local GridLayout = new("UIGridLayout", {
-            CellSize = UDim2.new(0, cellWidth, 0, 200),
-            CellPadding = UDim2.new(0, 15, 0, 15),
+            CellSize = UDim2.new(0, 280, 0, 200), -- Fixed width to match card size
+            CellPadding = UDim2.new(0, 10, 0, 15),
             HorizontalAlignment = Enum.HorizontalAlignment.Left,
             VerticalAlignment = Enum.VerticalAlignment.Top,
             SortOrder = Enum.SortOrder.LayoutOrder,
