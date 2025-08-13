@@ -501,17 +501,12 @@ function Lynk:CreateWindow(opts)
         }):Play()
     end)
 
-    -- Yes button closes the entire UI
+    -- Added missing Yes and No button functionality
     YesButton.MouseButton1Click:Connect(function()
-        Window:Destroy()
+        screen:Destroy()
     end)
 
-    -- No button just hides the popup
     NoButton.MouseButton1Click:Connect(function()
-        TweenService:Create(ConfirmationPopup, THEME.FastTween, {
-            Size = UDim2.new(0, 0, 0, 0)
-        }):Play()
-        wait(0.2)
         ConfirmationPopup.Visible = false
     end)
 
@@ -1646,6 +1641,11 @@ end
         }):Play()
     end
 
+
+ THEME.MediumTween, {
+            Position = UDim2.new(1, -350, 0, 0)
+        }):Play()
+    end
 
     -- Updated close sidebar function to properly hide the sidebar
     function Window:CloseScriptSidebar()
