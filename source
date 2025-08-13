@@ -1585,6 +1585,38 @@ end
             end
         end)
         
+        -- Create scroll frame for script cards after search bar
+        local ScrollFrame = new("ScrollingFrame", {
+            Name = "ScriptScrollFrame",
+            Position = UDim2.new(0, 0, 0, 50), -- Position below search bar
+            Size = UDim2.new(1, 0, 1, -50), -- Fill remaining space
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ScrollBarThickness = 6,
+            ScrollBarImageColor3 = THEME.Primary,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y
+        })
+        ScrollFrame.Parent = homeTab
+        
+        -- Add grid layout for cards
+        local GridLayout = new("UIGridLayout", {
+            CellSize = UDim2.new(0, 280, 0, 200),
+            CellPadding = UDim2.new(0, 15, 0, 15),
+            HorizontalAlignment = Enum.HorizontalAlignment.Left,
+            VerticalAlignment = Enum.VerticalAlignment.Top,
+            SortOrder = Enum.SortOrder.LayoutOrder
+        })
+        GridLayout.Parent = ScrollFrame
+        
+        -- Add padding to scroll frame
+        local Padding = new("UIPadding", {
+            PaddingTop = UDim.new(0, 15),
+            PaddingBottom = UDim.new(0, 15),
+            PaddingLeft = UDim.new(0, 15),
+            PaddingRight = UDim.new(0, 15)
+        })
+        Padding.Parent = ScrollFrame
 
         -- Get current game's scripts
         local currentPlaceId = getCurrentPlaceId()
@@ -1650,6 +1682,7 @@ end
             
             -- Animate window appearance
             MainFrame.Position = UDim2.new(0.5, 0, 0.4, 0)
+            
             MainFrame.Size = UDim2.new(0, 0, 0, 0)
             
             TweenService:Create(MainFrame, THEME.MediumTween, {
