@@ -834,23 +834,42 @@ function Lynk:CreateWindow(opts)
         end
     end
 
-    -- Script Database - You can replace this with your GitHub-hosted version
-    local SCRIPT_DATABASE = {
-        [1234567890] = { -- Example PlaceId
-            gameName = "Example Game",
-            scripts = {
-                {title = "Aimbot", description = "Advanced aimbot system", url = "https://raw.githubusercontent.com/...", hasKey = true},
-                {title = "ESP", description = "Player ESP with customization", url = "https://raw.githubusercontent.com/...", hasKey = false}
+    -- Replace hardcoded database with dynamic GitHub loading
+    local SCRIPT_DATABASE = {}
+    local GITHUB_SCRIPTS_URL = "https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/scripts.lua" -- Replace with your actual GitHub URL
+
+    -- Function to load scripts from GitHub
+    local function loadScriptsFromGitHub()
+        local HttpService = game:GetService("HttpService")
+        local success, result = pcall(function()
+            local response = HttpService:GetAsync(GITHUB_SCRIPTS_URL)
+            local loadedScripts = loadstring(response)()
+            return loadedScripts
+        end)
+        
+        if success and result then
+            SCRIPT_DATABASE = result
+            print("✅ Scripts loaded successfully from GitHub!")
+            return true
+        else
+            warn("❌ Failed to load scripts from GitHub:", result)
+            -- Fallback database
+            SCRIPT_DATABASE = {
+                ["Universal"] = {
+                    gameName = "Universal Scripts",
+                    scripts = {
+                        {title = "Infinite Yield", description = "Admin commands for any game", url = "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source", hasKey = false},
+                        {title = "Fly Script", description = "Universal fly with speed control", url = "https://raw.githubusercontent.com/yourusername/scripts/main/universal-fly.lua", hasKey = false},
+                        {title = "Noclip", description = "Walk through walls", url = "https://raw.githubusercontent.com/yourusername/scripts/main/universal-noclip.lua", hasKey = false}
+                    }
+                }
             }
-        },
-        ["Universal"] = {
-            gameName = "Universal Scripts",
-            scripts = {
-                {title = "Fly Script", description = "Universal fly with speed control", url = "https://raw.githubusercontent.com/...", hasKey = false},
-                {title = "Noclip", description = "Walk through walls", url = "https://raw.githubusercontent.com/...", hasKey = false}
-            }
-        }
-    }
+            return false
+        end
+    end
+
+    -- Load scripts on startup
+    loadScriptsFromGitHub()
 
     -- Added function to get current game's PlaceId
     local function getCurrentPlaceId()
