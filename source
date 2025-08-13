@@ -851,69 +851,25 @@ function Lynk:CreateWindow(opts)
     end
 
     -- Fixed GitHub URL placeholder and improved error handling
-    -- Initialize SCRIPT_DATABASE as empty table to prevent nil errors
-    local SCRIPT_DATABASE = {}
-
-    local GITHUB_SCRIPTS_URL = "https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/scripts.lua"
-
-    -- Function to load scripts from GitHub
-    local function loadScriptsFromGitHub()
-        local HttpService = game:GetService("HttpService")
-        
-        -- Check if HttpService is enabled
-        if not HttpService.HttpEnabled then
-            warn("❌ HttpService is disabled! Enable it in Game Settings > Security > Allow HTTP Requests")
-            warn("Using fallback database instead...")
-            -- Set fallback database with proper structure
-            SCRIPT_DATABASE = {
-                ["Universal"] = {
-                    gameName = "Universal Scripts",
-                    scripts = {
-                        {title = "Infinite Yield", description = "Admin commands for any game", url = "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source", hasKey = false},
-                        {title = "Fly Script", description = "Universal fly with speed control", url = "https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/fly.lua", hasKey = false},
-                        {title = "Noclip", description = "Walk through walls", url = "https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/noclip.lua", hasKey = false}
-                    }
-                }
+    -- Replaced GitHub loading with embedded script database
+    local SCRIPT_DATABASE = {
+        [301549746] = { -- Counter Blox
+            gameName = "Counter Blox",
+            scripts = {
+                {title = "Lynk CB", description = "Advanced Counter Blox script", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkcb/refs/heads/main/counterblox"))()', RequiresKey = true}
             }
-            return false
-        end
-        
-        local success, result = pcall(function()
-            local response = HttpService:GetAsync(GITHUB_SCRIPTS_URL)
-            if response and response ~= "" then
-                local loadedScripts = loadstring(response)()
-                return loadedScripts
-            else
-                error("Empty response from GitHub")
-            end
-        end)
-        
-        if success and result and type(result) == "table" then
-            SCRIPT_DATABASE = result
-            print("✅ Scripts loaded successfully from GitHub!")
-            return true
-        else
-            warn("❌ Failed to load scripts from GitHub. Error:", tostring(result))
-            warn("Make sure your GitHub URL is correct and the file returns a valid table")
-            -- Ensure fallback database is always set
-            SCRIPT_DATABASE = {
-                ["Universal"] = {
-                    gameName = "Universal Scripts",
-                    scripts = {
-                        {title = "Infinite Yield", description = "Admin commands for any game", url = "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source", hasKey = false},
-                        {title = "Fly Script", description = "Universal fly with speed control", url = "https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/fly.lua", hasKey = false},
-                        {title = "Noclip", description = "Walk through walls", url = "https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/noclip.lua", hasKey = false}
-                    }
-                }
+        },
+        ["Universal"] = {
+            gameName = "Universal Scripts",
+            scripts = {
+                {title = "Infinite Yield", description = "Admin commands for any game", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()', RequiresKey = false},
+                {title = "Fly Script", description = "Universal fly with speed control", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/fly.lua"))()', RequiresKey = false},
+                {title = "Noclip", description = "Walk through walls", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/noclip.lua"))()', RequiresKey = false}
             }
-            return false
-        end
-    end
+        }
+    }
 
-    -- Load scripts immediately when library is loaded
-    loadScriptsFromGitHub()
-
-    -- Added function to get current game's PlaceId
+    -- Removed GitHub loading functions since we're using embedded database
     local function getCurrentPlaceId()
         return game.PlaceId
     end
