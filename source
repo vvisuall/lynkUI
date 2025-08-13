@@ -1448,12 +1448,13 @@ function Lynk:CreateWindow(opts)
         -- Calculate cell width to fit exactly 2 columns in available space
         wait() -- Wait for frame to render and get proper size
         local actualWidth = ScrollFrame.AbsoluteSize.X > 0 and ScrollFrame.AbsoluteSize.X or 580
-        local totalPadding = 40 -- Left + Right + gap between columns
-        local cellWidth = math.floor((actualWidth - totalPadding) / 2)
+        -- Fixed calculation to ensure only 2 columns with larger cards
+        local totalPadding = 30 -- Padding between columns and edges
+        local cellWidth = math.max(250, math.floor((actualWidth - totalPadding) / 2))
         
         local GridLayout = new("UIGridLayout", {
             CellSize = UDim2.new(0, cellWidth, 0, 200),
-            CellPadding = UDim2.new(0, 10, 0, 15),
+            CellPadding = UDim2.new(0, 15, 0, 15),
             HorizontalAlignment = Enum.HorizontalAlignment.Left,
             VerticalAlignment = Enum.VerticalAlignment.Top,
             SortOrder = Enum.SortOrder.LayoutOrder,
