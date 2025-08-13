@@ -1616,7 +1616,7 @@ end
         })
         ScrollFrame.Parent = homeTab
         
-        -- Add grid layout for cards
+        -- Added 2-column grid layout instead of single column
         local GridLayout = new("UIGridLayout", {
             CellSize = UDim2.new(0, 280, 0, 200),
             CellPadding = UDim2.new(0, 15, 0, 15),
@@ -1644,10 +1644,11 @@ end
         -- Add current game's scripts first (if available)
         if currentGameData then
             for _, script in pairs(currentGameData.scripts) do
+                -- Removed position parameter since UIGridLayout handles positioning
                 local card = createScriptCard(ScrollFrame, {
                     placeId = currentPlaceId,
                     gameName = currentGameData.gameName
-                }, script, UDim2.new(0, 0, 0, 0))
+                }, script)
                 card.LayoutOrder = cardIndex
                 -- Add keywords and description as attributes for enhanced search
                 card:SetAttribute("Keywords", script.keywords or "")
@@ -1660,10 +1661,11 @@ end
         local universalData = SCRIPT_DATABASE["Universal"]
         if universalData then
             for _, script in pairs(universalData.scripts) do
+                -- Removed position parameter since UIGridLayout handles positioning
                 local card = createScriptCard(ScrollFrame, {
                     placeId = "Universal",
                     gameName = universalData.gameName
-                }, script, UDim2.new(0, 0, 0, 0))
+                }, script)
                 card.LayoutOrder = cardIndex
                 -- Add keywords and description as attributes for enhanced search
                 card:SetAttribute("Keywords", script.keywords or "fly noclip speed universal movement")
@@ -1676,10 +1678,11 @@ end
         for placeId, gameData in pairs(SCRIPT_DATABASE) do
             if placeId ~= currentPlaceId and placeId ~= "Universal" then
                 for _, script in pairs(gameData.scripts) do
+                    -- Removed position parameter since UIGridLayout handles positioning
                     local card = createScriptCard(ScrollFrame, {
                         placeId = placeId,
                         gameName = gameData.gameName
-                    }, script, UDim2.new(0, 0, 0, 0))
+                    }, script)
                     card.LayoutOrder = cardIndex
                     -- Add keywords and description as attributes for enhanced search
                     card:SetAttribute("Keywords", script.keywords or "")
