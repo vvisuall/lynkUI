@@ -1491,54 +1491,100 @@ end
             -- Filter script cards based on search text
             local scrollFrame = homeTab:FindFirstChild("ScriptScrollFrame")
             if scrollFrame then
+                local visibleCount = 0
+                local totalCards = 0
+                
                 for _, card in pairs(scrollFrame:GetChildren()) do
-                    if card:IsA("Frame") and card.Name ~= "UIGridLayout" and card.Name ~= "UIPadding" then
-                        local titleLabel = card:FindFirstChild("ScriptTitle")
-                        local gameLabel = card:FindFirstChild("GameName")
+                    if card:IsA("Frame") and card.Name ~= "UIGridLayout" and card.Name ~= "UIPadding" and card.Name ~= "NoMatchMessage" then
+                        totalCards = totalCards + 1
+                        -- Enhanced search to check script name, game name, and keywords
+                        local scriptNameLabel = card:FindFirstChild("ScriptName")
+                        local gameNameLabel = card:FindFirstChild("GameName")
                         local visible = false
                         
-                        if titleLabel and titleLabel.Text:lower():find(searchText:lower()) then
+                        if searchText == "" then
                             visible = true
-                        elseif gameLabel and gameLabel.Text:lower():find(searchText:lower()) then
-                            visible = true
-                        elseif searchText == "" then
-                            visible = true
+                        else
+                            local searchLower = searchText:lower()
+                            
+                            -- Search in script title
+                            if scriptNameLabel and scriptNameLabel.Text:lower():find(searchLower) then
+                                visible = true
+                            end
+                            
+                            -- Search in game name
+                            if gameNameLabel and gameNameLabel.Text:lower():find(searchLower) then
+                                visible = true
+                            end
+                            
+                            -- Search in keywords (stored as attributes)
+                            local keywords = card:GetAttribute("Keywords") or ""
+                            if keywords:lower():find(searchLower) then
+                                visible = true
+                            end
+                            
+                            -- Search in description (stored as attributes)
+                            local description = card:GetAttribute("Description") or ""
+                            if description:lower():find(searchLower) then
+                                visible = true
+                            end
                         end
                         
                         card.Visible = visible
+                        if visible then
+                            visibleCount = visibleCount + 1
+                        end
                     end
+                end
+                
+                -- Add or remove "no match" message based on search results
+                local noMatchMessage = scrollFrame:FindFirstChild("NoMatchMessage")
+                if visibleCount == 0 and searchText ~= "" and totalCards > 0 then
+                    if not noMatchMessage then
+                        noMatchMessage = new("Frame", {
+                            Name = "NoMatchMessage",
+                            Size = UDim2.new(1, 0, 0, 100),
+                            BackgroundTransparency = 1,
+                            LayoutOrder = 999
+                        })
+                        noMatchMessage.Parent = scrollFrame
+                        
+                        local noMatchIcon = new("TextLabel", {
+                            Name = "NoMatchIcon",
+                            Position = UDim2.new(0.5, -25, 0, 10),
+                            Size = UDim2.new(0, 50, 0, 30),
+                            BackgroundTransparency = 1,
+                            Text = "🔍",
+                            Font = Enum.Font.GothamBold,
+                            TextSize = 24,
+                            TextColor3 = THEME.TextMuted,
+                            TextXAlignment = Enum.TextXAlignment.Center,
+                            TextYAlignment = Enum.TextYAlignment.Center
+                        })
+                        noMatchIcon.Parent = noMatchMessage
+                        
+                        local noMatchText = new("TextLabel", {
+                            Name = "NoMatchText",
+                            Position = UDim2.new(0, 0, 0, 45),
+                            Size = UDim2.new(1, 0, 0, 40),
+                            BackgroundTransparency = 1,
+                            Text = "No scripts found matching your search",
+                            Font = Enum.Font.Gotham,
+                            TextSize = 14,
+                            TextColor3 = THEME.TextMuted,
+                            TextXAlignment = Enum.TextXAlignment.Center,
+                            TextYAlignment = Enum.TextYAlignment.Center,
+                            TextWrapped = true
+                        })
+                        noMatchText.Parent = noMatchMessage
+                    end
+                    noMatchMessage.Visible = true
+                elseif noMatchMessage then
+                    noMatchMessage.Visible = false
                 end
             end
         end)
         
-        -- Create scroll frame for cards positioned below search bar
-        local ScrollFrame = new("ScrollingFrame", {
-            Name = "ScriptScrollFrame",
-            Position = UDim2.new(0, 0, 0, 60), -- Position below search bar
-            Size = UDim2.new(1, 0, 1, -60), -- Adjust size to account for search bar
-            BackgroundTransparency = 1,
-            BorderSizePixel = 0,
-            ScrollBarThickness = 6,
-            ScrollBarImageColor3 = THEME.Primary,
-            CanvasSize = UDim2.new(0, 0, 0, 0),
-            AutomaticCanvasSize = Enum.AutomaticSize.Y
-        })
-        ScrollFrame.Parent = homeTab
-        
-        -- Grid layout for cards
-        local GridLayout = new("UIGridLayout")
-        GridLayout.CellSize = UDim2.new(0, 280, 0, 200)
-        GridLayout.CellPadding = UDim2.new(0, 20, 0, 20)
-        GridLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        GridLayout.Parent = ScrollFrame
-        
-        -- Padding for the scroll frame
-        local ScrollPadding = new("UIPadding")
-        ScrollPadding.PaddingTop = UDim.new(0, 20)
-        ScrollPadding.PaddingLeft = UDim.new(0, 20)
-        ScrollPadding.PaddingRight = UDim.new(0, 20)
-        ScrollPadding.PaddingBottom = UDim.new(0, 20)
-        ScrollPadding.Parent = ScrollFrame
 
         -- Get current game's scripts
         local currentPlaceId = getCurrentPlaceId()
@@ -1554,6 +1600,9 @@ end
                     gameName = currentGameData.gameName
                 }, script, UDim2.new(0, 0, 0, 0))
                 card.LayoutOrder = cardIndex
+                -- Add keywords and description as attributes for enhanced search
+                card:SetAttribute("Keywords", script.keywords or "")
+                card:SetAttribute("Description", script.description or "")
                 cardIndex = cardIndex + 1
             end
         end
@@ -1567,6 +1616,9 @@ end
                     gameName = universalData.gameName
                 }, script, UDim2.new(0, 0, 0, 0))
                 card.LayoutOrder = cardIndex
+                -- Add keywords and description as attributes for enhanced search
+                card:SetAttribute("Keywords", script.keywords or "fly noclip speed universal movement")
+                card:SetAttribute("Description", script.description or "")
                 cardIndex = cardIndex + 1
             end
         end
@@ -1580,11 +1632,15 @@ end
                         gameName = gameData.gameName
                     }, script, UDim2.new(0, 0, 0, 0))
                     card.LayoutOrder = cardIndex
+                    -- Add keywords and description as attributes for enhanced search
+                    card:SetAttribute("Keywords", script.keywords or "")
+                    card:SetAttribute("Description", script.description or "")
                     cardIndex = cardIndex + 1
                 end
             end
         end
     end
+
 
     -- Modified Show function to populate home tab by default
     function Window:Show()
