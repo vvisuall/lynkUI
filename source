@@ -1146,8 +1146,10 @@ function Lynk:CreateWindow(opts)
     -- Updated close sidebar function to properly hide the sidebar
     function Window:CloseScriptSidebar()
         if Window._scriptSidebar then
+            -- Hide sidebar completely instead of moving to side
             local closeTween = TweenService:Create(Window._scriptSidebar, THEME.MediumTween, {
-                Position = UDim2.new(1, 0, 0, 0)
+                Position = UDim2.new(1, 0, 0, 0),
+                Visible = false
             })
             closeTween:Play()
             
@@ -1439,15 +1441,18 @@ function Lynk:CreateWindow(opts)
         })
         ScrollFrame.Parent = homeTab
         
-        -- Fixed UIGridLayout to properly show 2 columns by calculating cell width
+        -- Fixed UIGridLayout with proper cell width calculation for 2 columns
+        local availableWidth = ScrollFrame.AbsoluteSize.X - 30 -- Account for padding
+        local cellWidth = math.floor((availableWidth - 15) / 2) -- 2 columns with gap
+        
         local GridLayout = new("UIGridLayout", {
-            CellSize = UDim2.new(0, 280, 0, 200), -- Fixed width for 2 columns
+            CellSize = UDim2.new(0, cellWidth, 0, 200),
             CellPadding = UDim2.new(0, 15, 0, 15),
             HorizontalAlignment = Enum.HorizontalAlignment.Left,
             VerticalAlignment = Enum.VerticalAlignment.Top,
             SortOrder = Enum.SortOrder.LayoutOrder,
-            FillDirection = Enum.FillDirection.Horizontal, -- Added to ensure horizontal filling
-            StartCorner = Enum.StartCorner.TopLeft -- Added to ensure proper starting position
+            FillDirection = Enum.FillDirection.Horizontal,
+            StartCorner = Enum.StartCorner.TopLeft
         })
         GridLayout.Parent = ScrollFrame
         
