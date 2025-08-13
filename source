@@ -790,7 +790,23 @@ function Lynk:CreateWindow(opts)
         return SearchBox
     end
 
-    -- Utility functions for creating UI elements
+    -- Added missing CreateLabel function
+    function Window:CreateLabel(parent, text, textSize)
+        local label = new("TextLabel", {
+            Size = UDim2.new(1, 0, 0, textSize and (textSize + 10) or 30),
+            BackgroundTransparency = 1,
+            Text = text or "Label",
+            Font = Enum.Font.Gotham,
+            TextSize = textSize or 14,
+            TextColor3 = THEME.Text,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextYAlignment = Enum.TextYAlignment.Center,
+            TextWrapped = true
+        })
+        label.Parent = parent
+        return label
+    end
+
     function Window:CreateButton(parent, text, callback)
         local button = new("TextButton", {
             Size = UDim2.new(1, 0, 0, 40),
@@ -834,8 +850,7 @@ function Lynk:CreateWindow(opts)
         end
     end
 
-    -- Replace hardcoded database with dynamic GitHub loading
-    local SCRIPT_DATABASE = {}
+    -- Fixed GitHub URL placeholder and improved error handling
     local GITHUB_SCRIPTS_URL = "https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/scripts.lua" -- Replace with your actual GitHub URL
 
     -- Function to load scripts from GitHub
@@ -843,16 +858,21 @@ function Lynk:CreateWindow(opts)
         local HttpService = game:GetService("HttpService")
         local success, result = pcall(function()
             local response = HttpService:GetAsync(GITHUB_SCRIPTS_URL)
-            local loadedScripts = loadstring(response)()
-            return loadedScripts
+            if response and response ~= "" then
+                local loadedScripts = loadstring(response)()
+                return loadedScripts
+            else
+                error("Empty response from GitHub")
+            end
         end)
         
-        if success and result then
+        if success and result and type(result) == "table" then
             SCRIPT_DATABASE = result
             print("✅ Scripts loaded successfully from GitHub!")
             return true
         else
-            warn("❌ Failed to load scripts from GitHub:", result)
+            warn("❌ Failed to load scripts from GitHub. Error:", tostring(result))
+            warn("Make sure your GitHub URL is correct and the file returns a valid table")
             -- Fallback database
             SCRIPT_DATABASE = {
                 ["Universal"] = {
