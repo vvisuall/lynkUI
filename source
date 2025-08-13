@@ -83,6 +83,9 @@ local THEME = {
     FastTween = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
     MediumTween = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
     SlowTween = TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+
+    -- Additional theme colors
+    SecondaryHover = Color3.fromRGB(134, 157, 238)
 }
 
 local Lynk = {}
@@ -323,6 +326,24 @@ function Lynk:CreateWindow(opts)
     })
     Subtitle.Parent = TitleContainer
 
+    -- Added minimize button next to close button
+    local MinimizeButton = new("TextButton", {
+        Name = "MinimizeButton",
+        Position = UDim2.new(1, -110, 0, 20),
+        Size = UDim2.new(0, 40, 0, 40),
+        BackgroundColor3 = THEME.Secondary,
+        Text = "−",
+        Font = Enum.Font.GothamBold,
+        TextSize = 20,
+        TextColor3 = THEME.Text,
+        AutoButtonColor = false
+    })
+    MinimizeButton.Parent = TopBar
+    
+    local minimizeCorner = new("UICorner")
+    minimizeCorner.CornerRadius = THEME.SmallCornerRadius
+    minimizeCorner.Parent = MinimizeButton
+
     -- Close button (enhanced)
     local CloseButton = new("TextButton", {
         Name = "CloseButton",
@@ -445,6 +466,30 @@ function Lynk:CreateWindow(opts)
     -- Button hover effects for popup buttons
     animateButton(YesButton, Color3.fromRGB(56, 180, 77), Color3.fromRGB(46, 160, 67))
     animateButton(NoButton, Color3.fromRGB(240, 70, 70), Color3.fromRGB(220, 50, 50))
+    -- Added hover effect for minimize button
+    animateButton(MinimizeButton, THEME.SecondaryHover, THEME.Secondary)
+
+    -- Added minimize/maximize functionality
+    local isMinimized = false
+    local originalSize = THEME.WindowSize
+    
+    MinimizeButton.MouseButton1Click:Connect(function()
+        isMinimized = not isMinimized
+        
+        if isMinimized then
+            -- Minimize to small size
+            TweenService:Create(Outline, THEME.MediumTween, {
+                Size = UDim2.new(0, 300, 0, 80)
+            }):Play()
+            MinimizeButton.Text = "□"
+        else
+            -- Restore to original size
+            TweenService:Create(Outline, THEME.MediumTween, {
+                Size = originalSize
+            }):Play()
+            MinimizeButton.Text = "−"
+        end
+    end)
 
     -- Modified close button to show popup instead of directly closing
     CloseButton.MouseButton1Click:Connect(function()
@@ -479,6 +524,93 @@ function Lynk:CreateWindow(opts)
         ClipsDescendants = true
     })
     PagesContainer.Parent = ContentArea
+
+    -- Added keybind selector in bottom left corner
+    local KeybindSelector = new("Frame", {
+        Name = "KeybindSelector",
+        Position = UDim2.new(0, 10, 1, -50),
+        Size = UDim2.new(0, 120, 0, 35),
+        BackgroundColor3 = THEME.Secondary,
+        BorderSizePixel = 0
+    })
+    KeybindSelector.Parent = MainFrame
+    
+    local keybindCorner = new("UICorner")
+    keybindCorner.CornerRadius = THEME.SmallCornerRadius
+    keybindCorner.Parent = KeybindSelector
+
+    local KeybindLabel = new("TextLabel", {
+        Name = "KeybindLabel",
+        Position = UDim2.new(0, 5, 0, 0),
+        Size = UDim2.new(0, 80, 1, 0),
+        BackgroundTransparency = 1,
+        Text = "Keybind:",
+        Font = Enum.Font.Gotham,
+        TextSize = 12,
+        TextColor3 = THEME.Text,
+        TextXAlignment = Enum.TextXAlignment.Left
+    })
+    KeybindLabel.Parent = KeybindSelector
+
+    local KeybindButton = new("TextButton", {
+        Name = "KeybindButton",
+        Position = UDim2.new(1, -35, 0, 5),
+        Size = UDim2.new(0, 30, 0, 25),
+        BackgroundColor3 = THEME.Background,
+        Text = "INS",
+        Font = Enum.Font.GothamSemibold,
+        TextSize = 10,
+        TextColor3 = THEME.Text,
+        AutoButtonColor = false
+    })
+    KeybindButton.Parent = KeybindSelector
+    
+    local keybindButtonCorner = new("UICorner")
+    keybindButtonCorner.CornerRadius = UDim2.new(0, 4, 0, 4)
+    keybindButtonCorner.Parent = KeybindButton
+
+    -- Keybind selector functionality
+    local isWaitingForKey = false
+    
+    local function getKeyName(keyCode)
+        local keyNames = {
+            [Enum.KeyCode.Insert] = "INS",
+            [Enum.KeyCode.Delete] = "DEL",
+            [Enum.KeyCode.Home] = "HOME",
+            [Enum.KeyCode.End] = "END",
+            [Enum.KeyCode.PageUp] = "PGUP",
+            [Enum.KeyCode.PageDown] = "PGDN",
+            [Enum.KeyCode.RightControl] = "RCTRL",
+            [Enum.KeyCode.LeftControl] = "LCTRL",
+            [Enum.KeyCode.RightShift] = "RSHIFT",
+            [Enum.KeyCode.LeftShift] = "LSHIFT",
+            [Enum.KeyCode.Tab] = "TAB",
+            [Enum.KeyCode.CapsLock] = "CAPS",
+            [Enum.KeyCode.Space] = "SPACE"
+        }
+        return keyNames[keyCode] or keyCode.Name:upper()
+    end
+    
+    KeybindButton.MouseButton1Click:Connect(function()
+        if isWaitingForKey then return end
+        
+        isWaitingForKey = true
+        KeybindButton.Text = "..."
+        KeybindButton.BackgroundColor3 = THEME.Primary
+        
+        local connection
+        connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if gameProcessed then return end
+            if input.UserInputType == Enum.UserInputType.Keyboard then
+                connection:Disconnect()
+                isWaitingForKey = false
+                
+                Window._uiKey = input.KeyCode
+                KeybindButton.Text = getKeyName(input.KeyCode)
+                KeybindButton.BackgroundColor3 = THEME.Background
+            end
+        end)
+    end)
 
     -- Store references
     Window._screen = screen
@@ -1938,6 +2070,7 @@ end
         end
     end
 
+-- Removed duplicate LoadScriptCards function that was only creating Home tab
 -- Modified LoadScriptCards to populate all tabs with embedded content
 function Window:LoadScriptCards()
     -- Remove existing "Home" tab if it exists
@@ -1968,26 +2101,6 @@ function Window:LoadScriptCards()
     -- Ensure home tab shows first
     homeTab:Show()
 end
-
-    -- Added function to load script cards
-    function Window:LoadScriptCards()
-        -- Check if Home tab already exists and remove it
-        for i, tab in pairs(Window._tabs) do
-            if tab.Name == "Home" then
-                if tab.Button then tab.Button:Destroy() end
-                if tab.Page then tab.Page:Destroy() end
-                table.remove(Window._tabs, i)
-                break
-            end
-        end
-        
-        -- Create Home tab without logo icon and set as first tab
-        local homeTab = Window:CreateTab("Home", "", 1) -- Empty icon string and layout order 1
-        populateHomeTab(homeTab.Page)
-        
-        -- Ensure home tab shows first
-        homeTab:Show()
-    end
 
     setmetatable(Window, {__index = Lynk})
     return Window
