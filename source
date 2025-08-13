@@ -566,7 +566,8 @@ function Lynk:CreateWindow(opts)
     KeybindButton.Parent = KeybindSelector
     
     local keybindButtonCorner = new("UICorner")
-    keybindButtonCorner.CornerRadius = UDim2.new(0, 4, 0, 4)
+    -- Fixed CornerRadius from UDim2 to UDim
+    keybindButtonCorner.CornerRadius = UDim.new(0, 4)
     keybindButtonCorner.Parent = KeybindButton
 
     -- Keybind selector functionality
