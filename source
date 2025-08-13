@@ -1174,9 +1174,10 @@ function Lynk:CreateWindow(opts)
         local placeId = gameData.placeId or "Universal"
         
         -- Card container
+        -- reduced card size from 280x200 to 240x180 to fit 2 columns
         local Card = new("Frame", {
             Name = "ScriptCard",
-            Size = UDim2.new(0, 280, 0, 200), -- Removed position since UIGridLayout handles it
+            Size = UDim2.new(0, 240, 0, 180), -- Reduced size for 2-column layout
             BackgroundColor3 = THEME.Card,
             BorderSizePixel = 0
         })
@@ -1451,12 +1452,13 @@ function Lynk:CreateWindow(opts)
 
         local actualWidth = ScrollFrame.AbsoluteSize.X > 0 and ScrollFrame.AbsoluteSize.X or 580
         -- Calculate for exactly 2 columns with proper spacing
+        -- reduced cell width calculation and minimum width to match smaller cards
         local totalPadding = 30 -- Account for left/right margins and center gap
         local cellWidth = math.floor((actualWidth - totalPadding) / 2)
-        cellWidth = math.max(cellWidth, 260) -- Minimum card width
+        cellWidth = math.max(cellWidth, 220) -- Reduced minimum card width to 220px
         
         local GridLayout = new("UIGridLayout", {
-            CellSize = UDim2.new(0, cellWidth, 0, 200),
+            CellSize = UDim2.new(0, cellWidth, 0, 180), -- Reduced height to match card size
             CellPadding = UDim2.new(0, 10, 0, 15),
             HorizontalAlignment = Enum.HorizontalAlignment.Left,
             VerticalAlignment = Enum.VerticalAlignment.Top,
