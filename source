@@ -956,6 +956,9 @@ function Lynk:CreateWindow(opts)
             Window:CreateScriptSidebar()
         end
         
+        -- Make sidebar visible again when opening
+        Window._scriptSidebar.Visible = true
+        
         -- Clear existing content
         for _, child in pairs(Window._sidebarContent:GetChildren()) do
             if child:IsA("GuiObject") then
