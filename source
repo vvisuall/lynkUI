@@ -875,442 +875,289 @@ function Lynk:CreateWindow(opts)
     end
 
     -- Modified script card creation to use loadstrings and add click handler for sidebar
-local function createScriptCard(parent, gameData, script, position)
-    local placeId = gameData.placeId or "Universal"
-    
-    -- Card container
-    local Card = new("Frame", {
-        Name = "ScriptCard",
-        Position = position,
-        Size = UDim2.new(0, 280, 0, 200),
-        BackgroundColor3 = THEME.Card,
-        BorderSizePixel = 0
-    })
-    Card.Parent = parent
-    
-    local cardCorner = new("UICorner")
-    cardCorner.CornerRadius = THEME.SmallCornerRadius
-    cardCorner.Parent = Card
-    
-    -- Card shadow/glow effect
-    createGlow(Card, THEME.Primary, 0.8)
-    
-    -- Game thumbnail
-    local ThumbnailContainer = new("Frame", {
-        Name = "ThumbnailContainer",
-        Position = UDim2.new(0, 8, 0, 8),
-        Size = UDim2.new(1, -16, 0, 120),
-        BackgroundColor3 = THEME.Surface,
-        BorderSizePixel = 0
-    })
-    ThumbnailContainer.Parent = Card
-    
-    local thumbCorner = new("UICorner")
-    thumbCorner.CornerRadius = THEME.SmallCornerRadius
-    thumbCorner.Parent = ThumbnailContainer
-    
-    -- Game thumbnail image
-    local GameThumbnail = new("ImageLabel", {
-        Name = "GameThumbnail",
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Image = placeId ~= "Universal" and string.format("https://www.roblox.com/asset-thumbnail/image?assetId=%d&width=768&height=432&format=png", placeId) or "",
-        ScaleType = Enum.ScaleType.Crop
-    })
-    GameThumbnail.Parent = ThumbnailContainer
-    
-    local imageCorner = new("UICorner")
-    imageCorner.CornerRadius = THEME.SmallCornerRadius
-    imageCorner.Parent = GameThumbnail
-    
-    -- Universal scripts placeholder
-    if placeId == "Universal" then
-        local UniversalIcon = new("TextLabel", {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundTransparency = 1,
-            Text = "🌐",
-            Font = Enum.Font.GothamBold,
-            TextSize = 48,
-            TextColor3 = THEME.Primary,
-            TextXAlignment = Enum.TextXAlignment.Center,
-            TextYAlignment = Enum.TextYAlignment.Center
+    -- Added script sidebar system
+    function Window:CreateScriptSidebar()
+        -- Sidebar container (initially hidden off-screen)
+        local ScriptSidebar = new("Frame", {
+            Name = "ScriptSidebar",
+            Position = UDim2.new(1, 0, 0, 0),
+            Size = UDim2.new(0, 350, 1, 0),
+            BackgroundColor3 = THEME.Surface,
+            BorderSizePixel = 0,
+            ZIndex = 100
         })
-        UniversalIcon.Parent = ThumbnailContainer
-    end
-    
-    -- Key system indicator
-    if script.RequiresKey then
-        local KeyIndicator = new("Frame", {
-            Name = "KeyIndicator",
-            Position = UDim2.new(1, -30, 0, 8),
-            Size = UDim2.new(0, 22, 0, 22),
-            BackgroundColor3 = Color3.fromRGB(255, 193, 7),
-            BorderSizePixel = 0
-        })
-        KeyIndicator.Parent = ThumbnailContainer
+        ScriptSidebar.Parent = MainFrame
         
-        local keyCorner = new("UICorner")
-        keyCorner.CornerRadius = UDim.new(0.5, 0)
-        keyCorner.Parent = KeyIndicator
+        local sidebarCorner = new("UICorner")
+        sidebarCorner.CornerRadius = THEME.CornerRadius
+        sidebarCorner.Parent = ScriptSidebar
         
-        local KeyIcon = new("TextLabel", {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundTransparency = 1,
-            Text = "🔑",
+        -- Sidebar gradient
+        createGradient(ScriptSidebar, {
+            ColorSequenceKeypoint.new(0, THEME.Surface),
+            ColorSequenceKeypoint.new(1, THEME.Panel)
+        }, 90)
+        
+        -- Close button
+        local CloseButton = new("TextButton", {
+            Name = "CloseButton",
+            Position = UDim2.new(1, -40, 0, 10),
+            Size = UDim2.new(0, 30, 0, 30),
+            BackgroundColor3 = THEME.Card,
+            BorderSizePixel = 0,
+            Text = "✕",
             Font = Enum.Font.GothamBold,
-            TextSize = 12,
-            TextColor3 = Color3.fromRGB(0, 0, 0),
-            TextXAlignment = Enum.TextXAlignment.Center,
-            TextYAlignment = Enum.TextYAlignment.Center
+            TextSize = 16,
+            TextColor3 = THEME.Text,
+            ZIndex = 101
         })
-        KeyIcon.Parent = KeyIndicator
+        CloseButton.Parent = ScriptSidebar
+        
+        local closeCorner = new("UICorner")
+        closeCorner.CornerRadius = UDim.new(0.5, 0)
+        closeCorner.Parent = CloseButton
+        
+        -- Content container
+        local ContentContainer = new("ScrollingFrame", {
+            Name = "ContentContainer",
+            Position = UDim2.new(0, 20, 0, 60),
+            Size = UDim2.new(1, -40, 1, -80),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ScrollBarThickness = 6,
+            ScrollBarImageColor3 = THEME.Primary,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y,
+            ZIndex = 101
+        })
+        ContentContainer.Parent = ScriptSidebar
+        
+        local contentLayout = new("UIListLayout")
+        contentLayout.Parent = ContentContainer
+        contentLayout.Padding = UDim.new(0, 15)
+        contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        
+        -- Store references
+        Window._scriptSidebar = ScriptSidebar
+        Window._sidebarContent = ContentContainer
+        Window._sidebarCloseButton = CloseButton
+        
+        -- Close button functionality
+        CloseButton.MouseButton1Click:Connect(function()
+            Window:CloseScriptSidebar()
+        end)
+        
+        return ScriptSidebar
     end
-    
-    -- Game name
-    local GameName = new("TextLabel", {
-        Name = "GameName",
-        Position = UDim2.new(0, 12, 0, 135),
-        Size = UDim2.new(1, -24, 0, 16),
-        BackgroundTransparency = 1,
-        Text = gameData.gameName,
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        TextColor3 = THEME.TextMuted,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        TextTruncate = Enum.TextTruncate.AtEnd
-    })
-    GameName.Parent = Card
-    
-    -- Script name (bigger and bolder)
-    local ScriptName = new("TextLabel", {
-        Name = "ScriptName",
-        Position = UDim2.new(0, 12, 0, 152),
-        Size = UDim2.new(1, -24, 0, 20),
-        BackgroundTransparency = 1,
-        Text = script.Title,
-        Font = Enum.Font.GothamBold,
-        TextSize = 16,
-        TextColor3 = THEME.Text,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        TextTruncate = Enum.TextTruncate.AtEnd
-    })
-    ScriptName.Parent = Card
-    
-    -- Added click handler to open sidebar instead of direct execute button
-    local ClickButton = new("TextButton", {
-        Name = "ClickButton",
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Text = "",
-        ZIndex = 10
-    })
-    ClickButton.Parent = Card
-    
-    -- Card click functionality to open sidebar
-    ClickButton.MouseButton1Click:Connect(function()
-        Window:OpenScriptSidebar(gameData, script)
-    end)
-    
-    -- Hover effects
-    ClickButton.MouseEnter:Connect(function()
-        TweenService:Create(Card, THEME.FastTween, {
-            BackgroundColor3 = THEME.Surface
-        }):Play()
-    end)
-    
-    ClickButton.MouseLeave:Connect(function()
-        TweenService:Create(Card, THEME.FastTween, {
-            BackgroundColor3 = THEME.Card
-        }):Play()
-    end)
-    
-    return Card
-end
 
--- Added script sidebar system
-function Window:CreateScriptSidebar()
-    -- Sidebar container (initially hidden off-screen)
-    local ScriptSidebar = new("Frame", {
-        Name = "ScriptSidebar",
-        Position = UDim2.new(1, 0, 0, 0),
-        Size = UDim2.new(0, 350, 1, 0),
-        BackgroundColor3 = THEME.Surface,
-        BorderSizePixel = 0,
-        ZIndex = 100
-    })
-    ScriptSidebar.Parent = MainFrame
-    
-    local sidebarCorner = new("UICorner")
-    sidebarCorner.CornerRadius = THEME.CornerRadius
-    sidebarCorner.Parent = ScriptSidebar
-    
-    -- Sidebar gradient
-    createGradient(ScriptSidebar, {
-        ColorSequenceKeypoint.new(0, THEME.Surface),
-        ColorSequenceKeypoint.new(1, THEME.Panel)
-    }, 90)
-    
-    -- Close button
-    local CloseButton = new("TextButton", {
-        Name = "CloseButton",
-        Position = UDim2.new(1, -40, 0, 10),
-        Size = UDim2.new(0, 30, 0, 30),
-        BackgroundColor3 = THEME.Card,
-        BorderSizePixel = 0,
-        Text = "✕",
-        Font = Enum.Font.GothamBold,
-        TextSize = 16,
-        TextColor3 = THEME.Text,
-        ZIndex = 101
-    })
-    CloseButton.Parent = ScriptSidebar
-    
-    local closeCorner = new("UICorner")
-    closeCorner.CornerRadius = UDim.new(0.5, 0)
-    closeCorner.Parent = CloseButton
-    
-    -- Content container
-    local ContentContainer = new("ScrollingFrame", {
-        Name = "ContentContainer",
-        Position = UDim2.new(0, 20, 0, 60),
-        Size = UDim2.new(1, -40, 1, -80),
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        ScrollBarThickness = 6,
-        ScrollBarImageColor3 = THEME.Primary,
-        CanvasSize = UDim2.new(0, 0, 0, 0),
-        AutomaticCanvasSize = Enum.AutomaticSize.Y,
-        ZIndex = 101
-    })
-    ContentContainer.Parent = ScriptSidebar
-    
-    local contentLayout = new("UIListLayout")
-    contentLayout.Parent = ContentContainer
-    contentLayout.Padding = UDim.new(0, 15)
-    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    
-    -- Store references
-    Window._scriptSidebar = ScriptSidebar
-    Window._sidebarContent = ContentContainer
-    Window._sidebarCloseButton = CloseButton
-    
-    -- Close button functionality
-    CloseButton.MouseButton1Click:Connect(function()
-        Window:CloseScriptSidebar()
-    end)
-    
-    return ScriptSidebar
-end
-
--- Added function to open sidebar with script details
-function Window:OpenScriptSidebar(gameData, script)
-    if not Window._scriptSidebar then
-        Window:CreateScriptSidebar()
-    end
-    
-    -- Clear existing content
-    for _, child in pairs(Window._sidebarContent:GetChildren()) do
-        if child:IsA("GuiObject") then
-            child:Destroy()
+    -- Added function to open sidebar with script details
+    function Window:OpenScriptSidebar(gameData, script)
+        if not Window._scriptSidebar then
+            Window:CreateScriptSidebar()
         end
-    end
-    
-    local placeId = gameData.placeId or "Universal"
-    
-    -- Game thumbnail (larger version)
-    local ThumbnailContainer = new("Frame", {
-        Name = "SidebarThumbnail",
-        Size = UDim2.new(1, 0, 0, 180),
-        BackgroundColor3 = THEME.Card,
-        BorderSizePixel = 0,
-        LayoutOrder = 1,
-        ZIndex = 102
-    })
-    ThumbnailContainer.Parent = Window._sidebarContent
-    
-    local thumbCorner = new("UICorner")
-    thumbCorner.CornerRadius = THEME.SmallCornerRadius
-    thumbCorner.Parent = ThumbnailContainer
-    
-    local GameThumbnail = new("ImageLabel", {
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Image = placeId ~= "Universal" and string.format("https://www.roblox.com/asset-thumbnail/image?assetId=%d&width=768&height=432&format=png", placeId) or "",
-        ScaleType = Enum.ScaleType.Crop,
-        ZIndex = 102
-    })
-    GameThumbnail.Parent = ThumbnailContainer
-    
-    local imageCorner = new("UICorner")
-    imageCorner.CornerRadius = THEME.SmallCornerRadius
-    imageCorner.Parent = GameThumbnail
-    
-    -- Universal placeholder
-    if placeId == "Universal" then
-        local UniversalIcon = new("TextLabel", {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundTransparency = 1,
-            Text = "🌐",
-            Font = Enum.Font.GothamBold,
-            TextSize = 64,
-            TextColor3 = THEME.Primary,
-            TextXAlignment = Enum.TextXAlignment.Center,
-            TextYAlignment = Enum.TextYAlignment.Center,
+        
+        -- Clear existing content
+        for _, child in pairs(Window._sidebarContent:GetChildren()) do
+            if child:IsA("GuiObject") then
+                child:Destroy()
+            end
+        end
+        
+        local placeId = gameData.placeId or "Universal"
+        
+        -- Game thumbnail (larger version)
+        local ThumbnailContainer = new("Frame", {
+            Name = "SidebarThumbnail",
+            Size = UDim2.new(1, 0, 0, 180),
+            BackgroundColor3 = THEME.Card,
+            BorderSizePixel = 0,
+            LayoutOrder = 1,
             ZIndex = 102
         })
-        UniversalIcon.Parent = ThumbnailContainer
-    end
-    
-    -- Key indicator (if needed)
-    if script.RequiresKey then
-        local KeyIndicator = new("Frame", {
-            Position = UDim2.new(1, -35, 0, 10),
-            Size = UDim2.new(0, 25, 0, 25),
-            BackgroundColor3 = Color3.fromRGB(255, 193, 7),
-            BorderSizePixel = 0,
-            ZIndex = 103
-        })
-        KeyIndicator.Parent = ThumbnailContainer
+        ThumbnailContainer.Parent = Window._sidebarContent
         
-        local keyCorner = new("UICorner")
-        keyCorner.CornerRadius = UDim.new(0.5, 0)
-        keyCorner.Parent = KeyIndicator
+        local thumbCorner = new("UICorner")
+        thumbCorner.CornerRadius = THEME.SmallCornerRadius
+        thumbCorner.Parent = ThumbnailContainer
         
-        local KeyIcon = new("TextLabel", {
+        local GameThumbnail = new("ImageLabel", {
             Size = UDim2.new(1, 0, 1, 0),
             BackgroundTransparency = 1,
-            Text = "🔑",
-            Font = Enum.Font.GothamBold,
-            TextSize = 14,
-            TextColor3 = Color3.fromRGB(0, 0, 0),
-            TextXAlignment = Enum.TextXAlignment.Center,
-            TextYAlignment = Enum.TextYAlignment.Center,
-            ZIndex = 103
+            Image = placeId ~= "Universal" and string.format("https://www.roblox.com/asset-thumbnail/image?assetId=%d&width=768&height=432&format=png", placeId) or "",
+            ScaleType = Enum.ScaleType.Crop,
+            ZIndex = 102
         })
-        KeyIcon.Parent = KeyIndicator
-    end
-    
-    -- Game name
-    local GameNameLabel = new("TextLabel", {
-        Name = "SidebarGameName",
-        Size = UDim2.new(1, 0, 0, 20),
-        BackgroundTransparency = 1,
-        Text = gameData.gameName,
-        Font = Enum.Font.Gotham,
-        TextSize = 14,
-        TextColor3 = THEME.TextMuted,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        LayoutOrder = 2,
-        ZIndex = 102
-    })
-    GameNameLabel.Parent = Window._sidebarContent
-    
-    -- Script name (large and bold)
-    local ScriptNameLabel = new("TextLabel", {
-        Name = "SidebarScriptName",
-        Size = UDim2.new(1, 0, 0, 30),
-        BackgroundTransparency = 1,
-        Text = script.Title,
-        Font = Enum.Font.GothamBold,
-        TextSize = 20,
-        TextColor3 = THEME.Text,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        LayoutOrder = 3,
-        ZIndex = 102
-    })
-    ScriptNameLabel.Parent = Window._sidebarContent
-    
-    -- Description (if available)
-    if script.Description then
-        local DescriptionLabel = new("TextLabel", {
-            Name = "SidebarDescription",
-            Size = UDim2.new(1, 0, 0, 0),
+        GameThumbnail.Parent = ThumbnailContainer
+        
+        local imageCorner = new("UICorner")
+        imageCorner.CornerRadius = THEME.SmallCornerRadius
+        imageCorner.Parent = GameThumbnail
+        
+        -- Universal placeholder
+        if placeId == "Universal" then
+            local UniversalIcon = new("TextLabel", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Text = "🌐",
+                Font = Enum.Font.GothamBold,
+                TextSize = 64,
+                TextColor3 = THEME.Primary,
+                TextXAlignment = Enum.TextXAlignment.Center,
+                TextYAlignment = Enum.TextYAlignment.Center,
+                ZIndex = 102
+            })
+            UniversalIcon.Parent = ThumbnailContainer
+        end
+        
+        -- Key indicator (if needed)
+        if script.RequiresKey then
+            local KeyIndicator = new("Frame", {
+                Position = UDim2.new(1, -35, 0, 10),
+                Size = UDim2.new(0, 25, 0, 25),
+                BackgroundColor3 = Color3.fromRGB(255, 193, 7),
+                BorderSizePixel = 0,
+                ZIndex = 103
+            })
+            KeyIndicator.Parent = ThumbnailContainer
+            
+            local keyCorner = new("UICorner")
+            keyCorner.CornerRadius = UDim.new(0.5, 0)
+            keyCorner.Parent = KeyIndicator
+            
+            local KeyIcon = new("TextLabel", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Text = "🔑",
+                Font = Enum.Font.GothamBold,
+                TextSize = 14,
+                TextColor3 = Color3.fromRGB(0, 0, 0),
+                TextXAlignment = Enum.TextXAlignment.Center,
+                TextYAlignment = Enum.TextYAlignment.Center,
+                ZIndex = 103
+            })
+            KeyIcon.Parent = KeyIndicator
+        end
+        
+        -- Game name
+        local GameNameLabel = new("TextLabel", {
+            Name = "SidebarGameName",
+            Size = UDim2.new(1, 0, 0, 20),
             BackgroundTransparency = 1,
-            Text = script.Description,
+            Text = gameData.gameName,
             Font = Enum.Font.Gotham,
-            TextSize = 13,
+            TextSize = 14,
             TextColor3 = THEME.TextMuted,
             TextXAlignment = Enum.TextXAlignment.Left,
-            TextYAlignment = Enum.TextYAlignment.Top,
-            TextWrapped = true,
-            AutomaticSize = Enum.AutomaticSize.Y,
-            LayoutOrder = 4,
+            LayoutOrder = 2,
             ZIndex = 102
         })
-        DescriptionLabel.Parent = Window._sidebarContent
-    end
-    
-    -- Execute button (large and prominent)
-    local ExecuteButton = new("TextButton", {
-        Name = "SidebarExecuteButton",
-        Size = UDim2.new(1, 0, 0, 50),
-        BackgroundColor3 = Color3.fromRGB(34, 197, 94),
-        BorderSizePixel = 0,
-        Text = "Execute Script",
-        Font = Enum.Font.GothamBold,
-        TextSize = 16,
-        TextColor3 = Color3.fromRGB(255, 255, 255),
-        AutoButtonColor = false,
-        LayoutOrder = 5,
-        ZIndex = 102
-    })
-    ExecuteButton.Parent = Window._sidebarContent
-    
-    local executeCorner = new("UICorner")
-    executeCorner.CornerRadius = THEME.SmallCornerRadius
-    executeCorner.Parent = ExecuteButton
-    
-    -- Execute button functionality
-    ExecuteButton.MouseButton1Click:Connect(function()
-        ExecuteButton.Text = "Executing..."
-        ExecuteButton.BackgroundColor3 = THEME.TextMuted
+        GameNameLabel.Parent = Window._sidebarContent
         
-        spawn(function()
-            local success, result = pcall(function()
-                loadstring(script.LoadString)()
-            end)
+        -- Script name (large and bold)
+        local ScriptNameLabel = new("TextLabel", {
+            Name = "SidebarScriptName",
+            Size = UDim2.new(1, 0, 0, 30),
+            BackgroundTransparency = 1,
+            Text = script.Title,
+            Font = Enum.Font.GothamBold,
+            TextSize = 20,
+            TextColor3 = THEME.Text,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            LayoutOrder = 3,
+            ZIndex = 102
+        })
+        ScriptNameLabel.Parent = Window._sidebarContent
+        
+        -- Description (if available)
+        if script.Description then
+            local DescriptionLabel = new("TextLabel", {
+                Name = "SidebarDescription",
+                Size = UDim2.new(1, 0, 0, 0),
+                BackgroundTransparency = 1,
+                Text = script.Description,
+                Font = Enum.Font.Gotham,
+                TextSize = 13,
+                TextColor3 = THEME.TextMuted,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextYAlignment = Enum.TextYAlignment.Top,
+                TextWrapped = true,
+                AutomaticSize = Enum.AutomaticSize.Y,
+                LayoutOrder = 4,
+                ZIndex = 102
+            })
+            DescriptionLabel.Parent = Window._sidebarContent
+        end
+        
+        -- Execute button (large and prominent)
+        local ExecuteButton = new("TextButton", {
+            Name = "SidebarExecuteButton",
+            Size = UDim2.new(1, 0, 0, 50),
+            BackgroundColor3 = Color3.fromRGB(34, 197, 94),
+            BorderSizePixel = 0,
+            Text = "Execute Script",
+            Font = Enum.Font.GothamBold,
+            TextSize = 16,
+            TextColor3 = Color3.fromRGB(255, 255, 255),
+            AutoButtonColor = false,
+            LayoutOrder = 5,
+            ZIndex = 102
+        })
+        ExecuteButton.Parent = Window._sidebarContent
+        
+        local executeCorner = new("UICorner")
+        executeCorner.CornerRadius = THEME.SmallCornerRadius
+        executeCorner.Parent = ExecuteButton
+        
+        -- Execute button functionality
+        ExecuteButton.MouseButton1Click:Connect(function()
+            ExecuteButton.Text = "Executing..."
+            ExecuteButton.BackgroundColor3 = THEME.TextMuted
             
-            wait(1)
-            
-            if success then
-                ExecuteButton.Text = "Executed Successfully ✓"
+            spawn(function()
+                local success, result = pcall(function()
+                    loadstring(script.LoadString)()
+                end)
+                
+                wait(1)
+                
+                if success then
+                    ExecuteButton.Text = "Executed Successfully ✓"
+                    ExecuteButton.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
+                else
+                    ExecuteButton.Text = "Execution Failed ✗"
+                    ExecuteButton.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+                    warn("Script execution failed:", result)
+                end
+                
+                wait(3)
+                ExecuteButton.Text = "Execute Script"
                 ExecuteButton.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
-            else
-                ExecuteButton.Text = "Execution Failed ✗"
-                ExecuteButton.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
-                warn("Script execution failed:", result)
-            end
-            
-            wait(3)
-            ExecuteButton.Text = "Execute Script"
-            ExecuteButton.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
+            end)
         end)
-    end)
-    
-    -- Animate sidebar in
-    TweenService:Create(Window._scriptSidebar, THEME.MediumTween, {
-        Position = UDim2.new(1, -350, 0, 0)
-    }):Play()
-end
-
--- Added function to close sidebar
-function Window:CloseScriptSidebar()
-    if Window._scriptSidebar then
+        
+        -- Animate sidebar in
         TweenService:Create(Window._scriptSidebar, THEME.MediumTween, {
-            Position = UDim2.new(1, 0, 0, 0)
+            Position = UDim2.new(1, -350, 0, 0)
         }):Play()
     end
-end
 
-    -- Added function to create script cards
+    -- Added function to close sidebar
+    function Window:CloseScriptSidebar()
+        if Window._scriptSidebar then
+            TweenService:Create(Window._scriptSidebar, THEME.MediumTween, {
+                Position = UDim2.new(1, 0, 0, 0)
+            }):Play()
+        end
+    end
+
+    -- Removed duplicate createScriptCard function and fixed property name inconsistencies
     local function createScriptCard(parent, gameData, script, position)
         local placeId = gameData.placeId or "Universal"
         
         -- Card container
         local Card = new("Frame", {
             Name = "ScriptCard",
-            Position = position,
-            Size = UDim2.new(0, 280, 0, 200),
+            Size = UDim2.new(0, 280, 0, 200), -- Removed position since UIGridLayout handles it
             BackgroundColor3 = THEME.Card,
             BorderSizePixel = 0
         })
@@ -1367,7 +1214,7 @@ end
         end
         
         -- Key system indicator
-        if script.hasKey then
+        if script.RequiresKey then
             local KeyIndicator = new("Frame", {
                 Name = "KeyIndicator",
                 Position = UDim2.new(1, -30, 0, 8),
@@ -1389,7 +1236,7 @@ end
                 TextSize = 12,
                 TextColor3 = Color3.fromRGB(0, 0, 0),
                 TextXAlignment = Enum.TextXAlignment.Center,
-                TextYAlignment = Enum.TextYalignment.Center
+                TextYAlignment = Enum.TextYAlignment.Center
             })
             KeyIcon.Parent = KeyIndicator
         end
@@ -1415,7 +1262,7 @@ end
             Position = UDim2.new(0, 12, 0, 152),
             Size = UDim2.new(1, -24, 0, 20),
             BackgroundTransparency = 1,
-            Text = script.title,
+            Text = script.Title or script.title, -- Fixed to handle both Title and title properties
             Font = Enum.Font.GothamBold,
             TextSize = 16,
             TextColor3 = THEME.Text,
@@ -1424,70 +1271,32 @@ end
         })
         ScriptName.Parent = Card
         
-        -- Execute button
-        local ExecuteButton = new("TextButton", {
-            Name = "ExecuteButton",
-            Position = UDim2.new(0, 12, 0, 175),
-            Size = UDim2.new(1, -24, 0, 20),
-            BackgroundColor3 = THEME.Primary,
-            BorderSizePixel = 0,
-            Text = "Execute",
-            Font = Enum.Font.GothamSemibold,
-            TextSize = 12,
-            TextColor3 = Color3.fromRGB(255, 255, 255),
-            AutoButtonColor = false
+        -- Added click handler to open sidebar instead of direct execute button
+        local ClickButton = new("TextButton", {
+            Name = "ClickButton",
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundTransparency = 1,
+            Text = "",
+            ZIndex = 10
         })
-        ExecuteButton.Parent = Card
+        ClickButton.Parent = Card
         
-        local executeCorner = new("UICorner")
-        executeCorner.CornerRadius = THEME.SmallCornerRadius
-        executeCorner.Parent = ExecuteButton
-        
-        -- Execute button functionality
-        ExecuteButton.MouseButton1Click:Connect(function()
-            -- Add loading state
-            ExecuteButton.Text = "Loading..."
-            ExecuteButton.BackgroundColor3 = THEME.TextMuted
-            
-            -- Execute script (you'll need to implement the actual execution logic)
-            spawn(function()
-                local success, result = pcall(function()
-                    loadstring(game:HttpGet(script.url))()
-                end)
-                
-                wait(1) -- Brief delay for user feedback
-                
-                if success then
-                    ExecuteButton.Text = "Executed ✓"
-                    ExecuteButton.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
-                else
-                    ExecuteButton.Text = "Error ✗"
-                    ExecuteButton.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
-                end
-                
-                wait(2)
-                ExecuteButton.Text = "Execute"
-                ExecuteButton.BackgroundColor3 = THEME.Primary
-            end)
+        -- Card click functionality to open sidebar
+        ClickButton.MouseButton1Click:Connect(function()
+            Window:OpenScriptSidebar(gameData, script)
         end)
         
         -- Hover effects
-        ExecuteButton.MouseEnter:Connect(function()
-            TweenService:Create(ExecuteButton, THEME.FastTween, {
-                BackgroundColor3 = Color3.fromRGB(
-                    math.min(255, THEME.Primary.R * 255 + 20),
-                    math.min(255, THEME.Primary.G * 255 + 20),
-                    math.min(255, THEME.Primary.B * 255 + 20)
-                )
+        ClickButton.MouseEnter:Connect(function()
+            TweenService:Create(Card, THEME.FastTween, {
+                BackgroundColor3 = THEME.Surface
             }):Play()
         end)
         
-        ExecuteButton.MouseLeave:Connect(function()
-            if ExecuteButton.Text == "Execute" then
-                TweenService:Create(ExecuteButton, THEME.FastTween, {
-                    BackgroundColor3 = THEME.Primary
-                }):Play()
-            end
+        ClickButton.MouseLeave:Connect(function()
+            TweenService:Create(Card, THEME.FastTween, {
+                BackgroundColor3 = THEME.Card
+            }):Play()
         end)
         
         return Card
@@ -1616,13 +1425,15 @@ end
         })
         ScrollFrame.Parent = homeTab
         
-        -- Added 2-column grid layout instead of single column
+        -- Fixed UIGridLayout to properly show 2 columns by calculating cell width
         local GridLayout = new("UIGridLayout", {
-            CellSize = UDim2.new(0, 280, 0, 200),
+            CellSize = UDim2.new(0, 280, 0, 200), -- Fixed width for 2 columns
             CellPadding = UDim2.new(0, 15, 0, 15),
             HorizontalAlignment = Enum.HorizontalAlignment.Left,
             VerticalAlignment = Enum.VerticalAlignment.Top,
-            SortOrder = Enum.SortOrder.LayoutOrder
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            FillDirection = Enum.FillDirection.Horizontal, -- Added to ensure horizontal filling
+            StartCorner = Enum.StartCorner.TopLeft -- Added to ensure proper starting position
         })
         GridLayout.Parent = ScrollFrame
         
