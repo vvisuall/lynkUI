@@ -851,11 +851,31 @@ function Lynk:CreateWindow(opts)
     end
 
     -- Fixed GitHub URL placeholder and improved error handling
-    local GITHUB_SCRIPTS_URL = "https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/scripts.lua" -- Replace with your actual GitHub URL
+    -- Updated GitHub URL to user's actual repository and added HttpService check
+    local GITHUB_SCRIPTS_URL = "https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/scripts.lua"
 
     -- Function to load scripts from GitHub
     local function loadScriptsFromGitHub()
         local HttpService = game:GetService("HttpService")
+        
+        -- Check if HttpService is enabled
+        if not HttpService.HttpEnabled then
+            warn("❌ HttpService is disabled! Enable it in Game Settings > Security > Allow HTTP Requests")
+            warn("Using fallback database instead...")
+            -- Use fallback database
+            SCRIPT_DATABASE = {
+                ["Universal"] = {
+                    gameName = "Universal Scripts",
+                    scripts = {
+                        {title = "Infinite Yield", description = "Admin commands for any game", url = "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source", hasKey = false},
+                        {title = "Fly Script", description = "Universal fly with speed control", url = "https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/fly.lua", hasKey = false},
+                        {title = "Noclip", description = "Walk through walls", url = "https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/noclip.lua", hasKey = false}
+                    }
+                }
+            }
+            return false
+        end
+        
         local success, result = pcall(function()
             local response = HttpService:GetAsync(GITHUB_SCRIPTS_URL)
             if response and response ~= "" then
@@ -879,17 +899,14 @@ function Lynk:CreateWindow(opts)
                     gameName = "Universal Scripts",
                     scripts = {
                         {title = "Infinite Yield", description = "Admin commands for any game", url = "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source", hasKey = false},
-                        {title = "Fly Script", description = "Universal fly with speed control", url = "https://raw.githubusercontent.com/yourusername/scripts/main/universal-fly.lua", hasKey = false},
-                        {title = "Noclip", description = "Walk through walls", url = "https://raw.githubusercontent.com/yourusername/scripts/main/universal-noclip.lua", hasKey = false}
+                        {title = "Fly Script", description = "Universal fly with speed control", url = "https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/fly.lua", hasKey = false},
+                        {title = "Noclip", description = "Walk through walls", url = "https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/noclip.lua", hasKey = false}
                     }
                 }
             }
             return false
         end
     end
-
-    -- Load scripts on startup
-    loadScriptsFromGitHub()
 
     -- Added function to get current game's PlaceId
     local function getCurrentPlaceId()
