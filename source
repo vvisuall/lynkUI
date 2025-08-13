@@ -97,7 +97,8 @@ function Lynk:CreateWindow(opts)
     Window._logo = opts.Logo or "rbxassetid://17673929618"
     Window._title = opts.Title or (opts.Name or "lynkUI v2.0")
     Window._subtitle = opts.Subtitle or "Universal Script Hub"
-    Window._uiKey = opts.DefaultKeybind or Enum.KeyCode.RightControl
+    -- Changed default keybind from RightControl to Insert
+    Window._uiKey = opts.DefaultKeybind or Enum.KeyCode.Insert
     Window._shown = false
 
     -- Create ScreenGui with enhanced properties
@@ -395,7 +396,8 @@ function Lynk:CreateWindow(opts)
         Position = UDim2.new(0, 20, 0, 60),
         Size = UDim2.new(1, -40, 0, 60),
         BackgroundTransparency = 1,
-        Text = "Are you sure you want to close?\nInstead press RightCtrl to toggle the UI.",
+        -- Updated popup message to reflect Insert key instead of RightCtrl
+        Text = "Are you sure you want to close?\nInstead press Insert to toggle the UI.",
         Font = Enum.Font.Gotham,
         TextSize = 14,
         TextColor3 = THEME.TextSecondary,
