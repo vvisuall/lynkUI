@@ -897,25 +897,25 @@ function Lynk:CreateWindow(opts)
             ColorSequenceKeypoint.new(0, THEME.Surface),
             ColorSequenceKeypoint.new(1, THEME.Panel)
         }, 90)
-        
-        -- Close button
-        local CloseButton = new("TextButton", {
-            Name = "CloseButton",
-            Position = UDim2.new(1, -40, 0, 10),
-            Size = UDim2.new(0, 30, 0, 30),
-            BackgroundColor3 = THEME.Card,
+
+        -- Return button (changed from close button)
+        local ReturnButton = new("TextButton", {
+            Name = "ReturnButton",
+            Position = UDim2.new(0, 10, 0, 10),
+            Size = UDim2.new(0, 80, 0, 35),
+            BackgroundColor3 = THEME.Primary,
             BorderSizePixel = 0,
-            Text = "✕",
+            Text = "← Return",
             Font = Enum.Font.GothamBold,
-            TextSize = 16,
-            TextColor3 = THEME.Text,
+            TextSize = 14,
+            TextColor3 = Color3.fromRGB(255, 255, 255),
             ZIndex = 101
         })
-        CloseButton.Parent = ScriptSidebar
+        ReturnButton.Parent = ScriptSidebar
         
-        local closeCorner = new("UICorner")
-        closeCorner.CornerRadius = UDim.new(0.5, 0)
-        closeCorner.Parent = CloseButton
+        local returnCorner = new("UICorner")
+        returnCorner.CornerRadius = UDim.new(0, 8)
+        returnCorner.Parent = ReturnButton
         
         -- Content container
         local ContentContainer = new("ScrollingFrame", {
@@ -940,10 +940,10 @@ function Lynk:CreateWindow(opts)
         -- Store references
         Window._scriptSidebar = ScriptSidebar
         Window._sidebarContent = ContentContainer
-        Window._sidebarCloseButton = CloseButton
+        Window._sidebarReturnButton = ReturnButton
         
-        -- Close button functionality
-        CloseButton.MouseButton1Click:Connect(function()
+        -- Return button functionality
+        ReturnButton.MouseButton1Click:Connect(function()
             Window:CloseScriptSidebar()
         end)
         
@@ -1053,12 +1053,13 @@ function Lynk:CreateWindow(opts)
         })
         GameNameLabel.Parent = Window._sidebarContent
         
+
         -- Script name (large and bold)
         local ScriptNameLabel = new("TextLabel", {
             Name = "SidebarScriptName",
             Size = UDim2.new(1, 0, 0, 30),
             BackgroundTransparency = 1,
-            Text = script.Title,
+            Text = script.Title or script.title or "Unknown Script", -- Added fallback for script name
             Font = Enum.Font.GothamBold,
             TextSize = 20,
             TextColor3 = THEME.Text,
@@ -1141,12 +1142,25 @@ function Lynk:CreateWindow(opts)
         }):Play()
     end
 
-    -- Added function to close sidebar
+
+    -- Updated close sidebar function to properly hide the sidebar
     function Window:CloseScriptSidebar()
         if Window._scriptSidebar then
-            TweenService:Create(Window._scriptSidebar, THEME.MediumTween, {
+            local closeTween = TweenService:Create(Window._scriptSidebar, THEME.MediumTween, {
                 Position = UDim2.new(1, 0, 0, 0)
-            }):Play()
+            })
+            closeTween:Play()
+            
+            -- Clear sidebar content after animation
+            closeTween.Completed:Connect(function()
+                if Window._sidebarContent then
+                    for _, child in pairs(Window._sidebarContent:GetChildren()) do
+                        if child:IsA("GuiObject") then
+                            child:Destroy()
+                        end
+                    end
+                end
+            end)
         end
     end
 
