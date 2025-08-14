@@ -1899,36 +1899,28 @@ end
     end
 
 
-    -- Modified Show function to populate home tab by default
+    -- Modified Show function to always populate home tab regardless of manual tab creation
     function Window:Show()
         if not Window._shown then
             Window._shown = true
             MainFrame.Visible = true
-            
+        
             -- Animate window appearance
             MainFrame.Position = UDim2.new(0.5, 0, 0.4, 0)
-            
+        
             MainFrame.Size = UDim2.new(0, 0, 0, 0)
-            
+        
             TweenService:Create(MainFrame, THEME.MediumTween, {
                 Position = UDim2.new(0.5, -400, 0.5, -300),
                 Size = UDim2.new(0, 800, 0, 600)
             }):Play()
+        
+            -- Show first tab by default (if any exist)
+            if Window._tabs[1] then
+                Window._tabs[1]:Show()
             
-            -- Only auto-load script cards if user hasn't manually created tabs
-            if #Window._tabs == 0 then
-                -- Show first tab by default (if any exist)
-                if Window._tabs[1] then
-                    Window._tabs[1]:Show()
-                end
-                
-                -- Auto-load script cards for home tab
-                Window:LoadScriptCards()
-            else
-                -- User has manually created tabs, show the first one
-                if Window._tabs[1] then
-                    Window._tabs[1]:Show()
-                end
+                -- Always populate the first tab (Home) with script cards
+                populateHomeTab(Window._tabs[1].Page)
             end
         end
     end
