@@ -854,96 +854,6 @@ function Lynk:CreateWindow(opts)
     end
 
 -- Added populate functions for Updates, Credits, and Settings tabs
-local function populateUpdatesTab(updatesTab)
-    -- Clear existing content
-    for _, child in pairs(updatesTab:GetChildren()) do
-        if child:IsA("GuiObject") then
-            child:Destroy()
-        end
-    end
-    
-    -- Create scroll frame for updates content
-    local ScrollFrame = new("ScrollingFrame", {
-        Name = "UpdatesScrollFrame",
-        Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        ScrollBarThickness = 6,
-        ScrollBarImageColor3 = THEME.TextMuted,
-        CanvasSize = UDim2.new(0, 0, 0, 0),
-        AutomaticCanvasSize = Enum.AutomaticSize.Y
-    })
-    ScrollFrame.Parent = updatesTab
-    
-    local layout = new("UIListLayout")
-    layout.Parent = ScrollFrame
-    layout.Padding = UDim.new(0, 10)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    
-    local padding = new("UIPadding")
-    padding.Parent = ScrollFrame
-    padding.PaddingAll = UDim.new(0, 20)
-    
-    -- Add update entries
-    local updates = {
-        {version = "🚀 Version 2.1.0 - Today", items = {
-            "• Fixed script card loading issues",
-            "• Corrected database property names", 
-            "• Improved GitHub integration",
-            "• Enhanced error handling"
-        }},
-        {version = "🚀 Version 2.0.0 - 1 day ago", items = {
-            "• Complete UI redesign",
-            "• Added script thumbnails",
-            "• New confirmation dialogs", 
-            "• Smooth tab transitions"
-        }}
-    }
-    
-    for i, update in ipairs(updates) do
-        -- Version header
-        local versionLabel = new("TextLabel", {
-            Name = "Version" .. i,
-            Size = UDim2.new(1, 0, 0, 25),
-            BackgroundTransparency = 1,
-            Text = update.version,
-            Font = Enum.Font.GothamBold,
-            TextSize = 16,
-            TextColor3 = Window._accent,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            LayoutOrder = i * 10
-        })
-        versionLabel.Parent = ScrollFrame
-        
-        -- Update items
-        for j, item in ipairs(update.items) do
-            local itemLabel = new("TextLabel", {
-                Name = "Item" .. i .. "_" .. j,
-                Size = UDim2.new(1, 0, 0, 20),
-                BackgroundTransparency = 1,
-                Text = item,
-                Font = Enum.Font.Gotham,
-                TextSize = 14,
-                TextColor3 = THEME.Text,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                LayoutOrder = i * 10 + j
-            })
-            itemLabel.Parent = ScrollFrame
-        end
-        
-        -- Spacer
-        if i < #updates then
-            local spacer = new("Frame", {
-                Name = "Spacer" .. i,
-                Size = UDim2.new(1, 0, 0, 10),
-                BackgroundTransparency = 1,
-                LayoutOrder = i * 10 + 20
-            })
-            spacer.Parent = ScrollFrame
-        end
-    end
-end
 
 local function populateCreditsTab(creditsTab)
     -- Clear existing content
@@ -1957,15 +1867,15 @@ function Window:LoadScriptCards()
     local homeTab = Window:CreateTab("Home", "", 1)
     populateHomeTab(homeTab.Page)
     
-    -- Create and populate other tabs
-    local updatesTab = Window:CreateTab("Updates", "rbxassetid://7733674079", 2)
-    populateUpdatesTab(updatesTab.Page)
+    -- Removed Updates tab creation to fix choppy loading issue
+    -- local updatesTab = Window:CreateTab("Updates", "rbxassetid://7733674079", 2)
+    -- populateUpdatesTab(updatesTab.Page)
     
-    -- Changed Credits tab icon to be different from Updates tab
-    local creditsTab = Window:CreateTab("Credits", "rbxassetid://7733955511", 3)
+    -- Changed Credits tab icon and adjusted tab order
+    local creditsTab = Window:CreateTab("Credits", "rbxassetid://7733955511", 2)
     populateCreditsTab(creditsTab.Page)
-    
-    local settingsTab = Window:CreateTab("Settings", "rbxassetid://7733674079", 4)
+
+    local settingsTab = Window:CreateTab("Settings", "rbxassetid://7733674079", 3)
     populateSettingsTab(settingsTab.Page)
 
     -- Ensure home tab shows first
