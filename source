@@ -526,7 +526,8 @@ function Lynk:CreateWindow(opts)
     end)
 
     -- Window visibility toggle
-    local isVisible = false
+    -- Set initial visibility to true so UI opens automatically
+    local isVisible = true
     
     local function setVisibility(visible)
         isVisible = visible
@@ -1960,17 +1961,22 @@ function Window:LoadScriptCards()
     local updatesTab = Window:CreateTab("Updates", "rbxassetid://7733674079", 2)
     populateUpdatesTab(updatesTab.Page)
     
-    local creditsTab = Window:CreateTab("Credits", "rbxassetid://7733674079", 3)
+    -- Changed Credits tab icon to be different from Updates tab
+    local creditsTab = Window:CreateTab("Credits", "rbxassetid://7733955511", 3)
     populateCreditsTab(creditsTab.Page)
     
     local settingsTab = Window:CreateTab("Settings", "rbxassetid://7733674079", 4)
     populateSettingsTab(settingsTab.Page)
-    
+
     -- Ensure home tab shows first
     homeTab:Show()
 end
 
     setmetatable(Window, {__index = Lynk})
+
+    -- Show the UI automatically when created
+    setVisibility(true)
+
     return Window
 end
 
