@@ -1185,6 +1185,27 @@ local function populateSettingsTab(settingsTab)
     end)
 end
 
+    -- Fixed tab creation to use your specified icons and ensure all tabs load
+local function createTabs()
+    -- Create tabs with your specified icons in the correct order
+    local homeTab = Window:CreateTab("Home", "rbxassetid://10734950309", 1)
+    populateHomeTab(homeTab.Page)
+
+    local updatesTab = Window:CreateTab("Updates", "rbxassetid://7733674079", 2)
+    populateUpdatesTab(updatesTab.Page)
+
+    local creditsTab = Window:CreateTab("Credits", "rbxassetid://7733955511", 3)
+    populateCreditsTab(creditsTab.Page)
+
+    local settingsTab = Window:CreateTab("Settings", "rbxassetid://10734950020", 4)
+    populateSettingsTab(settingsTab.Page)
+
+    -- Ensure home tab shows first
+    homeTab:Show()
+    
+    return homeTab, updatesTab, creditsTab, settingsTab
+end
+
     -- Fixed GitHub URL placeholder and improved error handling
     -- Replaced GitHub loading with embedded script database
     local SCRIPT_DATABASE = {
