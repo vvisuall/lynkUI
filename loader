@@ -13,8 +13,6 @@ local Window = Lynk:CreateWindow({
     DefaultKeybind = Enum.KeyCode.Insert
 })
 
-Window:Show()
-
 -- Load script database from GitHub with proper error handling
 local function loadScriptDatabase()
     local success, result = pcall(function()
