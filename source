@@ -1936,38 +1936,24 @@ end
 -- Removed duplicate LoadScriptCards function that was only creating Home tab
 -- Modified LoadScriptCards to populate all tabs with embedded content
 function Window:LoadScriptCards()
-    -- Remove existing "Home" tab if it exists
-    for i = #Window._tabs, 1, -1 do
-        local tab = Window._tabs[i]
-        if tab.Name == "Home" then
-            table.remove(Window._tabs, i)
-            if tab.Button then
-                tab.Button:Destroy()
-            end
-            if tab.Page then
-                tab.Page:Destroy()
-            end
-            break
-        end
+    -- Only create tabs if none exist yet
+    if #Window._tabs == 0 then
+        -- Create tabs with your specified icons and order
+        local homeTab = Window:CreateTab("Home", "rbxassetid://10734950309", 1)
+        populateHomeTab(homeTab.Page)
+        
+        local updatesTab = Window:CreateTab("Updates", "rbxassetid://7733674079", 2)
+        populateUpdatesTab(updatesTab.Page)
+        
+        local creditsTab = Window:CreateTab("Credits", "rbxassetid://7733955511", 3)
+        populateCreditsTab(creditsTab.Page)
+
+        local settingsTab = Window:CreateTab("Settings", "rbxassetid://10734950020", 4)
+        populateSettingsTab(settingsTab.Page)
+
+        -- Ensure home tab shows first
+        homeTab:Show()
     end
-    
-    -- Create tabs with your specified icons and order
-    local homeTab = Window:CreateTab("Home", "rbxassetid://10734950309", 1)
-    populateHomeTab(homeTab.Page)
-    
-    local updatesTab = Window:CreateTab("Updates", "rbxassetid://7733674079", 2)
-    populateUpdatesTab(updatesTab.Page)
-    
-    -- Fixed Credits tab to use CreateTab instead of CreateLabel
-    local creditsTab = Window:CreateTab("Credits", "rbxassetid://7733955511", 3)
-    populateCreditsTab(creditsTab.Page)
-
-    -- Updated Settings tab icon to your specified one
-    local settingsTab = Window:CreateTab("Settings", "rbxassetid://10734950020", 4)
-    populateSettingsTab(settingsTab.Page)
-
-    -- Ensure home tab shows first
-    homeTab:Show()
 end
 
     setmetatable(Window, {__index = Lynk})
