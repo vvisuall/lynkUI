@@ -1938,6 +1938,7 @@ end
         end
     end
 
+-- Removed duplicate LoadScriptCards function that was only creating Home tab
 -- Modified LoadScriptCards to populate all tabs with embedded content
 function Window:LoadScriptCards()
     -- Remove existing "Home" tab if it exists
@@ -1968,26 +1969,6 @@ function Window:LoadScriptCards()
     -- Ensure home tab shows first
     homeTab:Show()
 end
-
-    -- Added function to load script cards
-    function Window:LoadScriptCards()
-        -- Check if Home tab already exists and remove it
-        for i, tab in pairs(Window._tabs) do
-            if tab.Name == "Home" then
-                if tab.Button then tab.Button:Destroy() end
-                if tab.Page then tab.Page:Destroy() end
-                table.remove(Window._tabs, i)
-                break
-            end
-        end
-        
-        -- Create Home tab without logo icon and set as first tab
-        local homeTab = Window:CreateTab("Home", "", 1) -- Empty icon string and layout order 1
-        populateHomeTab(homeTab.Page)
-        
-        -- Ensure home tab shows first
-        homeTab:Show()
-    end
 
     setmetatable(Window, {__index = Lynk})
     return Window
