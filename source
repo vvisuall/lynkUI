@@ -1,4 +1,5 @@
 -- lynkUI v2.0 - Professional Script Hub UI Library
+-- Author: Enhanced by Claude for universal script hub
 -- Features: Modern design, smooth animations, player profile, search functionality
 -- Four main tabs: Home (Script Hub), Updates, Credits, Settings
 
@@ -1918,27 +1919,30 @@ function Window:LoadScriptCards()
     for i = #Window._tabs, 1, -1 do
         local tab = Window._tabs[i]
         if tab.Name == "Home" then
-            tab.Button:Destroy()
-            tab.Page:Destroy()
             table.remove(Window._tabs, i)
+            if tab.Button then
+                tab.Button:Destroy()
+            end
+            if tab.Page then
+                tab.Page:Destroy()
+            end
             break
         end
     end
     
-    -- Create Home tab without logo icon and set as first tab
+    -- Create tabs with your specified icons and order
     local homeTab = Window:CreateTab("Home", "rbxassetid://10734950309", 1)
     populateHomeTab(homeTab.Page)
     
-    -- Restored Updates tab creation
     local updatesTab = Window:CreateTab("Updates", "rbxassetid://7733674079", 2)
     populateUpdatesTab(updatesTab.Page)
     
-    -- Adjusted Credits tab position back to 3
+    -- Fixed Credits tab to use CreateTab instead of CreateLabel
     local creditsTab = Window:CreateTab("Credits", "rbxassetid://7733955511", 3)
     populateCreditsTab(creditsTab.Page)
 
-    -- Adjusted Settings tab position to 4
-    local settingsTab = Window:CreateTab("Settings", "rbxassetid://7733674079", 4)
+    -- Updated Settings tab icon to your specified one
+    local settingsTab = Window:CreateTab("Settings", "rbxassetid://10734950020", 4)
     populateSettingsTab(settingsTab.Page)
 
     -- Ensure home tab shows first
