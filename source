@@ -1926,7 +1926,7 @@ function Window:LoadScriptCards()
     end
     
     -- Create Home tab without logo icon and set as first tab
-    local homeTab = Window:CreateTab("Home", "", 1)
+    local homeTab = Window:CreateTab("Home", "rbxassetid://10734950309", 1)
     populateHomeTab(homeTab.Page)
     
     -- Restored Updates tab creation
