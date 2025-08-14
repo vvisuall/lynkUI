@@ -1615,7 +1615,12 @@ end
             
             spawn(function()
                 local success, result = pcall(function()
-                    loadstring(script.LoadString)()
+                    -- Fixed LoadString reference - now uses the script's LoadString property from the script data
+                    if scriptData and scriptData.LoadString then
+                        loadstring(scriptData.LoadString)()
+                    else
+                        error("No LoadString found for this script")
+                    end
                 end)
                 
                 wait(1)
@@ -1635,38 +1640,37 @@ end
             end)
         end)
         
-        -- Animate sidebar in
-        TweenService:Create(Window._scriptSidebar, THEME.MediumTween, {
-            Position = UDim2.new(1, -350, 0, 0)
-        }):Play()
+        -- Added proper script database storage and LoadScriptCards function
+    Window._scriptDatabase = {}
+    
+    function Window:SetScriptDatabase(database)
+        self._scriptDatabase = database
+        self:LoadScriptCards()
     end
-
-
- THEME.MediumTween, {
-            Position = UDim2.new(1, -350, 0, 0)
-        }):Play()
-    end
-
-    -- Updated close sidebar function to properly hide the sidebar
-    function Window:CloseScriptSidebar()
-        if Window._scriptSidebar then
-            -- Hide sidebar completely instead of moving to side
-            local closeTween = TweenService:Create(Window._scriptSidebar, THEME.MediumTween, {
-                Position = UDim2.new(1, 0, 0, 0),
-                Visible = false
-            })
-            closeTween:Play()
-            
-            -- Clear sidebar content after animation
-            closeTween.Completed:Connect(function()
-                if Window._sidebarContent then
-                    for _, child in pairs(Window._sidebarContent:GetChildren()) do
-                        if child:IsA("GuiObject") then
-                            child:Destroy()
-                        end
-                    end
+    
+    function Window:LoadScriptCards()
+        if not self._scriptDatabase then
+            warn("No script database loaded")
+            return
+        end
+        
+        -- Clear existing script cards
+        if self._homeTab and self._homeTab.ScrollingFrame then
+            for _, child in pairs(self._homeTab.ScrollingFrame:GetChildren()) do
+                if child:IsA("Frame") and child.Name == "ScriptCard" then
+                    child:Destroy()
                 end
-            end)
+            end
+        end
+        
+        -- Load scripts for current game or universal scripts
+        local currentPlaceId = tostring(game.PlaceId)
+        local scriptsToLoad = self._scriptDatabase[currentPlaceId] or self._scriptDatabase["Universal"]
+        
+        if scriptsToLoad and scriptsToLoad.scripts then
+            for _, scriptData in pairs(scriptsToLoad.scripts) do
+                self:CreateScriptCard(scriptData)
+            end
         end
     end
 
