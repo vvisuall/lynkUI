@@ -1934,12 +1934,12 @@ function Window:LoadScriptCards()
     end
 end
 
-    -- Ensure UI shows automatically on creation
+    -- Window visibility toggle
+    -- Set initial visibility to true for auto-show
+    local isVisible = true
+    
+    -- Removed duplicate Show call and setVisibility call that was causing conflicts
     setmetatable(Window, {__index = Lynk})
-
-    -- Show the UI automatically when created
-    setVisibility(true)
-    Window:Show()
 
     return Window
 end
