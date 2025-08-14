@@ -859,19 +859,12 @@ function Lynk:CreateWindow(opts)
                 {title = "Lynk CB", description = "Advanced Counter Blox script", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkcb/refs/heads/main/counterblox"))()', RequiresKey = true}
             }
         },
-        [9791603388] = { -- Underground War 2.0
-            gameName = "Underground War 2.0",
-            scripts = {
-                {title = "Silent Aim Fixed", description = "Silent aim for Underground War", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/WITHERCC/refs/heads/main/un"))()', RequiresKey = false}
-            }
-        },
         ["Universal"] = {
             gameName = "Universal Scripts",
             scripts = {
                 {title = "Infinite Yield", description = "Admin commands for any game", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()', RequiresKey = false},
                 {title = "Fly Script", description = "Universal fly with speed control", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/fly.lua"))()', RequiresKey = false},
-                {title = "Noclip", description = "Walk through walls", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/noclip.lua"))()', RequiresKey = false},
-                {title = "Universal Fly", description = "Universal fly script", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/WITHERCC/refs/heads/main/universal%20fly"))()', RequiresKey = false}
+                {title = "Noclip", description = "Walk through walls", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/noclip.lua"))()', RequiresKey = false}
             }
         }
     }
@@ -1181,10 +1174,9 @@ function Lynk:CreateWindow(opts)
         local placeId = gameData.placeId or "Universal"
         
         -- Card container
-        -- reduced card size from 280x200 to 240x180 to fit 2 columns
         local Card = new("Frame", {
             Name = "ScriptCard",
-            Size = UDim2.new(0, 240, 0, 180), -- Reduced size for 2-column layout
+            Size = UDim2.new(0, 280, 0, 200), -- Removed position since UIGridLayout handles it
             BackgroundColor3 = THEME.Card,
             BorderSizePixel = 0
         })
@@ -1453,20 +1445,13 @@ function Lynk:CreateWindow(opts)
 
         ScrollFrame.Parent = homeTab
         
-        -- Fixed 2-column layout to display side by side instead of centered
-        -- Calculate cell width to fit exactly 2 columns in available space
-        wait() -- Wait for frame to render and get proper size
-
-        local actualWidth = ScrollFrame.AbsoluteSize.X > 0 and ScrollFrame.AbsoluteSize.X or 580
-        -- Calculate for exactly 2 columns with proper spacing
-        -- reduced cell width calculation and minimum width to match smaller cards
-        local totalPadding = 30 -- Account for left/right margins and center gap
-        local cellWidth = math.floor((actualWidth - totalPadding) / 2)
-        cellWidth = math.max(cellWidth, 220) -- Reduced minimum card width to 220px
+        -- Fixed cell width calculation to use proper sizing instead of AbsoluteSize
+        -- Fixed UIGridLayout with proper cell width calculation for 2 columns
+        local cellWidth = 280 -- Fixed width for each card
         
         local GridLayout = new("UIGridLayout", {
-            CellSize = UDim2.new(0, cellWidth, 0, 180), -- Reduced height to match card size
-            CellPadding = UDim2.new(0, 10, 0, 15),
+            CellSize = UDim2.new(0, cellWidth, 0, 200),
+            CellPadding = UDim2.new(0, 15, 0, 15),
             HorizontalAlignment = Enum.HorizontalAlignment.Left,
             VerticalAlignment = Enum.VerticalAlignment.Top,
             SortOrder = Enum.SortOrder.LayoutOrder,
@@ -1479,8 +1464,8 @@ function Lynk:CreateWindow(opts)
         local Padding = new("UIPadding", {
             PaddingTop = UDim.new(0, 15),
             PaddingBottom = UDim.new(0, 15),
-            PaddingLeft = UDim.new(0, 10),
-            PaddingRight = UDim.new(0, 10)
+            PaddingLeft = UDim.new(0, 15),
+            PaddingRight = UDim.new(0, 15)
         })
         Padding.Parent = ScrollFrame
 
