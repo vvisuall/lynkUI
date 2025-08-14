@@ -1,5 +1,4 @@
 -- lynkUI v2.0 - Professional Script Hub UI Library
--- Author: Enhanced by Claude for universal script hub
 -- Features: Modern design, smooth animations, player profile, search functionality
 -- Four main tabs: Home (Script Hub), Updates, Credits, Settings
 
@@ -854,6 +853,69 @@ function Lynk:CreateWindow(opts)
     end
 
 -- Added populate functions for Updates, Credits, and Settings tabs
+
+-- Restoring the populateUpdatesTab function that was removed
+local function populateUpdatesTab(updatesTab)
+    -- Clear existing content
+    for _, child in pairs(updatesTab:GetChildren()) do
+        if child:IsA("GuiObject") then
+            child:Destroy()
+        end
+    end
+    
+    -- Create scroll frame for updates content
+    local ScrollFrame = new("ScrollingFrame", {
+        Name = "UpdatesScrollFrame",
+        Position = UDim2.new(0, 0, 0, 0),
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        ScrollBarThickness = 6,
+        ScrollBarImageColor3 = THEME.TextMuted,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
+        AutomaticCanvasSize = Enum.AutomaticSize.Y
+    })
+    ScrollFrame.Parent = updatesTab
+    
+    local layout = new("UIListLayout")
+    layout.Parent = ScrollFrame
+    layout.Padding = UDim.new(0, 8)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    
+    local padding = new("UIPadding")
+    padding.Parent = ScrollFrame
+    padding.PaddingAll = UDim.new(0, 20)
+    
+    -- Add updates content
+    local updates = {
+        {text = "📋 Recent Updates", size = 18, color = Window._accent, bold = true},
+        {text = "", size = 10, color = THEME.Text, bold = false},
+        {text = "🔄 Version 2.1.0:", size = 16, color = THEME.Text, bold = true},
+        {text = "• Improved UI performance", size = 14, color = THEME.Text, bold = false},
+        {text = "• Added new script categories", size = 14, color = THEME.Text, bold = false},
+        {text = "• Enhanced search functionality", size = 14, color = THEME.Text, bold = false},
+        {text = "", size = 10, color = THEME.Text, bold = false},
+        {text = "🔄 Version 2.0.5:", size = 16, color = THEME.Text, bold = true},
+        {text = "• Fixed loading issues", size = 14, color = THEME.Text, bold = false},
+        {text = "• Updated script database", size = 14, color = THEME.Text, bold = false},
+        {text = "• Improved stability", size = 14, color = THEME.Text, bold = false}
+    }
+    
+    for i, update in ipairs(updates) do
+        local updateLabel = new("TextLabel", {
+            Name = "Update" .. i,
+            Size = UDim2.new(1, 0, 0, update.size + 5),
+            BackgroundTransparency = 1,
+            Text = update.text,
+            Font = update.bold and Enum.Font.GothamBold or Enum.Font.Gotham,
+            TextSize = update.size,
+            TextColor3 = update.color,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            LayoutOrder = i
+        })
+        updateLabel.Parent = ScrollFrame
+    end
+end
 
 local function populateCreditsTab(creditsTab)
     -- Clear existing content
@@ -1867,15 +1929,16 @@ function Window:LoadScriptCards()
     local homeTab = Window:CreateTab("Home", "", 1)
     populateHomeTab(homeTab.Page)
     
-    -- Removed Updates tab creation to fix choppy loading issue
-    -- local updatesTab = Window:CreateTab("Updates", "rbxassetid://7733674079", 2)
-    -- populateUpdatesTab(updatesTab.Page)
+    -- Restored Updates tab creation
+    local updatesTab = Window:CreateTab("Updates", "rbxassetid://7733674079", 2)
+    populateUpdatesTab(updatesTab.Page)
     
-    -- Changed Credits tab icon and adjusted tab order
-    local creditsTab = Window:CreateTab("Credits", "rbxassetid://7733955511", 2)
+    -- Adjusted Credits tab position back to 3
+    local creditsTab = Window:CreateTab("Credits", "rbxassetid://7733955511", 3)
     populateCreditsTab(creditsTab.Page)
 
-    local settingsTab = Window:CreateTab("Settings", "rbxassetid://7733674079", 3)
+    -- Adjusted Settings tab position to 4
+    local settingsTab = Window:CreateTab("Settings", "rbxassetid://7733674079", 4)
     populateSettingsTab(settingsTab.Page)
 
     -- Ensure home tab shows first
