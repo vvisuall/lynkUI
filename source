@@ -2204,11 +2204,11 @@ end
             end
         else
             print("[v0] Creating main UI after key system validation")
-            -- Complete UI recreation after key system validation
+            -- Complete UI recreation after key system validation with all components
         
             -- Create ScreenGui with enhanced properties
-            local screen = new("ScreenGui", {
-                Name = opts.Name or "lynkUI",
+            screen = new("ScreenGui", {
+                Name = "lynkUI",
                 ResetOnSpawn = false,
                 DisplayOrder = 10000,
                 IgnoreGuiInset = true,
@@ -2265,149 +2265,73 @@ end
             mainCorner.CornerRadius = THEME.CornerRadius
             mainCorner.Parent = MainFrame
 
-            -- Header section
-            local Header = new("Frame", {
-                Name = "Header",
-                Size = UDim2.new(1, 0, 0, 60),
+            -- Sidebar (left panel)
+            Sidebar = new("Frame", {
+                Name = "Sidebar",
+                Size = UDim2.new(0, 280, 1, 0),
                 BackgroundColor3 = THEME.Surface,
                 BorderSizePixel = 0,
                 ZIndex = 4
             })
-            Header.Parent = MainFrame
+            Sidebar.Parent = MainFrame
         
-            local headerCorner = new("UICorner")
-            headerCorner.CornerRadius = THEME.CornerRadius
-            headerCorner.Parent = Header
+            local sidebarCorner = new("UICorner")
+            sidebarCorner.CornerRadius = THEME.CornerRadius
+            sidebarCorner.Parent = Sidebar
 
-            -- Logo
-            local Logo = new("ImageLabel", {
-                Name = "Logo",
-                Position = UDim2.new(0, 20, 0.5, -15),
-                Size = UDim2.new(0, 30, 0, 30),
+            -- Sidebar gradient
+            createGradient(Sidebar, {
+                ColorSequenceKeypoint.new(0, THEME.Surface),
+                ColorSequenceKeypoint.new(1, THEME.Panel)
+            }, 90)
+
+            -- Tabs container
+            TabsContainer = new("Frame", {
+                Name = "TabsContainer",
+                Position = UDim2.new(0, 20, 0, 120),
+                Size = UDim2.new(1, -40, 1, -140),
                 BackgroundTransparency = 1,
-                Image = Window._logo,
-                ScaleType = Enum.ScaleType.Fit,
                 ZIndex = 5
             })
-            Logo.Parent = Header
-
-            -- Title
-            local Title = new("TextLabel", {
-                Name = "Title",
-                Position = UDim2.new(0, 60, 0, 8),
-                Size = UDim2.new(1, -120, 0, 20),
-                BackgroundTransparency = 1,
-                Text = Window._title,
-                Font = Enum.Font.GothamBold,
-                TextSize = 16,
-                TextColor3 = THEME.Text,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                ZIndex = 5
-            })
-            Title.Parent = Header
-
-            -- Subtitle
-            local Subtitle = new("TextLabel", {
-                Name = "Subtitle",
-                Position = UDim2.new(0, 60, 0, 32),
-                Size = UDim2.new(1, -120, 0, 16),
-                BackgroundTransparency = 1,
-                Text = Window._subtitle,
-                Font = Enum.Font.Gotham,
-                TextSize = 12,
-                TextColor3 = THEME.TextMuted,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                ZIndex = 5
-            })
-            Subtitle.Parent = Header
-
-            -- Close button
-            local CloseButton = new("TextButton", {
-                Name = "CloseButton",
-                Position = UDim2.new(1, -40, 0.5, -15),
-                Size = UDim2.new(0, 30, 0, 30),
-                BackgroundColor3 = Color3.fromRGB(255, 95, 87),
-                BorderSizePixel = 0,
-                Text = "×",
-                Font = Enum.Font.GothamBold,
-                TextSize = 18,
-                TextColor3 = Color3.fromRGB(255, 255, 255),
-                ZIndex = 5
-            })
-            CloseButton.Parent = Header
+            TabsContainer.Parent = Sidebar
         
-            local closeCorner = new("UICorner")
-            closeCorner.CornerRadius = UDim.new(0.5, 0)
-            closeCorner.Parent = CloseButton
+            local tabsLayout = new("UIListLayout")
+            tabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            tabsLayout.Padding = UDim.new(0, 8)
+            tabsLayout.Parent = TabsContainer
 
-            CloseButton.MouseButton1Click:Connect(function()
-                setVisibility(false)
-            end)
-
-            -- Content area
-            local ContentArea = new("Frame", {
+            -- Content area (right panel)
+            ContentArea = new("Frame", {
                 Name = "ContentArea",
-                Position = UDim2.new(0, 0, 0, 60),
-                Size = UDim2.new(1, 0, 1, -60),
-                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 280, 0, 0),
+                Size = UDim2.new(1, -280, 1, 0),
+                BackgroundColor3 = THEME.Background,
+                BorderSizePixel = 0,
                 ZIndex = 4
             })
             ContentArea.Parent = MainFrame
 
-            -- Sidebar for tabs
-            local Sidebar = new("Frame", {
-                Name = "Sidebar",
-                Size = UDim2.new(0, 200, 1, 0),
-                BackgroundColor3 = THEME.Panel,
-                BorderSizePixel = 0,
-                ZIndex = 4
-            })
-            Sidebar.Parent = ContentArea
-
-            -- Tabs container
-            TabsContainer = new("ScrollingFrame", {
-                Name = "TabsContainer",
-                Position = UDim2.new(0, 10, 0, 20),
-                Size = UDim2.new(1, -20, 1, -40),
-                BackgroundTransparency = 1,
-                BorderSizePixel = 0,
-                ScrollBarThickness = 4,
-                ScrollBarImageColor3 = THEME.Primary,
-                CanvasSize = UDim2.new(0, 0, 0, 0),
-                AutomaticCanvasSize = Enum.AutomaticSize.Y,
-                ZIndex = 5
-            })
-            TabsContainer.Parent = Sidebar
-
-            local tabsLayout = new("UIListLayout")
-            tabsLayout.Parent = TabsContainer
-            tabsLayout.Padding = UDim.new(0, 8)
-            tabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
             -- Pages container
             PagesContainer = new("Frame", {
                 Name = "PagesContainer",
-                Position = UDim2.new(0, 200, 0, 0),
-                Size = UDim2.new(1, -200, 1, 0),
+                Size = UDim2.new(1, 0, 1, 0),
                 BackgroundTransparency = 1,
-                ClipsDescendants = true,
-                ZIndex = 4
+                ZIndex = 5
             })
             PagesContainer.Parent = ContentArea
 
-            -- Set up visibility system
-            isVisible = true
+            -- Set window as shown and make visible
             Window._shown = true
-        
-            -- Animate window opening
+            isVisible = true
+            
+            -- Animate window appearance
             TweenService:Create(Outline, THEME.SlowTween, {
                 Size = THEME.WindowSize
             }):Play()
-        
+            
+            print("[v0] Main UI creation complete, calling LoadScriptCards")
             -- Load script cards and create tabs
             Window:LoadScriptCards()
-        
-            print("[v0] Main UI creation completed successfully")
         end
     end
 
