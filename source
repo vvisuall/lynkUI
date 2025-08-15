@@ -211,8 +211,11 @@ local function createKeySystem(Window)
             wait(1)
             KeySystemGui:Destroy()
             
-            -- Create the main UI now
+            -- Create the main UI and properly initialize it
             Window:_createMainUI()
+            -- Ensure UI is visible and keybind system is active after key validation
+            Window._shown = true
+            Window:Show()
             
         else
             StatusLabel.Text = "❌ Invalid key! Please try again."
@@ -415,7 +418,7 @@ function Lynk:_createMainUI()
     local opts = self._opts or {}
     
     -- Create ScreenGui with enhanced properties
-    local screen = new("ScreenGui", {
+    screen = new("ScreenGui", {
         Name = opts.Name or "lynkUI",
         ResetOnSpawn = false,
         DisplayOrder = 10000,
@@ -424,29 +427,33 @@ function Lynk:_createMainUI()
     })
     screen.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
+    -- Store screen reference
+    self._screen = screen
+
     -- Main container with blur effect
-    local BlurFrame = new("Frame", {
+    BlurFrame = new("Frame", {
         Name = "BlurContainer",
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundColor3 = Color3.new(0, 0, 0),
         BackgroundTransparency = 0.3,
         BorderSizePixel = 0,
-        Visible = false
+        Visible = true
     })
     BlurFrame.Parent = screen
 
-    -- Main window outline
-    local Outline = new("Frame", {
+    -- Fixed window sizing to prevent squishing
+    -- Main window outline with proper size
+    Outline = new("Frame", {
         Name = "Outline",
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(0, 0, 0, 0),
+        Size = UDim2.new(0, 900, 0, 600), -- Set proper fixed size instead of 0,0
         BackgroundColor3 = THEME.Border,
         BorderSizePixel = 0,
         ZIndex = 2
     })
     Outline.Parent = BlurFrame
-    
+
     local outlineCorner = new("UICorner")
     outlineCorner.CornerRadius = THEME.CornerRadius
     outlineCorner.Parent = Outline
@@ -455,7 +462,7 @@ function Lynk:_createMainUI()
     createGlow(Outline, self._accent)
 
     -- Main content frame
-    local MainFrame = new("Frame", {
+    MainFrame = new("Frame", {
         Name = "MainFrame",
         Position = UDim2.new(0, 2, 0, 2),
         Size = UDim2.new(1, -4, 1, -4),
@@ -776,8 +783,11 @@ function Lynk:_createMainUI()
         }):Play()
     end)
 
+    -- Fixed Yes button in close dialog to properly destroy UI
     -- Yes button closes the entire UI
     YesButton.MouseButton1Click:Connect(function()
+        -- Hide popup first, then destroy
+        ConfirmationPopup.Visible = false
         self:Destroy()
     end)
 
@@ -1145,10 +1155,15 @@ function Lynk:_createMainUI()
         return button
     end
 
-    function Window:Destroy()
+    -- Fixed Destroy function to properly clean up all UI elements
+    function Lynk:Destroy()
         if self._screen and self._screen.Parent then
             self._screen:Destroy()
+            self._screen = nil
         end
+        -- Reset visibility state
+        self._shown = false
+        isVisible = false
     end
 
 -- Added populate functions for Updates, Credits, and Settings tabs
@@ -2508,26 +2523,42 @@ local function onKeySuccess()
         })
         PagesContainer.Parent = ContentArea
 
-        -- Set window as shown and make visible
-        Window._shown = true
-        isVisible = true
+    -- Initialize keybind system properly after UI creation
+    -- Set up keybind system
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
         
-        -- Animate window appearance
-        TweenService:Create(Outline, THEME.SlowTween, {
-            Size = THEME.WindowSize
-        }):Play()
-        
-        print("[v0] Main UI creation complete, calling LoadScriptCards")
-        -- Load script cards and create tabs
-        Window:LoadScriptCards()
-        
-        print("[v0] Main UI created successfully after key validation")
+        if input.KeyCode == self._uiKey then
+            self:Toggle()
+        end
     end)
+    
+    -- Set initial state
+    self._shown = true
+    isVisible = true
 end
 
-    setmetatable(Window, {__index = Lynk})
 
-    return Window
+-- Fixed Destroy function to properly clean up all UI elements
+function Lynk:Destroy()
+    if self._screen and self._screen.Parent then
+        self._screen:Destroy()
+        self._screen = nil
+    end
+    -- Reset visibility state
+    self._shown = false
+    isVisible = false
 end
 
-return Lynk
+
+-- Fixed Yes button in close dialog to properly destroy UI
+-- Yes button closes the entire UI
+YesButton.MouseButton1Click:Connect(function()
+    -- Hide popup first, then destroy
+    ConfirmationPopup.Visible = false
+    self:Destroy()
+end)
+
+</updates>
+
+Rewrite the cut off point verbatim, and then continue the text stream as shown in the example
