@@ -2193,18 +2193,19 @@ end
             -- Normal show when no key system
             Window._shown = true
             setVisibility(true)
-            
+        
             TweenService:Create(Outline, THEME.SlowTween, {
                 Size = THEME.WindowSize
             }):Play()
-            
+        
             -- Load script cards after UI is shown
             if #Window._tabs == 0 then
                 Window:LoadScriptCards()
             end
         else
             print("[v0] Creating main UI after key system validation")
-            -- Completely recreate the main UI using the original creation logic
+            -- Complete UI recreation after key system validation
+        
             -- Create ScreenGui with enhanced properties
             local screen = new("ScreenGui", {
                 Name = opts.Name or "lynkUI",
@@ -2217,7 +2218,7 @@ end
             print("[v0] Created ScreenGui:", screen.Name)
 
             -- Main container with blur effect
-            local BlurFrame = new("Frame", {
+            BlurFrame = new("Frame", {
                 Name = "BlurContainer",
                 Size = UDim2.new(1, 0, 1, 0),
                 BackgroundColor3 = Color3.new(0, 0, 0),
@@ -2229,7 +2230,7 @@ end
             print("[v0] Created BlurFrame")
 
             -- Main window outline
-            local Outline = new("Frame", {
+            Outline = new("Frame", {
                 Name = "Outline",
                 AnchorPoint = Vector2.new(0.5, 0.5),
                 Position = UDim2.new(0.5, 0, 0.5, 0),
@@ -2240,7 +2241,7 @@ end
             })
             Outline.Parent = BlurFrame
             print("[v0] Created Outline")
-            
+        
             local outlineCorner = new("UICorner")
             outlineCorner.CornerRadius = THEME.CornerRadius
             outlineCorner.Parent = Outline
@@ -2250,79 +2251,163 @@ end
             print("[v0] Added glow to outline")
 
             -- Main content frame
-            local MainFrame = new("Frame", {
+            MainFrame = new("Frame", {
                 Name = "MainFrame",
                 Position = UDim2.new(0, 2, 0, 2),
                 Size = UDim2.new(1, -4, 1, -4),
                 BackgroundColor3 = THEME.Background,
-                BorderSizePixel = 0
+                BorderSizePixel = 0,
+                ZIndex = 3
             })
             MainFrame.Parent = Outline
-            print("[v0] Created MainFrame")
-            
+        
             local mainCorner = new("UICorner")
             mainCorner.CornerRadius = THEME.CornerRadius
             mainCorner.Parent = MainFrame
 
-            -- Store references and set up complete visibility system
-            Window._screen = screen
-            Window._blurFrame = BlurFrame
-            Window._outline = Outline
-            Window._mainFrame = MainFrame
-            
+            -- Header section
+            local Header = new("Frame", {
+                Name = "Header",
+                Size = UDim2.new(1, 0, 0, 60),
+                BackgroundColor3 = THEME.Surface,
+                BorderSizePixel = 0,
+                ZIndex = 4
+            })
+            Header.Parent = MainFrame
+        
+            local headerCorner = new("UICorner")
+            headerCorner.CornerRadius = THEME.CornerRadius
+            headerCorner.Parent = Header
+
+            -- Logo
+            local Logo = new("ImageLabel", {
+                Name = "Logo",
+                Position = UDim2.new(0, 20, 0.5, -15),
+                Size = UDim2.new(0, 30, 0, 30),
+                BackgroundTransparency = 1,
+                Image = Window._logo,
+                ScaleType = Enum.ScaleType.Fit,
+                ZIndex = 5
+            })
+            Logo.Parent = Header
+
+            -- Title
+            local Title = new("TextLabel", {
+                Name = "Title",
+                Position = UDim2.new(0, 60, 0, 8),
+                Size = UDim2.new(1, -120, 0, 20),
+                BackgroundTransparency = 1,
+                Text = Window._title,
+                Font = Enum.Font.GothamBold,
+                TextSize = 16,
+                TextColor3 = THEME.Text,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                ZIndex = 5
+            })
+            Title.Parent = Header
+
+            -- Subtitle
+            local Subtitle = new("TextLabel", {
+                Name = "Subtitle",
+                Position = UDim2.new(0, 60, 0, 32),
+                Size = UDim2.new(1, -120, 0, 16),
+                BackgroundTransparency = 1,
+                Text = Window._subtitle,
+                Font = Enum.Font.Gotham,
+                TextSize = 12,
+                TextColor3 = THEME.TextMuted,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                ZIndex = 5
+            })
+            Subtitle.Parent = Header
+
+            -- Close button
+            local CloseButton = new("TextButton", {
+                Name = "CloseButton",
+                Position = UDim2.new(1, -40, 0.5, -15),
+                Size = UDim2.new(0, 30, 0, 30),
+                BackgroundColor3 = Color3.fromRGB(255, 95, 87),
+                BorderSizePixel = 0,
+                Text = "×",
+                Font = Enum.Font.GothamBold,
+                TextSize = 18,
+                TextColor3 = Color3.fromRGB(255, 255, 255),
+                ZIndex = 5
+            })
+            CloseButton.Parent = Header
+        
+            local closeCorner = new("UICorner")
+            closeCorner.CornerRadius = UDim.new(0.5, 0)
+            closeCorner.Parent = CloseButton
+
+            CloseButton.MouseButton1Click:Connect(function()
+                setVisibility(false)
+            end)
+
+            -- Content area
+            local ContentArea = new("Frame", {
+                Name = "ContentArea",
+                Position = UDim2.new(0, 0, 0, 60),
+                Size = UDim2.new(1, 0, 1, -60),
+                BackgroundTransparency = 1,
+                ZIndex = 4
+            })
+            ContentArea.Parent = MainFrame
+
+            -- Sidebar for tabs
+            local Sidebar = new("Frame", {
+                Name = "Sidebar",
+                Size = UDim2.new(0, 200, 1, 0),
+                BackgroundColor3 = THEME.Panel,
+                BorderSizePixel = 0,
+                ZIndex = 4
+            })
+            Sidebar.Parent = ContentArea
+
+            -- Tabs container
+            TabsContainer = new("ScrollingFrame", {
+                Name = "TabsContainer",
+                Position = UDim2.new(0, 10, 0, 20),
+                Size = UDim2.new(1, -20, 1, -40),
+                BackgroundTransparency = 1,
+                BorderSizePixel = 0,
+                ScrollBarThickness = 4,
+                ScrollBarImageColor3 = THEME.Primary,
+                CanvasSize = UDim2.new(0, 0, 0, 0),
+                AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                ZIndex = 5
+            })
+            TabsContainer.Parent = Sidebar
+
+            local tabsLayout = new("UIListLayout")
+            tabsLayout.Parent = TabsContainer
+            tabsLayout.Padding = UDim.new(0, 8)
+            tabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+            -- Pages container
+            PagesContainer = new("Frame", {
+                Name = "PagesContainer",
+                Position = UDim2.new(0, 200, 0, 0),
+                Size = UDim2.new(1, -200, 1, 0),
+                BackgroundTransparency = 1,
+                ClipsDescendants = true,
+                ZIndex = 4
+            })
+            PagesContainer.Parent = ContentArea
+
             -- Set up visibility system
             isVisible = true
-            
-            -- Recreate the setVisibility function for this instance
-            local function setMainUIVisibility(visible)
-                print("[v0] setMainUIVisibility called with:", visible)
-                isVisible = visible
-                BlurFrame.Visible = visible
-                
-                if visible then
-                    -- Animate window opening
-                    Outline.Size = UDim2.new(0, 0, 0, 0)
-                    TweenService:Create(Outline, THEME.SlowTween, {
-                        Size = THEME.WindowSize
-                    }):Play()
-                    print("[v0] Started opening animation")
-                else
-                    -- Animate window closing
-                    TweenService:Create(Outline, THEME.MediumTween, {
-                        Size = UDim2.new(0, 0, 0, 0)
-                    }):Play()
-                    
-                    task.wait(0.25)
-                    if not isVisible then
-                        BlurFrame.Visible = false
-                    end
-                    print("[v0] Started closing animation")
-                end
-            end
-
-            -- Set up keybind listener for this UI instance
-            UserInputService.InputBegan:Connect(function(input, gameProcessed)
-                if gameProcessed then return end
-                if input.KeyCode == Window._uiKey then
-                    print("[v0] Keybind pressed, toggling UI")
-                    setMainUIVisibility(not isVisible)
-                end
-            end)
-            
-            -- Mark as shown and start the UI
             Window._shown = true
-            print("[v0] Set _shown to true")
-            
-            -- Start the opening animation
+        
+            -- Animate window opening
             TweenService:Create(Outline, THEME.SlowTween, {
                 Size = THEME.WindowSize
             }):Play()
-            print("[v0] Started main UI opening animation")
-            
-            -- Load script cards after UI animation starts
-            print("[v0] About to call LoadScriptCards, current tabs:", #Window._tabs)
+        
+            -- Load script cards and create tabs
             Window:LoadScriptCards()
-            print("[v0] LoadScriptCards completed")
+        
+            print("[v0] Main UI creation completed successfully")
         end
     end
 
