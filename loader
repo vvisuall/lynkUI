@@ -13,9 +13,9 @@ local Window = Lynk:CreateWindow({
     DefaultKeybind = Enum.KeyCode.Insert
 })
 
--- Updated comments to reflect the new direct UI creation approach
+-- Removed all references to Show methods - using direct activation instead
 -- The key system now creates the main UI directly after validation
--- No Window:Show() calls needed - everything is handled automatically
+-- No Show methods needed - everything is handled with direct visibility and activation
 
 print("🔑 Key system initialized - enter your key to access the script hub!")
 print("🎮 Current Game:", game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name)
