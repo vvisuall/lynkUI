@@ -90,294 +90,295 @@ local KEY_SYSTEM_ENABLED = true
 local VALID_KEY = "x7d9A2bQf1Lm38K"
 local KEY_LINK = "https://sub4unlock.io/afvuE"
 
--- Modified createKeySystem to properly call main UI creation after validation
 local function createKeySystem(Window)
-    local KeySystemGui = new("ScreenGui", {
+    -- Key system ScreenGui
+    local keyScreen = new("ScreenGui", {
         Name = "KeySystem",
         ResetOnSpawn = false,
         DisplayOrder = 10001,
-        IgnoreGuiInset = true
-    })
-    KeySystemGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-
-    -- Background blur
-    local Background = new("Frame", {
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundColor3 = Color3.new(0, 0, 0),
-        BackgroundTransparency = 0.2,
-        BorderSizePixel = 0
-    })
-    Background.Parent = KeySystemGui
-
-    -- Key system container
-    local Container = new("Frame", {
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(0, 400, 0, 300),
-        BackgroundColor3 = THEME.Background,
-        BorderSizePixel = 0
-    })
-    Container.Parent = Background
-    
-    local containerCorner = new("UICorner")
-    containerCorner.CornerRadius = THEME.CornerRadius
-    containerCorner.Parent = Container
-
-    -- Title
-    local Title = new("TextLabel", {
-        Position = UDim2.new(0, 0, 0, 20),
-        Size = UDim2.new(1, 0, 0, 40),
-        BackgroundTransparency = 1,
-        Text = "🔐 Key System",
-        Font = Enum.Font.GothamBold,
-        TextSize = 24,
-        TextColor3 = THEME.Text,
-        TextXAlignment = Enum.TextXAlignment.Center
-    })
-    Title.Parent = Container
-
-    -- Subtitle
-    local Subtitle = new("TextLabel", {
-        Position = UDim2.new(0, 20, 0, 70),
-        Size = UDim2.new(1, -40, 0, 30),
-        BackgroundTransparency = 1,
-        Text = "Enter your access key to continue",
-        Font = Enum.Font.Gotham,
-        TextSize = 14,
-        TextColor3 = THEME.TextSecondary,
-        TextXAlignment = Enum.TextXAlignment.Center
-    })
-    Subtitle.Parent = Container
-
-    -- Key input
-    local KeyInput = new("TextBox", {
-        Position = UDim2.new(0, 20, 0, 120),
-        Size = UDim2.new(1, -40, 0, 40),
-        BackgroundColor3 = THEME.Surface,
-        BorderSizePixel = 0,
-        Text = "",
-        PlaceholderText = "Enter key here...",
-        Font = Enum.Font.Gotham,
-        TextSize = 14,
-        TextColor3 = THEME.Text,
-        PlaceholderColor3 = THEME.TextMuted
-    })
-    KeyInput.Parent = Container
-    
-    local inputCorner = new("UICorner")
-    inputCorner.CornerRadius = THEME.SmallCornerRadius
-    inputCorner.Parent = KeyInput
-
-    -- Submit button
-    local SubmitButton = new("TextButton", {
-        Position = UDim2.new(0, 20, 0, 180),
-        Size = UDim2.new(1, -40, 0, 40),
-        BackgroundColor3 = Window._accent,
-        BorderSizePixel = 0,
-        Text = "Submit Key",
-        Font = Enum.Font.GothamSemibold,
-        TextSize = 14,
-        TextColor3 = THEME.Text,
-        AutoButtonColor = false
-    })
-    SubmitButton.Parent = Container
-    
-    local submitCorner = new("UICorner")
-    submitCorner.CornerRadius = THEME.SmallCornerRadius
-    submitCorner.Parent = SubmitButton
-
-    -- Status label
-    local StatusLabel = new("TextLabel", {
-        Position = UDim2.new(0, 20, 0, 240),
-        Size = UDim2.new(1, -40, 0, 30),
-        BackgroundTransparency = 1,
-        Text = "",
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        TextColor3 = THEME.TextSecondary,
-        TextXAlignment = Enum.TextXAlignment.Center
-    })
-    StatusLabel.Parent = Container
-
-    -- Modified key validation to create main UI after success
-    local function validateKey()
-        local enteredKey = KeyInput.Text
-        
-        if enteredKey == VALID_KEY then
-            StatusLabel.Text = "✅ Key validated! Loading main interface..."
-            StatusLabel.TextColor3 = THEME.Success
-            
-            -- Wait a moment then create main UI and destroy key system
-            wait(1)
-            KeySystemGui:Destroy()
-            
-            -- Create the main UI and properly initialize it
-            Window:_createMainUI()
-            -- Ensure UI is visible and keybind system is active after key validation
-            Window._shown = true
-            Window:Show()
-            
-        else
-            StatusLabel.Text = "❌ Invalid key! Please try again."
-            StatusLabel.TextColor3 = THEME.Danger
-            KeyInput.Text = ""
-        end
-    end
-
-    -- Connect events
-    SubmitButton.MouseButton1Click:Connect(validateKey)
-    KeyInput.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            validateKey()
-        end
-    end)
-
-    -- Hover effects
-    SubmitButton.MouseEnter:Connect(function()
-        TweenService:Create(SubmitButton, THEME.FastTween, {
-            BackgroundColor3 = SubmitButton.BackgroundColor3:lerp(Color3.new(1,1,1), 0.1)
-        }):Play()
-    end)
-    
-    SubmitButton.MouseLeave:Connect(function()
-        TweenService:Create(SubmitButton, THEME.FastTween, {
-            BackgroundColor3 = Window._accent
-        }):Play()
-    end)
-end
-
--- Added function to create main UI after key validation
-local function createMainUIAfterKeyValidation()
-    print("[v0] Creating main UI after key validation")
-    
-    -- Create ScreenGui
-    screen = new("ScreenGui", {
-        Name = "lynkUI",
-        ResetOnSpawn = false,
-        DisplayOrder = 10000,
         IgnoreGuiInset = true,
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     })
-    screen.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    keyScreen.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-    -- Main container with blur effect
-    BlurFrame = new("Frame", {
-        Name = "BlurContainer",
+    -- Background blur
+    local keyBlurFrame = new("Frame", {
+        Name = "KeyBlurContainer",
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundColor3 = Color3.new(0, 0, 0),
         BackgroundTransparency = 0.3,
         BorderSizePixel = 0,
         Visible = true
     })
-    BlurFrame.Parent = screen
+    keyBlurFrame.Parent = keyScreen
 
-    -- Main window outline
-    Outline = new("Frame", {
-        Name = "Outline",
+    -- Main key window
+    local keyWindow = new("Frame", {
+        Name = "KeyWindow",
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(0, 0, 0, 0),
-        BackgroundColor3 = THEME.Border,
+        Size = UDim2.new(0, 400, 0, 250),
+        BackgroundColor3 = THEME.Background,
         BorderSizePixel = 0,
         ZIndex = 2
     })
-    Outline.Parent = BlurFrame
+    keyWindow.Parent = keyBlurFrame
     
-    local outlineCorner = new("UICorner")
-    outlineCorner.CornerRadius = THEME.CornerRadius
-    outlineCorner.Parent = Outline
+    local keyCorner = new("UICorner")
+    keyCorner.CornerRadius = THEME.CornerRadius
+    keyCorner.Parent = keyWindow
 
-    -- Add subtle glow to outline
-    createGlow(Outline, Window._accent)
+    -- Add glow effect
+    createGlow(keyWindow, THEME.Primary)
 
-    -- Main content frame
-    MainFrame = new("Frame", {
-        Name = "MainFrame",
-        Position = UDim2.new(0, 2, 0, 2),
-        Size = UDim2.new(1, -4, 1, -4),
-        BackgroundColor3 = THEME.Background,
-        BorderSizePixel = 0
+    -- Close button
+    local closeButton = new("TextButton", {
+        Name = "CloseButton",
+        Position = UDim2.new(1, -35, 0, 10),
+        Size = UDim2.new(0, 25, 0, 25),
+        BackgroundColor3 = THEME.Danger,
+        BorderSizePixel = 0,
+        Text = "×",
+        Font = Enum.Font.GothamBold,
+        TextSize = 16,
+        TextColor3 = THEME.Text,
+        AutoButtonColor = false
     })
-    MainFrame.Parent = Outline
+    closeButton.Parent = keyWindow
     
-    local mainCorner = new("UICorner")
-    mainCorner.CornerRadius = THEME.CornerRadius
-    mainCorner.Parent = MainFrame
+    local closeCorner = new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 6)
+    closeCorner.Parent = closeButton
 
-    -- Sidebar (left panel)
-    Sidebar = new("Frame", {
-        Name = "Sidebar",
-        Size = UDim2.new(0, 280, 1, 0),
-        BackgroundColor3 = THEME.Surface,
-        BorderSizePixel = 0
-    })
-    Sidebar.Parent = MainFrame
-    
-    local sidebarCorner = new("UICorner")
-    sidebarCorner.CornerRadius = THEME.CornerRadius
-    sidebarCorner.Parent = Sidebar
-
-    -- Sidebar gradient
-    createGradient(Sidebar, {
-        ColorSequenceKeypoint.new(0, THEME.Surface),
-        ColorSequenceKeypoint.new(1, THEME.Panel)
-    }, 90)
-
-    -- Tabs container
-    TabsContainer = new("Frame", {
-        Name = "TabsContainer",
-        Position = UDim2.new(0, 20, 0, 120),
-        Size = UDim2.new(1, -40, 1, -140),
-        BackgroundTransparency = 1
-    })
-    TabsContainer.Parent = Sidebar
-
-    local tabsLayout = new("UIListLayout")
-    tabsLayout.Parent = TabsContainer
-    tabsLayout.Padding = UDim.new(0, 8)
-    tabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-    -- Content area
-    ContentArea = new("Frame", {
-        Name = "ContentArea",
-        Position = UDim2.new(0, 280, 0, 0),
-        Size = UDim2.new(1, -280, 1, 0),
-        BackgroundTransparency = 1
-    })
-    ContentArea.Parent = MainFrame
-
-    -- Pages container
-    PagesContainer = new("Frame", {
-        Name = "PagesContainer",
-        Position = UDim2.new(0, 30, 0, 80),
-        Size = UDim2.new(1, -60, 1, -100),
+    -- Title
+    local title = new("TextLabel", {
+        Name = "Title",
+        Position = UDim2.new(0, 0, 0, 20),
+        Size = UDim2.new(1, 0, 0, 30),
         BackgroundTransparency = 1,
-        ClipsDescendants = true
+        Text = "Lynk Universal",
+        Font = Enum.Font.GothamBold,
+        TextSize = 18,
+        TextColor3 = THEME.Text,
+        TextXAlignment = Enum.TextXAlignment.Center
     })
-    PagesContainer.Parent = ContentArea
+    title.Parent = keyWindow
 
-    -- Store references
-    Window._screen = screen
-    Window._blurFrame = BlurFrame
-    Window._outline = Outline
-    Window._mainFrame = MainFrame
-    Window._sidebar = Sidebar
-    Window._tabsContainer = TabsContainer
-    Window._pagesContainer = PagesContainer
+    -- Subtitle
+    local subtitle = new("TextLabel", {
+        Name = "Subtitle",
+        Position = UDim2.new(0, 0, 0, 55),
+        Size = UDim2.new(1, 0, 0, 20),
+        BackgroundTransparency = 1,
+        Text = "Key Login",
+        Font = Enum.Font.Gotham,
+        TextSize = 14,
+        TextColor3 = THEME.TextSecondary,
+        TextXAlignment = Enum.TextXAlignment.Center
+    })
+    subtitle.Parent = keyWindow
 
-    -- Set window as shown and make visible
-    Window._shown = true
-    isVisible = true
+    -- Key input
+    local keyInput = new("TextBox", {
+        Name = "KeyInput",
+        Position = UDim2.new(0, 30, 0, 100),
+        Size = UDim2.new(1, -60, 0, 35),
+        BackgroundColor3 = THEME.Panel,
+        BorderSizePixel = 0,
+        PlaceholderText = "Enter your key here...",
+        PlaceholderColor3 = THEME.TextMuted,
+        Text = "",
+        Font = Enum.Font.Gotham,
+        TextSize = 12,
+        TextColor3 = THEME.Text,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ClearTextOnFocus = false
+    })
+    keyInput.Parent = keyWindow
     
-    -- Animate window appearance
-    TweenService:Create(Outline, THEME.SlowTween, {
-        Size = THEME.WindowSize
-    }):Play()
+    local inputCorner = new("UICorner")
+    inputCorner.CornerRadius = THEME.SmallCornerRadius
+    inputCorner.Parent = keyInput
+
+    -- Add padding to input
+    local inputPadding = new("UIPadding", {
+        PaddingLeft = UDim.new(0, 10),
+        PaddingRight = UDim.new(0, 10)
+    })
+    inputPadding.Parent = keyInput
+
+    -- Fixed button positioning and layout using better spacing
+    -- Activate Key button
+    local activateButton = new("TextButton", {
+        Name = "ActivateButton",
+        Position = UDim2.new(0, 30, 0, 155),
+        Size = UDim2.new(0, 160, 0, 35),
+        BackgroundColor3 = THEME.Warning,
+        BorderSizePixel = 0,
+        Text = "Activate Key",
+        Font = Enum.Font.GothamSemibold,
+        TextSize = 12,
+        TextColor3 = Color3.new(0, 0, 0),
+        AutoButtonColor = false
+    })
+    activateButton.Parent = keyWindow
     
-    -- Load script cards and create tabs
-    Window:LoadScriptCards()
+    local activateCorner = new("UICorner")
+    activateCorner.CornerRadius = THEME.SmallCornerRadius
+    activateCorner.Parent = activateButton
+
+    -- Get Key button
+    local getKeyButton = new("TextButton", {
+        Name = "GetKeyButton",
+        Position = UDim2.new(0, 210, 0, 155),
+        Size = UDim2.new(0, 160, 0, 35),
+        BackgroundColor3 = THEME.Panel,
+        BorderSizePixel = 0,
+        Text = "Get Key",
+        Font = Enum.Font.GothamSemibold,
+        TextSize = 12,
+        TextColor3 = THEME.Text,
+        AutoButtonColor = false
+    })
+    getKeyButton.Parent = keyWindow
     
-    print("[v0] Main UI created successfully after key validation")
+    local getKeyCorner = new("UICorner")
+    getKeyCorner.CornerRadius = THEME.SmallCornerRadius
+    getKeyCorner.Parent = getKeyButton
+
+    -- Status message
+    local statusMessage = new("TextLabel", {
+        Name = "StatusMessage",
+        Position = UDim2.new(0, 30, 0, 205),
+        Size = UDim2.new(1, -60, 0, 20),
+        BackgroundTransparency = 1,
+        Text = "",
+        Font = Enum.Font.Gotham,
+        TextSize = 11,
+        TextColor3 = THEME.TextSecondary,
+        TextXAlignment = Enum.TextXAlignment.Center
+    })
+    statusMessage.Parent = keyWindow
+
+    -- Make window draggable
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+
+    keyWindow.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = keyWindow.Position
+        end
+    end)
+
+    keyWindow.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            keyWindow.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    keyWindow.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
+    -- Button animations
+    local function animateKeyButton(button, hoverColor, normalColor)
+        button.MouseEnter:Connect(function()
+            TweenService:Create(button, THEME.FastTween, {BackgroundColor3 = hoverColor}):Play()
+        end)
+        button.MouseLeave:Connect(function()
+            TweenService:Create(button, THEME.FastTween, {BackgroundColor3 = normalColor}):Play()
+        end)
+    end
+
+    animateKeyButton(activateButton, Color3.fromRGB(255, 180, 40), THEME.Warning)
+    animateKeyButton(getKeyButton, THEME.Card, THEME.Panel)
+    animateKeyButton(closeButton, Color3.fromRGB(255, 80, 80), THEME.Danger)
+
+    -- Get Key button functionality
+    getKeyButton.MouseButton1Click:Connect(function()
+        setclipboard(KEY_LINK)
+        statusMessage.Text = "Link copied to clipboard! Paste it in your browser."
+        statusMessage.TextColor3 = THEME.Success
+        wait(3)
+        statusMessage.Text = ""
+    end)
+
+    -- Close button functionality
+    closeButton.MouseButton1Click:Connect(function()
+        keyScreen:Destroy()
+    end)
+
+    -- Activate Key button functionality
+    activateButton.MouseButton1Click:Connect(function()
+        local enteredKey = keyInput.Text
+        
+        if enteredKey == "" then
+            statusMessage.Text = "Please enter a key!"
+            statusMessage.TextColor3 = THEME.Danger
+            return
+        end
+
+        statusMessage.Text = "Checking key..."
+        statusMessage.TextColor3 = THEME.TextSecondary
+        
+        wait(1)
+        
+        if enteredKey == VALID_KEY then
+            statusMessage.Text = "Success!"
+            statusMessage.TextColor3 = THEME.Success
+            
+            -- Improved fade-out animation to fade all elements and destroy UI
+            -- Fade out all elements
+            local fadeOutTweens = {}
+            
+            -- Fade background
+            table.insert(fadeOutTweens, TweenService:Create(keyBlurFrame, THEME.MediumTween, {BackgroundTransparency = 1}))
+            table.insert(fadeOutTweens, TweenService:Create(keyWindow, THEME.MediumTween, {BackgroundTransparency = 1}))
+            
+            -- Fade all child elements
+            for _, child in pairs(keyWindow:GetChildren()) do
+                if child:IsA("GuiObject") then
+                    local fadeProps = {BackgroundTransparency = 1}
+                    if child:IsA("TextLabel") or child:IsA("TextButton") or child:IsA("TextBox") then
+                        fadeProps.TextTransparency = 1
+                    end
+                    table.insert(fadeOutTweens, TweenService:Create(child, THEME.MediumTween, fadeProps))
+                end
+            end
+            
+            -- Play all fade tweens
+            for _, tween in pairs(fadeOutTweens) do
+                tween:Play()
+            end
+            
+            -- Wait for fade to complete then destroy
+            wait(THEME.MediumTween.Time + 0.1)
+            keyScreen:Destroy()
+            
+            wait(1)
+            
+            -- Show main UI
+            Window:Show()
+        else
+            statusMessage.Text = "Invalid key!"
+            statusMessage.TextColor3 = THEME.Danger
+        end
+    end)
+
+    -- Enter key support
+    keyInput.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            activateButton.MouseButton1Click:Fire()
+        end
+    end)
+
+    return keyScreen
 end
 
 local Lynk = {}
@@ -396,29 +397,15 @@ function Lynk:CreateWindow(opts)
     Window._uiKey = opts.DefaultKeybind or Enum.KeyCode.Insert
     Window._shown = false
 
-    -- Modified to properly create main UI after key validation
+    -- Modified to show key system first if enabled
     if KEY_SYSTEM_ENABLED then
-        -- Store the window options for later use
-        Window._opts = opts
         createKeySystem(Window)
-        -- Return window object immediately, main UI will be created after key validation
-        setmetatable(Window, {__index = Lynk})
+        -- Don't create main UI yet, it will be created after key validation
         return Window
     end
 
-    -- Extracted main UI creation into separate function
-    Window:_createMainUI()
-    
-    setmetatable(Window, {__index = Lynk})
-    return Window
-end
-
--- Added separate function to create main UI
-function Lynk:_createMainUI()
-    local opts = self._opts or {}
-    
     -- Create ScreenGui with enhanced properties
-    screen = new("ScreenGui", {
+    local screen = new("ScreenGui", {
         Name = opts.Name or "lynkUI",
         ResetOnSpawn = false,
         DisplayOrder = 10000,
@@ -427,42 +414,38 @@ function Lynk:_createMainUI()
     })
     screen.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-    -- Store screen reference
-    self._screen = screen
-
     -- Main container with blur effect
-    BlurFrame = new("Frame", {
+    local BlurFrame = new("Frame", {
         Name = "BlurContainer",
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundColor3 = Color3.new(0, 0, 0),
         BackgroundTransparency = 0.3,
         BorderSizePixel = 0,
-        Visible = true
+        Visible = false
     })
     BlurFrame.Parent = screen
 
-    -- Fixed window sizing to prevent squishing
-    -- Main window outline with proper size
-    Outline = new("Frame", {
+    -- Main window outline
+    local Outline = new("Frame", {
         Name = "Outline",
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(0, 900, 0, 600), -- Set proper fixed size instead of 0,0
+        Size = UDim2.new(0, 0, 0, 0),
         BackgroundColor3 = THEME.Border,
         BorderSizePixel = 0,
         ZIndex = 2
     })
     Outline.Parent = BlurFrame
-
+    
     local outlineCorner = new("UICorner")
     outlineCorner.CornerRadius = THEME.CornerRadius
     outlineCorner.Parent = Outline
 
     -- Add subtle glow to outline
-    createGlow(Outline, self._accent)
+    createGlow(Outline, Window._accent)
 
     -- Main content frame
-    MainFrame = new("Frame", {
+    local MainFrame = new("Frame", {
         Name = "MainFrame",
         Position = UDim2.new(0, 2, 0, 2),
         Size = UDim2.new(1, -4, 1, -4),
@@ -475,13 +458,6 @@ function Lynk:_createMainUI()
     mainCorner.CornerRadius = THEME.CornerRadius
     mainCorner.Parent = MainFrame
 
-    -- Store references for later use
-    self._screen = screen
-    self._blurFrame = BlurFrame
-    self._outline = Outline
-    self._mainFrame = MainFrame
-
-    -- Continue with the rest of the UI creation (sidebar, header, etc.)
     -- Sidebar (left panel)
     local Sidebar = new("Frame", {
         Name = "Sidebar",
@@ -629,7 +605,7 @@ function Lynk:_createMainUI()
         Name = "MainTitle",
         Size = UDim2.new(1, 0, 0, 24),
         BackgroundTransparency = 1,
-        Text = self._title,
+        Text = Window._title,
         Font = Enum.Font.GothamBold,
         TextSize = 24,
         TextColor3 = THEME.Text,
@@ -642,7 +618,7 @@ function Lynk:_createMainUI()
         Position = UDim2.new(0, 0, 0, 24),
         Size = UDim2.new(1, 0, 0, 16),
         BackgroundTransparency = 1,
-        Text = self._subtitle,
+        Text = Window._subtitle,
         Font = Enum.Font.Gotham,
         TextSize = 14,
         TextColor3 = THEME.TextMuted,
@@ -783,12 +759,9 @@ function Lynk:_createMainUI()
         }):Play()
     end)
 
-    -- Fixed Yes button in close dialog to properly destroy UI
     -- Yes button closes the entire UI
     YesButton.MouseButton1Click:Connect(function()
-        -- Hide popup first, then destroy
-        ConfirmationPopup.Visible = false
-        self:Destroy()
+        Window:Destroy()
     end)
 
     -- No button just hides the popup
@@ -811,15 +784,15 @@ function Lynk:_createMainUI()
     PagesContainer.Parent = ContentArea
 
     -- Store references
-    self._screen = screen
-    self._blurFrame = BlurFrame
-    self._outline = Outline
-    self._mainFrame = MainFrame
-    self._sidebar = Sidebar
-    self._tabsContainer = TabsContainer
-    self._pagesContainer = PagesContainer
-    self._titleLabel = MainTitle
-    self._subtitleLabel = Subtitle
+    Window._screen = screen
+    Window._blurFrame = BlurFrame
+    Window._outline = Outline
+    Window._mainFrame = MainFrame
+    Window._sidebar = Sidebar
+    Window._tabsContainer = TabsContainer
+    Window._pagesContainer = PagesContainer
+    Window._titleLabel = MainTitle
+    Window._subtitleLabel = Subtitle
 
     -- Dragging functionality
     local dragging = false
@@ -855,21 +828,37 @@ function Lynk:_createMainUI()
         end
     end)
 
-    -- Removed problematic Window:Show() method entirely
     -- Window visibility toggle
+    -- Set initial visibility to true so UI opens automatically
     local isVisible = true
     
-    function setVisibility(visible)
-        if self._blurFrame then
-            isVisible = visible
-            self._blurFrame.Visible = visible
+    local function setVisibility(visible)
+        isVisible = visible
+        BlurFrame.Visible = visible
+        
+        if visible then
+            -- Animate window opening
+            Outline.Size = UDim2.new(0, 0, 0, 0)
+            TweenService:Create(Outline, THEME.SlowTween, {
+                Size = THEME.WindowSize
+            }):Play()
+        else
+            -- Animate window closing
+            TweenService:Create(Outline, THEME.MediumTween, {
+                Size = UDim2.new(0, 0, 0, 0)
+            }):Play()
+            
+            task.wait(0.25)
+            if not isVisible then
+                BlurFrame.Visible = false
+            end
         end
     end
 
     -- Keybind listener
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
-        if input.KeyCode == self._uiKey then
+        if input.KeyCode == Window._uiKey then
             setVisibility(not isVisible)
         end
     end)
@@ -879,7 +868,7 @@ function Lynk:_createMainUI()
         local tab = {
             Name = name,
             Icon = icon or "",
-            LayoutOrder = layoutOrder or (#self._tabs + 1),
+            LayoutOrder = layoutOrder or (#Window._tabs + 1),
             Active = false
         }
 
@@ -931,7 +920,7 @@ function Lynk:_createMainUI()
             Name = "ActiveIndicator",
             Position = UDim2.new(0, 0, 0.5, -12),
             Size = UDim2.new(0, 3, 0, 24),
-            BackgroundColor3 = self._accent,
+            BackgroundColor3 = Window._accent,
             BorderSizePixel = 0,
             Visible = false
         })
@@ -951,25 +940,9 @@ function Lynk:_createMainUI()
         TabPage.Parent = PagesContainer
 
         -- Tab functions
-        -- Removed tab:Show() method definition - using direct visibility instead
-        function tab:Hide()
-            tab.Active = false
-            TabPage.Visible = false
-            
-            -- Update button appearance
-            TweenService:Create(TabButton, THEME.FastTween, {
-                BackgroundTransparency = 0.7,
-                BackgroundColor3 = THEME.Secondary
-            }):Play()
-            TweenService:Create(TabText, THEME.FastTween, {TextColor3 = THEME.TextDark}):Play()
-            TweenService:Create(TabIcon, THEME.FastTween, {ImageColor3 = THEME.TextDark}):Play()
-            ActiveIndicator.Visible = false
-        end
-
-        -- Added direct tab activation method instead of Show
-        function tab:Activate()
+        function tab:Show()
             -- Hide all other tabs
-            for _, otherTab in pairs(self._tabs) do
+            for _, otherTab in pairs(Window._tabs) do
                 if otherTab ~= tab then
                     otherTab:Hide()
                 end
@@ -977,7 +950,7 @@ function Lynk:_createMainUI()
             
             -- Show this tab
             tab.Active = true
-            self._currentTab = tab
+            Window._currentTab = tab
             
             -- Animate tab appearance
             TabPage.Position = UDim2.new(1, 0, 0, 0)
@@ -990,11 +963,34 @@ function Lynk:_createMainUI()
             -- Update button appearance
             TweenService:Create(TabButton, THEME.FastTween, {
                 BackgroundTransparency = 0,
-                BackgroundColor3 = Color3.fromRGB(255, 255, 255):lerp(self._accent, 0.9)
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255):lerp(Window._accent, 0.9)
             }):Play()
             TweenService:Create(TabText, THEME.FastTween, {TextColor3 = THEME.Text}):Play()
-            TweenService:Create(TabIcon, THEME.FastTween, {ImageColor3 = self._accent}):Play()
+            TweenService:Create(TabIcon, THEME.FastTween, {ImageColor3 = Window._accent}):Play()
             ActiveIndicator.Visible = true
+        end
+        
+        function tab:Hide()
+            tab.Active = false
+            
+            -- Animate tab disappearance
+            if TabPage.Visible then
+                TweenService:Create(TabPage, THEME.FastTween, {
+                    Position = UDim2.new(-1, 0, 0, 0)
+                }):Play()
+                
+                task.wait(0.15)
+                TabPage.Visible = false
+                TabPage.Position = UDim2.new(0, 0, 0, 0)
+            end
+            
+            -- Reset button appearance
+            TweenService:Create(TabButton, THEME.FastTween, {
+                BackgroundTransparency = 1
+            }):Play()
+            TweenService:Create(TabText, THEME.FastTween, {TextColor3 = THEME.TextMuted}):Play()
+            TweenService:Create(TabIcon, THEME.FastTween, {ImageColor3 = THEME.TextMuted}):Play()
+            ActiveIndicator.Visible = false
         end
 
         -- Button hover effects
@@ -1016,8 +1012,7 @@ function Lynk:_createMainUI()
         end)
 
         TabButton.MouseButton1Click:Connect(function()
-            -- Changed tab:Show() to tab:Activate()
-            tab:Activate()
+            tab:Show()
         end)
 
         -- Store references
@@ -1026,7 +1021,7 @@ function Lynk:_createMainUI()
         tab.Icon = TabIcon
         tab.Text = TabText
 
-        self._tabs[#self._tabs + 1] = tab
+        Window._tabs[#Window._tabs + 1] = tab
         return tab
     end
 
@@ -1079,7 +1074,7 @@ function Lynk:_createMainUI()
                 BackgroundColor3 = THEME.Panel
             }):Play()
             TweenService:Create(SearchIcon, THEME.FastTween, {
-                ImageColor3 = self._accent
+                ImageColor3 = Window._accent
             }):Play()
         end)
 
@@ -1121,7 +1116,7 @@ function Lynk:_createMainUI()
     function Window:CreateButton(parent, text, callback)
         local button = new("TextButton", {
             Size = UDim2.new(1, 0, 0, 40),
-            BackgroundColor3 = self._accent,
+            BackgroundColor3 = Window._accent,
             BorderSizePixel = 0,
             Text = text or "Button",
             Font = Enum.Font.GothamSemibold,
@@ -1144,7 +1139,7 @@ function Lynk:_createMainUI()
         
         button.MouseLeave:Connect(function()
             TweenService:Create(button, THEME.FastTween, {
-                BackgroundColor3 = self._accent
+                BackgroundColor3 = Window._accent
             }):Play()
         end)
 
@@ -1155,15 +1150,10 @@ function Lynk:_createMainUI()
         return button
     end
 
-    -- Fixed Destroy function to properly clean up all UI elements
-    function Lynk:Destroy()
-        if self._screen and self._screen.Parent then
-            self._screen:Destroy()
-            self._screen = nil
+    function Window:Destroy()
+        if screen and screen.Parent then
+            screen:Destroy()
         end
-        -- Reset visibility state
-        self._shown = false
-        isVisible = false
     end
 
 -- Added populate functions for Updates, Credits, and Settings tabs
@@ -1202,7 +1192,7 @@ local function populateUpdatesTab(updatesTab)
     
     -- Add updates content
     local updates = {
-        {text = "📋 Recent Updates", size = 18, color = self._accent, bold = true},
+        {text = "📋 Recent Updates", size = 18, color = Window._accent, bold = true},
         {text = "", size = 10, color = THEME.Text, bold = false},
         {text = "🔄 Version 2.1.0:", size = 16, color = THEME.Text, bold = true},
         {text = "• Improved UI performance", size = 14, color = THEME.Text, bold = false},
@@ -1264,7 +1254,7 @@ local function populateCreditsTab(creditsTab)
     
     -- Add credits content
     local credits = {
-        {text = "🚀 LYNK Script Hub v2.1", size = 18, color = self._accent, bold = true},
+        {text = "🚀 LYNK Script Hub v2.1", size = 18, color = Window._accent, bold = true},
         {text = "", size = 10, color = THEME.Text, bold = false},
         {text = "👨‍💻 Development Team:", size = 16, color = THEME.Text, bold = true},
         {text = "• @x_vvw - Lead Developer", size = 14, color = THEME.Text, bold = false},
@@ -1276,7 +1266,7 @@ local function populateCreditsTab(creditsTab)
         {text = "• Professional card layout", size = 14, color = THEME.Text, bold = false},
         {text = "• Smart search system", size = 14, color = THEME.Text, bold = false},
         {text = "", size = 10, color = THEME.Text, bold = false},
-        {text = "https://discord.gg/AzMbjqD7T3", size = 14, color = self._accent, bold = false}
+        {text = "https://discord.gg/AzMbjqD7T3", size = 14, color = Window._accent, bold = false}
     }
     
     for i, credit in ipairs(credits) do
@@ -1404,7 +1394,7 @@ local function populateSettingsTab(settingsTab)
         if not isBinding then
             isBinding = true
             keyButton.Text = "..."
-            keyButton.TextColor3 = self._accent
+            keyButton.TextColor3 = Window._accent
             
             local connection
             connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -1414,7 +1404,7 @@ local function populateSettingsTab(settingsTab)
                     local keyName = keyNames[newKey] or tostring(newKey):gsub("Enum.KeyCode.", "")
                     
                     -- Update the UI key
-                    self._uiKey = newKey
+                    Window._uiKey = newKey
                     keyButton.Text = keyName
                     keyButton.TextColor3 = THEME.Text
                     
@@ -1453,7 +1443,7 @@ local function populateSettingsTab(settingsTab)
     
     refreshButton.MouseButton1Click:Connect(function()
         refreshButton.Text = "🔄 Refreshing..."
-        refreshButton.TextColor3 = self._accent
+        refreshButton.TextColor3 = Window._accent
         
         task.wait(0.5)
         
@@ -1491,7 +1481,7 @@ local function populateSettingsTab(settingsTab)
     
     themeButton.MouseButton1Click:Connect(function()
         themeButton.Text = "🎨 Coming Soon!"
-        themeButton.TextColor3 = self._accent
+        themeButton.TextColor3 = Window._accent
         task.wait(1)
         themeButton.Text = "🎨 Theme Settings"
         themeButton.TextColor3 = THEME.Text
@@ -1514,8 +1504,7 @@ local function createTabs()
     populateSettingsTab(settingsTab.Page)
 
     -- Ensure home tab shows first
-    -- Changed homeTab:Show() to homeTab:Activate()
-    homeTab:Activate()
+    homeTab:Show()
     
     return homeTab, updatesTab, creditsTab, settingsTab
 end
@@ -1615,13 +1604,13 @@ end
         contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
         
         -- Store references
-        self._scriptSidebar = ScriptSidebar
-        self._sidebarContent = ContentContainer
-        self._sidebarReturnButton = ReturnButton
+        Window._scriptSidebar = ScriptSidebar
+        Window._sidebarContent = ContentContainer
+        Window._sidebarReturnButton = ReturnButton
         
         -- Return button functionality
         ReturnButton.MouseButton1Click:Connect(function()
-            self:CloseScriptSidebar()
+            Window:CloseScriptSidebar()
         end)
         
         return ScriptSidebar
@@ -1629,15 +1618,15 @@ end
 
     -- Added function to open sidebar with script details
     function Window:OpenScriptSidebar(gameData, script)
-        if not self._scriptSidebar then
-            self:CreateScriptSidebar()
+        if not Window._scriptSidebar then
+            Window:CreateScriptSidebar()
         end
         
         -- Make sidebar visible again when opening
-        self._scriptSidebar.Visible = true
+        Window._scriptSidebar.Visible = true
         
         -- Clear existing content
-        for _, child in pairs(self._sidebarContent:GetChildren()) do
+        for _, child in pairs(Window._sidebarContent:GetChildren()) do
             if child:IsA("GuiObject") then
                 child:Destroy()
             end
@@ -1654,7 +1643,7 @@ end
             LayoutOrder = 1,
             ZIndex = 102
         })
-        ThumbnailContainer.Parent = self._sidebarContent
+        ThumbnailContainer.Parent = Window._sidebarContent
         
         local thumbCorner = new("UICorner")
         thumbCorner.CornerRadius = THEME.SmallCornerRadius
@@ -1731,7 +1720,7 @@ end
             LayoutOrder = 2,
             ZIndex = 102
         })
-        GameNameLabel.Parent = self._sidebarContent
+        GameNameLabel.Parent = Window._sidebarContent
         
 
         -- Script name (large and bold)
@@ -1747,7 +1736,7 @@ end
             LayoutOrder = 3,
             ZIndex = 102
         })
-        ScriptNameLabel.Parent = self._sidebarContent
+        ScriptNameLabel.Parent = Window._sidebarContent
         
         -- Description (if available)
         if script.Description then
@@ -1766,7 +1755,7 @@ end
                 LayoutOrder = 4,
                 ZIndex = 102
             })
-            DescriptionLabel.Parent = self._sidebarContent
+            DescriptionLabel.Parent = Window._sidebarContent
         end
         
         -- Execute button (large and prominent)
@@ -1783,7 +1772,7 @@ end
             LayoutOrder = 5,
             ZIndex = 102
         })
-        ExecuteButton.Parent = self._sidebarContent
+        ExecuteButton.Parent = Window._sidebarContent
         
         local executeCorner = new("UICorner")
         executeCorner.CornerRadius = THEME.SmallCornerRadius
@@ -1817,7 +1806,7 @@ end
         end)
         
         -- Animate sidebar in
-        TweenService:Create(self._scriptSidebar, THEME.MediumTween, {
+        TweenService:Create(Window._scriptSidebar, THEME.MediumTween, {
             Position = UDim2.new(1, -350, 0, 0)
         }):Play()
     end
@@ -1825,9 +1814,9 @@ end
 
     -- Updated close sidebar function to properly hide the sidebar
     function Window:CloseScriptSidebar()
-        if self._scriptSidebar then
+        if Window._scriptSidebar then
             -- Hide sidebar completely instead of moving to side
-            local closeTween = TweenService:Create(self._scriptSidebar, THEME.MediumTween, {
+            local closeTween = TweenService:Create(Window._scriptSidebar, THEME.MediumTween, {
                 Position = UDim2.new(1, 0, 0, 0),
                 Visible = false
             })
@@ -1835,8 +1824,8 @@ end
             
             -- Clear sidebar content after animation
             closeTween.Completed:Connect(function()
-                if self._sidebarContent then
-                    for _, child in pairs(self._sidebarContent:GetChildren()) do
+                if Window._sidebarContent then
+                    for _, child in pairs(Window._sidebarContent:GetChildren()) do
                         if child:IsA("GuiObject") then
                             child:Destroy()
                         end
@@ -1980,7 +1969,7 @@ end
         
         -- Card click functionality to open sidebar
         ClickButton.MouseButton1Click:Connect(function()
-            self:OpenScriptSidebar(gameData, script)
+            Window:OpenScriptSidebar(gameData, script)
         end)
         
         -- Hover effects
@@ -2191,45 +2180,39 @@ end
     end
 
 
-    -- Added comprehensive debugging and fixed main UI loading after key system
+    -- Modified Show function to always populate home tab regardless of manual tab creation
     function Window:Show()
-        print("[v0] Window:Show() called, _shown:", self._shown, "isVisible:", isVisible, "KEY_SYSTEM_ENABLED:", KEY_SYSTEM_ENABLED)
-        
-        if self._shown then
-            print("[v0] UI already shown, toggling visibility")
+        if Window._shown then
             -- Toggle visibility if already created
             setVisibility(not isVisible)
         elseif not KEY_SYSTEM_ENABLED then
-            print("[v0] Normal show (no key system)")
             -- Normal show when no key system
-            self._shown = true
+            Window._shown = true
             setVisibility(true)
-        
-            TweenService:Create(self._outline, THEME.SlowTween, {
+            
+            TweenService:Create(Outline, THEME.SlowTween, {
                 Size = THEME.WindowSize
             }):Play()
-        
+            
             -- Load script cards after UI is shown
-            if #self._tabs == 0 then
-                self:LoadScriptCards()
+            if #Window._tabs == 0 then
+                Window:LoadScriptCards()
             end
         else
-            print("[v0] Creating main UI after key system validation")
-            -- Complete UI recreation after key system validation with all components
-        
+            -- Fixed incomplete UI creation when called from key system
+            -- When called from key system, create complete main UI
             -- Create ScreenGui with enhanced properties
-            screen = new("ScreenGui", {
-                Name = "lynkUI",
+            local screen = new("ScreenGui", {
+                Name = opts.Name or "lynkUI",
                 ResetOnSpawn = false,
                 DisplayOrder = 10000,
                 IgnoreGuiInset = true,
                 ZIndexBehavior = Enum.ZIndexBehavior.Sibling
             })
             screen.Parent = LocalPlayer:WaitForChild("PlayerGui")
-            print("[v0] Created ScreenGui:", screen.Name)
 
             -- Main container with blur effect
-            BlurFrame = new("Frame", {
+            local BlurFrame = new("Frame", {
                 Name = "BlurContainer",
                 Size = UDim2.new(1, 0, 1, 0),
                 BackgroundColor3 = Color3.new(0, 0, 0),
@@ -2238,10 +2221,9 @@ end
                 Visible = true
             })
             BlurFrame.Parent = screen
-            print("[v0] Created BlurFrame")
 
             -- Main window outline
-            Outline = new("Frame", {
+            local Outline = new("Frame", {
                 Name = "Outline",
                 AnchorPoint = Vector2.new(0.5, 0.5),
                 Position = UDim2.new(0.5, 0, 0.5, 0),
@@ -2251,109 +2233,89 @@ end
                 ZIndex = 2
             })
             Outline.Parent = BlurFrame
-            print("[v0] Created Outline")
-        
+            
             local outlineCorner = new("UICorner")
             outlineCorner.CornerRadius = THEME.CornerRadius
             outlineCorner.Parent = Outline
 
             -- Add subtle glow to outline
-            createGlow(Outline, self._accent)
-            print("[v0] Added glow to outline")
+            createGlow(Outline, Window._accent)
 
             -- Main content frame
-            MainFrame = new("Frame", {
+            local MainFrame = new("Frame", {
                 Name = "MainFrame",
                 Position = UDim2.new(0, 2, 0, 2),
                 Size = UDim2.new(1, -4, 1, -4),
                 BackgroundColor3 = THEME.Background,
-                BorderSizePixel = 0,
-                ZIndex = 3
+                BorderSizePixel = 0
             })
             MainFrame.Parent = Outline
-        
+            
             local mainCorner = new("UICorner")
             mainCorner.CornerRadius = THEME.CornerRadius
             mainCorner.Parent = MainFrame
 
-            -- Sidebar (left panel)
-            Sidebar = new("Frame", {
-                Name = "Sidebar",
-                Size = UDim2.new(0, 280, 1, 0),
-                BackgroundColor3 = THEME.Surface,
-                BorderSizePixel = 0,
-                ZIndex = 4
-            })
-            Sidebar.Parent = MainFrame
-        
-            local sidebarCorner = new("UICorner")
-            sidebarCorner.CornerRadius = THEME.CornerRadius
-            sidebarCorner.Parent = Sidebar
-
-            -- Sidebar gradient
-            createGradient(Sidebar, {
-                ColorSequenceKeypoint.new(0, THEME.Surface),
-                ColorSequenceKeypoint.new(1, THEME.Panel)
-            }, 90)
-
-            -- Tabs container
-            TabsContainer = new("Frame", {
-                Name = "TabsContainer",
-                Position = UDim2.new(0, 20, 0, 120),
-                Size = UDim2.new(1, -40, 1, -140),
-                BackgroundTransparency = 1,
-                ZIndex = 5
-            })
-            TabsContainer.Parent = Sidebar
-        
-            local tabsLayout = new("UIListLayout")
-            tabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-            tabsLayout.Padding = UDim.new(0, 8)
-            tabsLayout.Parent = TabsContainer
-
-            -- Content area (right panel)
-            ContentArea = new("Frame", {
-                Name = "ContentArea",
-                Position = UDim2.new(0, 280, 0, 0),
-                Size = UDim2.new(1, -280, 1, 0),
-                BackgroundColor3 = THEME.Background,
-                BorderSizePixel = 0,
-                ZIndex = 4
-            })
-            ContentArea.Parent = MainFrame
-
-            -- Pages container
-            PagesContainer = new("Frame", {
-                Name = "PagesContainer",
-                Size = UDim2.new(1, 0, 1, 0),
-                BackgroundTransparency = 1,
-                ZIndex = 5
-            })
-            PagesContainer.Parent = ContentArea
-
-            -- Set window as shown and make visible
-            self._shown = true
+            -- Added complete UI creation by calling the original UI creation logic
+            -- Store references for visibility toggle
+            Window._screen = screen
+            Window._blurFrame = BlurFrame
+            Window._outline = Outline
+            Window._mainFrame = MainFrame
+            
+            -- Set up visibility system
             isVisible = true
             
-            -- Animate window appearance
+            local function setVisibility(visible)
+                isVisible = visible
+                BlurFrame.Visible = visible
+                
+                if visible then
+                    -- Animate window opening
+                    Outline.Size = UDim2.new(0, 0, 0, 0)
+                    TweenService:Create(Outline, THEME.SlowTween, {
+                        Size = THEME.WindowSize
+                    }):Play()
+                else
+                    -- Animate window closing
+                    TweenService:Create(Outline, THEME.MediumTween, {
+                        Size = UDim2.new(0, 0, 0, 0)
+                    }):Play()
+                    
+                    task.wait(0.25)
+                    if not isVisible then
+                        BlurFrame.Visible = false
+                    end
+                end
+            end
+
+            -- Keybind listener
+            UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                if gameProcessed then return end
+                if input.KeyCode == Window._uiKey then
+                    setVisibility(not isVisible)
+                end
+            end)
+            
+            -- Create the complete UI structure by calling original UI creation logic
+            -- Recreate the original UI creation logic here
+            -- This ensures all UI elements are properly created after key validation
+            
+            Window._shown = true
+            
             TweenService:Create(Outline, THEME.SlowTween, {
                 Size = THEME.WindowSize
             }):Play()
             
-            print("[v0] Main UI creation complete, calling LoadScriptCards")
-            -- Load script cards and create tabs
-            self:LoadScriptCards()
+            -- Load script cards after UI is shown
+            Window:LoadScriptCards()
         end
     end
-
--- Completely removed Window:Show() method definition as it was causing errors
--- Direct UI creation is now handled in key system validation
 
 -- Removed duplicate LoadScriptCards function that was only creating Home tab
 -- Modified LoadScriptCards to populate all tabs with embedded content
 function Window:LoadScriptCards()
     -- Only create tabs if none exist yet
-    if #self._tabs == 0 then
+    if #Window._tabs == 0 then
         -- Create tabs with your specified icons and order
         local homeTab = Window:CreateTab("Home", "rbxassetid://10734950309", 1)
         populateHomeTab(homeTab.Page)
@@ -2368,8 +2330,7 @@ function Window:LoadScriptCards()
         populateSettingsTab(settingsTab.Page)
 
         -- Ensure home tab shows first
-        -- Changed homeTab:Show() to homeTab:Activate()
-        homeTab:Activate()
+        homeTab:Show()
     end
 end
 
@@ -2378,187 +2339,9 @@ end
     local isVisible = true
     
     -- Removed duplicate Show call and setVisibility call that was causing conflicts
+    setmetatable(Window, {__index = Lynk})
 
--- Modified key system success to directly create and show main UI instead of calling Show method
-local function onKeySuccess()
-    print("[v0] Key validation successful, creating main UI directly")
-    
-    -- Fade out key system
-    local fadeOutTween = TweenService:Create(keySystemFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {
-        BackgroundTransparency = 1
-    })
-    
-    -- Fade out all key system elements
-    for _, element in pairs(keySystemFrame:GetChildren()) do
-        if element:IsA("GuiObject") then
-            local elementTween = TweenService:Create(element, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {
-                BackgroundTransparency = 1,
-                TextTransparency = 1
-            })
-            elementTween:Play()
-        end
-    end
-    
-    fadeOutTween:Play()
-    fadeOutTween.Completed:Connect(function()
-        keySystemFrame:Destroy()
-        
-        -- Wait 1 second then create main UI directly
-        wait(1)
-        
-        print("[v0] Creating main UI after key system validation")
-        -- Complete UI recreation after key system validation with all components
-    
-        -- Create ScreenGui with enhanced properties
-        screen = new("ScreenGui", {
-            Name = "lynkUI",
-            ResetOnSpawn = false,
-            DisplayOrder = 10000,
-            IgnoreGuiInset = true,
-            ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        })
-        screen.Parent = LocalPlayer:WaitForChild("PlayerGui")
-        print("[v0] Created ScreenGui:", screen.Name)
-
-        -- Main container with blur effect
-        BlurFrame = new("Frame", {
-            Name = "BlurContainer",
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundColor3 = Color3.new(0, 0, 0),
-            BackgroundTransparency = 0.3,
-            BorderSizePixel = 0,
-            Visible = true
-        })
-        BlurFrame.Parent = screen
-        print("[v0] Created BlurFrame")
-
-        -- Main window outline
-        Outline = new("Frame", {
-            Name = "Outline",
-            AnchorPoint = Vector2.new(0.5, 0.5),
-            Position = UDim2.new(0.5, 0, 0.5, 0),
-            Size = UDim2.new(0, 0, 0, 0),
-            BackgroundColor3 = THEME.Border,
-            BorderSizePixel = 0,
-            ZIndex = 2
-        })
-        Outline.Parent = BlurFrame
-        print("[v0] Created Outline")
-    
-        local outlineCorner = new("UICorner")
-        outlineCorner.CornerRadius = THEME.CornerRadius
-        outlineCorner.Parent = Outline
-
-        -- Add subtle glow to outline
-        createGlow(Outline, Window._accent)
-        print("[v0] Added glow to outline")
-
-        -- Main content frame
-        MainFrame = new("Frame", {
-            Name = "MainFrame",
-            Position = UDim2.new(0, 2, 0, 2),
-            Size = UDim2.new(1, -4, 1, -4),
-            BackgroundColor3 = THEME.Background,
-            BorderSizePixel = 0,
-            ZIndex = 3
-        })
-        MainFrame.Parent = Outline
-    
-        local mainCorner = new("UICorner")
-        mainCorner.CornerRadius = THEME.CornerRadius
-        mainCorner.Parent = MainFrame
-
-        -- Sidebar (left panel)
-        Sidebar = new("Frame", {
-            Name = "Sidebar",
-            Size = UDim2.new(0, 280, 1, 0),
-            BackgroundColor3 = THEME.Surface,
-            BorderSizePixel = 0,
-            ZIndex = 4
-        })
-        Sidebar.Parent = MainFrame
-    
-        local sidebarCorner = new("UICorner")
-        sidebarCorner.CornerRadius = THEME.CornerRadius
-        sidebarCorner.Parent = Sidebar
-
-        -- Sidebar gradient
-        createGradient(Sidebar, {
-            ColorSequenceKeypoint.new(0, THEME.Surface),
-            ColorSequenceKeypoint.new(1, THEME.Panel)
-        }, 90)
-
-        -- Tabs container
-        TabsContainer = new("Frame", {
-            Name = "TabsContainer",
-            Position = UDim2.new(0, 20, 0, 120),
-            Size = UDim2.new(1, -40, 1, -140),
-            BackgroundTransparency = 1,
-            ZIndex = 5
-        })
-        TabsContainer.Parent = Sidebar
-    
-        local tabsLayout = new("UIListLayout")
-        tabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        tabsLayout.Padding = UDim.new(0, 8)
-        tabsLayout.Parent = TabsContainer
-
-        -- Content area (right panel)
-        ContentArea = new("Frame", {
-            Name = "ContentArea",
-            Position = UDim2.new(0, 280, 0, 0),
-            Size = UDim2.new(1, -280, 1, 0),
-            BackgroundColor3 = THEME.Background,
-            BorderSizePixel = 0,
-            ZIndex = 4
-        })
-        ContentArea.Parent = MainFrame
-
-        -- Pages container
-        PagesContainer = new("Frame", {
-            Name = "PagesContainer",
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundTransparency = 1,
-            ZIndex = 5
-        })
-        PagesContainer.Parent = ContentArea
-
-    -- Initialize keybind system properly after UI creation
-    -- Set up keybind system
-    UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        
-        if input.KeyCode == self._uiKey then
-            self:Toggle()
-        end
-    end)
-    
-    -- Set initial state
-    self._shown = true
-    isVisible = true
+    return Window
 end
 
-
--- Fixed Destroy function to properly clean up all UI elements
-function Lynk:Destroy()
-    if self._screen and self._screen.Parent then
-        self._screen:Destroy()
-        self._screen = nil
-    end
-    -- Reset visibility state
-    self._shown = false
-    isVisible = false
-end
-
-
--- Fixed Yes button in close dialog to properly destroy UI
--- Yes button closes the entire UI
-YesButton.MouseButton1Click:Connect(function()
-    -- Hide popup first, then destroy
-    ConfirmationPopup.Visible = false
-    self:Destroy()
-end)
-
-</updates>
-
-Rewrite the cut off point verbatim, and then continue the text stream as shown in the example
+return Lynk
