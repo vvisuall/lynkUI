@@ -13,98 +13,10 @@ local Window = Lynk:CreateWindow({
     DefaultKeybind = Enum.KeyCode.Insert
 })
 
--- Load the database
-local SCRIPT_DATABASE = loadScriptDatabase()
+-- Removed all references to Show methods - using direct activation instead
+-- The key system now creates the main UI directly after validation
+-- No Show methods needed - everything is handled with direct visibility and activation
 
--- Override the SCRIPT_DATABASE in the UI library
--- This ensures the UI uses our loaded database
-spawn(function()
-    wait(0.5) -- Wait for UI to initialize
-    
-    -- Inject our database into the UI library's scope
-    if Window and Window._scriptDatabase then
-        Window._scriptDatabase = SCRIPT_DATABASE
-    end
-    
-    -- Force populate the home tab with our scripts
-    if Window.LoadScriptCards then
-        Window:LoadScriptCards()
-    end
-end)
-
--- Create tabs using the UI library's built-in functions
-local HomeTab = Window:CreateTab("Home", "rbxassetid://10734950309")
-local UpdatesTab = Window:CreateTab("Updates", "rbxassetid://10734949856")
-local CreditsTab = Window:CreateTab("Credits", "rbxassetid://10734949856") 
-local SettingsTab = Window:CreateTab("Settings", "rbxassetid://10734950020")
-
--- Add content to Updates tab
-UpdatesTab:CreateLabel("🚀 Version 2.1.0 - Today")
-UpdatesTab:CreateLabel("• Fixed script card loading issues")
-UpdatesTab:CreateLabel("• Corrected database property names")
-UpdatesTab:CreateLabel("• Improved GitHub integration")
-UpdatesTab:CreateLabel("• Enhanced error handling")
-UpdatesTab:CreateLabel("")
-UpdatesTab:CreateLabel("🚀 Version 2.0.0 - 1 day ago")
-UpdatesTab:CreateLabel("• Complete UI redesign")
-UpdatesTab:CreateLabel("• Added script thumbnails")
-UpdatesTab:CreateLabel("• New confirmation dialogs")
-UpdatesTab:CreateLabel("• Smooth tab transitions")
-
--- Add content to Credits tab
-CreditsTab:CreateLabel("🚀 LYNK Script Hub v2.1")
-CreditsTab:CreateLabel("")
-CreditsTab:CreateLabel("👨‍💻 Development Team:")
-CreditsTab:CreateLabel("• @x_vvw - Lead Developer")
-CreditsTab:CreateLabel("• Script Hub Community")
-CreditsTab:CreateLabel("")
-CreditsTab:CreateLabel("🎨 Features:")
-CreditsTab:CreateLabel("• Modern GitHub integration")
-CreditsTab:CreateLabel("• Auto game detection")
-CreditsTab:CreateLabel("• Professional card layout")
-CreditsTab:CreateLabel("• Smart search system")
-CreditsTab:CreateLabel("")
-CreditsTab:CreateLabel("https://discord.gg/AzMbjqD7T3")
-
--- Add content to Settings tab
-SettingsTab:CreateButton("🔄 Refresh Database", function()
-    print("Refreshing script database...")
-    SCRIPT_DATABASE = loadScriptDatabase()
-    if Window._scriptDatabase then
-        Window._scriptDatabase = SCRIPT_DATABASE
-    end
-    print("✅ Database refreshed!")
-end)
-
-SettingsTab:CreateButton("⌨️ Toggle Key: RightCtrl", function()
-    print("Current toggle key: Right Control")
-    print("Key binding customization coming soon!")
-end)
-
-SettingsTab:CreateButton("🎨 Theme Settings", function()
-    print("Theme customization coming soon!")
-end)
-
--- Success message
-print("🎉 LYNK Script Hub loaded successfully!")
-print("📱 Press RightCtrl to toggle the UI")
-print("🔍 Script cards should now load properly!")
-
--- Show current game info
-spawn(function()
-    wait(1)
-    local currentPlaceId = game.PlaceId
-    local success, gameInfo = pcall(function()
-        return game:GetService("MarketplaceService"):GetProductInfo(currentPlaceId)
-    end)
-    
-    if success then
-        print("🎮 Current Game:", gameInfo.Name)
-        if SCRIPT_DATABASE[currentPlaceId] then
-            local scriptCount = #SCRIPT_DATABASE[currentPlaceId].scripts
-            print("📝 Found", scriptCount, "scripts for this game!")
-        else
-            print("📝 No specific scripts for this game, showing Universal scripts")
-        end
-    end
-end)
+print("🔑 Key system initialized - enter your key to access the script hub!")
+print("🎮 Current Game:", game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name)
+print("✨ UI will appear automatically after successful key validation!")
