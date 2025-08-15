@@ -1,10 +1,10 @@
--- Universal Script Hub - Fixed Version
--- This works with the updated key system that creates UI directly after validation
+-- Universal Script Hub - Fixed Integration Version with Key System Support
+-- This properly integrates with your lynkUI library and handles key system timing
 
 -- Load your UI library
 local Lynk = loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/source"))()
 
--- Create window - the key system will handle everything else
+-- Create window first
 local Window = Lynk:CreateWindow({
     Name = "Universal Script Hub",
     Title = "LYNK | No.1 Scripthub", 
@@ -13,10 +13,155 @@ local Window = Lynk:CreateWindow({
     DefaultKeybind = Enum.KeyCode.Insert
 })
 
--- Removed all references to Show methods - using direct activation instead
--- The key system now creates the main UI directly after validation
--- No Show methods needed - everything is handled with direct visibility and activation
+-- Added function to wait for main UI after key system validation
+local function waitForMainUI()
+    local attempts = 0
+    while attempts < 100 do -- Wait up to 10 seconds for key validation
+        if Window and Window._mainFrame and Window.CreateTab then
+            return true
+        end
+        wait(0.1)
+        attempts = attempts + 1
+    end
+    return false
+end
 
-print("🔑 Key system initialized - enter your key to access the script hub!")
-print("🎮 Current Game:", game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name)
-print("✨ UI will appear automatically after successful key validation!")
+-- Load script database from GitHub with proper error handling
+local function loadScriptDatabase()
+    local success, result = pcall(function()
+        return loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/scripts.lua"))()
+    end)
+    
+    if success and result then
+        print("✅ Script database loaded successfully!")
+        return result
+    else
+        print("❌ Failed to load script database:", result)
+        -- Fallback database with correct property names
+        return {
+            ["Universal"] = {
+                gameName = "Universal Scripts",
+                scripts = {
+                    {
+                        Title = "Infinite Yield", 
+                        Description = "Admin commands for any game", 
+                        LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()', 
+                        RequiresKey = false
+                    },
+                    {
+                        Title = "Fly Script", 
+                        Description = "Universal fly script", 
+                        LoadString = 'print("Fly script would execute here")', 
+                        RequiresKey = false
+                    }
+                }
+            }
+        }
+    end
+end
+
+-- Wrapped all tab creation and setup in a function that waits for main UI
+local function setupScriptHub()
+    -- Load the database
+    local SCRIPT_DATABASE = loadScriptDatabase()
+
+    -- Override the SCRIPT_DATABASE in the UI library
+    if Window and Window._scriptDatabase then
+        Window._scriptDatabase = SCRIPT_DATABASE
+    end
+    
+    -- Create tabs using the UI library's built-in functions
+    local HomeTab = Window:CreateTab("Home", "rbxassetid://10734950309")
+    local UpdatesTab = Window:CreateTab("Updates", "rbxassetid://10734949856")
+    local CreditsTab = Window:CreateTab("Credits", "rbxassetid://10734949856") 
+    local SettingsTab = Window:CreateTab("Settings", "rbxassetid://10734950020")
+
+    -- Add content to Updates tab
+    UpdatesTab:CreateLabel("🚀 Version 2.1.0 - Today")
+    UpdatesTab:CreateLabel("• Fixed script card loading issues")
+    UpdatesTab:CreateLabel("• Corrected database property names")
+    UpdatesTab:CreateLabel("• Improved GitHub integration")
+    UpdatesTab:CreateLabel("• Enhanced error handling")
+    UpdatesTab:CreateLabel("")
+    UpdatesTab:CreateLabel("🚀 Version 2.0.0 - 1 day ago")
+    UpdatesTab:CreateLabel("• Complete UI redesign")
+    UpdatesTab:CreateLabel("• Added script thumbnails")
+    UpdatesTab:CreateLabel("• New confirmation dialogs")
+    UpdatesTab:CreateLabel("• Smooth tab transitions")
+
+    -- Add content to Credits tab
+    CreditsTab:CreateLabel("🚀 LYNK Script Hub v2.1")
+    CreditsTab:CreateLabel("")
+    CreditsTab:CreateLabel("👨‍💻 Development Team:")
+    CreditsTab:CreateLabel("• @x_vvw - Lead Developer")
+    CreditsTab:CreateLabel("• Script Hub Community")
+    CreditsTab:CreateLabel("")
+    CreditsTab:CreateLabel("🎨 Features:")
+    CreditsTab:CreateLabel("• Modern GitHub integration")
+    CreditsTab:CreateLabel("• Auto game detection")
+    CreditsTab:CreateLabel("• Professional card layout")
+    CreditsTab:CreateLabel("• Smart search system")
+    CreditsTab:CreateLabel("")
+    CreditsTab:CreateLabel("https://discord.gg/AzMbjqD7T3")
+
+    -- Add content to Settings tab
+    SettingsTab:CreateButton("🔄 Refresh Database", function()
+        print("Refreshing script database...")
+        SCRIPT_DATABASE = loadScriptDatabase()
+        if Window._scriptDatabase then
+            Window._scriptDatabase = SCRIPT_DATABASE
+        end
+        print("✅ Database refreshed!")
+    end)
+
+    SettingsTab:CreateButton("⌨️ Toggle Key: Insert", function()
+        print("Current toggle key: Insert")
+        print("Key binding customization coming soon!")
+    end)
+
+    SettingsTab:CreateButton("🎨 Theme Settings", function()
+        print("Theme customization coming soon!")
+    end)
+
+    -- Force populate the home tab with scripts after tabs are created
+    wait(0.5)
+    if Window.LoadScriptCards then
+        Window:LoadScriptCards()
+    end
+
+    -- Success message
+    print("🎉 LYNK Script Hub loaded successfully!")
+    print("📱 Press Insert to toggle the UI")
+    print("🔍 Script cards should now load properly!")
+
+    -- Show current game info
+    spawn(function()
+        wait(1)
+        local currentPlaceId = game.PlaceId
+        local success, gameInfo = pcall(function()
+            return game:GetService("MarketplaceService"):GetProductInfo(currentPlaceId)
+        end)
+        
+        if success then
+            print("🎮 Current Game:", gameInfo.Name)
+            if SCRIPT_DATABASE[currentPlaceId] then
+                local scriptCount = #SCRIPT_DATABASE[currentPlaceId].scripts
+                print("📝 Found", scriptCount, "scripts for this game!")
+            else
+                print("📝 No specific scripts for this game, showing Universal scripts")
+            end
+        end
+    end)
+end
+
+-- Added logic to handle both key system enabled and disabled scenarios
+spawn(function()
+    if waitForMainUI() then
+        print("🎉 Main UI detected, setting up script hub...")
+        setupScriptHub()
+    else
+        print("❌ Failed to detect main UI - trying immediate setup...")
+        -- Fallback: try immediate setup in case key system is disabled
+        setupScriptHub()
+    end
+end)
