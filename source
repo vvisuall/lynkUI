@@ -2180,12 +2180,16 @@ end
     end
 
 
-    -- Modified Show function to always populate home tab regardless of manual tab creation
+    -- Added comprehensive debugging and fixed main UI loading after key system
     function Window:Show()
+        print("[v0] Window:Show() called, _shown:", Window._shown, "isVisible:", isVisible, "KEY_SYSTEM_ENABLED:", KEY_SYSTEM_ENABLED)
+        
         if Window._shown then
+            print("[v0] UI already shown, toggling visibility")
             -- Toggle visibility if already created
             setVisibility(not isVisible)
         elseif not KEY_SYSTEM_ENABLED then
+            print("[v0] Normal show (no key system)")
             -- Normal show when no key system
             Window._shown = true
             setVisibility(true)
@@ -2199,8 +2203,8 @@ end
                 Window:LoadScriptCards()
             end
         else
-            -- Fixed incomplete UI creation when called from key system
-            -- When called from key system, create complete main UI
+            print("[v0] Creating main UI after key system validation")
+            -- Completely recreate the main UI using the original creation logic
             -- Create ScreenGui with enhanced properties
             local screen = new("ScreenGui", {
                 Name = opts.Name or "lynkUI",
@@ -2210,6 +2214,7 @@ end
                 ZIndexBehavior = Enum.ZIndexBehavior.Sibling
             })
             screen.Parent = LocalPlayer:WaitForChild("PlayerGui")
+            print("[v0] Created ScreenGui:", screen.Name)
 
             -- Main container with blur effect
             local BlurFrame = new("Frame", {
@@ -2221,6 +2226,7 @@ end
                 Visible = true
             })
             BlurFrame.Parent = screen
+            print("[v0] Created BlurFrame")
 
             -- Main window outline
             local Outline = new("Frame", {
@@ -2233,6 +2239,7 @@ end
                 ZIndex = 2
             })
             Outline.Parent = BlurFrame
+            print("[v0] Created Outline")
             
             local outlineCorner = new("UICorner")
             outlineCorner.CornerRadius = THEME.CornerRadius
@@ -2240,6 +2247,7 @@ end
 
             -- Add subtle glow to outline
             createGlow(Outline, Window._accent)
+            print("[v0] Added glow to outline")
 
             -- Main content frame
             local MainFrame = new("Frame", {
@@ -2250,13 +2258,13 @@ end
                 BorderSizePixel = 0
             })
             MainFrame.Parent = Outline
+            print("[v0] Created MainFrame")
             
             local mainCorner = new("UICorner")
             mainCorner.CornerRadius = THEME.CornerRadius
             mainCorner.Parent = MainFrame
 
-            -- Added complete UI creation by calling the original UI creation logic
-            -- Store references for visibility toggle
+            -- Store references and set up complete visibility system
             Window._screen = screen
             Window._blurFrame = BlurFrame
             Window._outline = Outline
@@ -2265,7 +2273,9 @@ end
             -- Set up visibility system
             isVisible = true
             
-            local function setVisibility(visible)
+            -- Recreate the setVisibility function for this instance
+            local function setMainUIVisibility(visible)
+                print("[v0] setMainUIVisibility called with:", visible)
                 isVisible = visible
                 BlurFrame.Visible = visible
                 
@@ -2275,6 +2285,7 @@ end
                     TweenService:Create(Outline, THEME.SlowTween, {
                         Size = THEME.WindowSize
                     }):Play()
+                    print("[v0] Started opening animation")
                 else
                     -- Animate window closing
                     TweenService:Create(Outline, THEME.MediumTween, {
@@ -2285,29 +2296,33 @@ end
                     if not isVisible then
                         BlurFrame.Visible = false
                     end
+                    print("[v0] Started closing animation")
                 end
             end
 
-            -- Keybind listener
+            -- Set up keybind listener for this UI instance
             UserInputService.InputBegan:Connect(function(input, gameProcessed)
                 if gameProcessed then return end
                 if input.KeyCode == Window._uiKey then
-                    setVisibility(not isVisible)
+                    print("[v0] Keybind pressed, toggling UI")
+                    setMainUIVisibility(not isVisible)
                 end
             end)
             
-            -- Create the complete UI structure by calling original UI creation logic
-            -- Recreate the original UI creation logic here
-            -- This ensures all UI elements are properly created after key validation
-            
+            -- Mark as shown and start the UI
             Window._shown = true
+            print("[v0] Set _shown to true")
             
+            -- Start the opening animation
             TweenService:Create(Outline, THEME.SlowTween, {
                 Size = THEME.WindowSize
             }):Play()
+            print("[v0] Started main UI opening animation")
             
-            -- Load script cards after UI is shown
+            -- Load script cards after UI animation starts
+            print("[v0] About to call LoadScriptCards, current tabs:", #Window._tabs)
             Window:LoadScriptCards()
+            print("[v0] LoadScriptCards completed")
         end
     end
 
