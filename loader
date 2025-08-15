@@ -133,6 +133,7 @@ spawn(function()
     
     SettingsTab:CreateButton("🔑 Valid Keys", function()
         print("Valid keys for testing:")
+        print("• x7d9A2bQf1Lm38K (Original)")
         print("• LYNK-2024-PREMIUM")
         print("• SCRIPTHUB-VIP-ACCESS") 
         print("• UNIVERSAL-KEY-2024")
