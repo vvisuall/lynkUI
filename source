@@ -2390,16 +2390,134 @@ local function onKeySuccess()
         -- Wait 1 second then create main UI directly
         wait(1)
         
-        -- Create main UI directly without calling Show method
+        print("[v0] Creating main UI after key system validation")
+        -- Complete UI recreation after key system validation with all components
+    
+        -- Create ScreenGui with enhanced properties
+        screen = new("ScreenGui", {
+            Name = "lynkUI",
+            ResetOnSpawn = false,
+            DisplayOrder = 10000,
+            IgnoreGuiInset = true,
+            ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        })
+        screen.Parent = LocalPlayer:WaitForChild("PlayerGui")
+        print("[v0] Created ScreenGui:", screen.Name)
+
+        -- Main container with blur effect
+        BlurFrame = new("Frame", {
+            Name = "BlurContainer",
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundColor3 = Color3.new(0, 0, 0),
+            BackgroundTransparency = 0.3,
+            BorderSizePixel = 0,
+            Visible = true
+        })
+        BlurFrame.Parent = screen
+        print("[v0] Created BlurFrame")
+
+        -- Main window outline
+        Outline = new("Frame", {
+            Name = "Outline",
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.new(0.5, 0, 0.5, 0),
+            Size = UDim2.new(0, 0, 0, 0),
+            BackgroundColor3 = THEME.Border,
+            BorderSizePixel = 0,
+            ZIndex = 2
+        })
+        Outline.Parent = BlurFrame
+        print("[v0] Created Outline")
+    
+        local outlineCorner = new("UICorner")
+        outlineCorner.CornerRadius = THEME.CornerRadius
+        outlineCorner.Parent = Outline
+
+        -- Add subtle glow to outline
+        createGlow(Outline, Window._accent)
+        print("[v0] Added glow to outline")
+
+        -- Main content frame
+        MainFrame = new("Frame", {
+            Name = "MainFrame",
+            Position = UDim2.new(0, 2, 0, 2),
+            Size = UDim2.new(1, -4, 1, -4),
+            BackgroundColor3 = THEME.Background,
+            BorderSizePixel = 0,
+            ZIndex = 3
+        })
+        MainFrame.Parent = Outline
+    
+        local mainCorner = new("UICorner")
+        mainCorner.CornerRadius = THEME.CornerRadius
+        mainCorner.Parent = MainFrame
+
+        -- Sidebar (left panel)
+        Sidebar = new("Frame", {
+            Name = "Sidebar",
+            Size = UDim2.new(0, 280, 1, 0),
+            BackgroundColor3 = THEME.Surface,
+            BorderSizePixel = 0,
+            ZIndex = 4
+        })
+        Sidebar.Parent = MainFrame
+    
+        local sidebarCorner = new("UICorner")
+        sidebarCorner.CornerRadius = THEME.CornerRadius
+        sidebarCorner.Parent = Sidebar
+
+        -- Sidebar gradient
+        createGradient(Sidebar, {
+            ColorSequenceKeypoint.new(0, THEME.Surface),
+            ColorSequenceKeypoint.new(1, THEME.Panel)
+        }, 90)
+
+        -- Tabs container
+        TabsContainer = new("Frame", {
+            Name = "TabsContainer",
+            Position = UDim2.new(0, 20, 0, 120),
+            Size = UDim2.new(1, -40, 1, -140),
+            BackgroundTransparency = 1,
+            ZIndex = 5
+        })
+        TabsContainer.Parent = Sidebar
+    
+        local tabsLayout = new("UIListLayout")
+        tabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        tabsLayout.Padding = UDim.new(0, 8)
+        tabsLayout.Parent = TabsContainer
+
+        -- Content area (right panel)
+        ContentArea = new("Frame", {
+            Name = "ContentArea",
+            Position = UDim2.new(0, 280, 0, 0),
+            Size = UDim2.new(1, -280, 1, 0),
+            BackgroundColor3 = THEME.Background,
+            BorderSizePixel = 0,
+            ZIndex = 4
+        })
+        ContentArea.Parent = MainFrame
+
+        -- Pages container
+        PagesContainer = new("Frame", {
+            Name = "PagesContainer",
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundTransparency = 1,
+            ZIndex = 5
+        })
+        PagesContainer.Parent = ContentArea
+
+        -- Set window as shown and make visible
         Window._shown = true
-        setVisibility(true)
+        isVisible = true
         
-        -- Create main UI structure
+        -- Animate window appearance
         TweenService:Create(Outline, THEME.SlowTween, {
             Size = THEME.WindowSize
         }):Play()
         
-        -- Load script cards
+        print("[v0] Main UI creation complete, calling LoadScriptCards")
+        -- Load script cards and create tabs
         Window:LoadScriptCards()
         
         print("[v0] Main UI created successfully after key validation")
