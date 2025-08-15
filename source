@@ -940,7 +940,23 @@ function Lynk:CreateWindow(opts)
         TabPage.Parent = PagesContainer
 
         -- Tab functions
-        function tab:Show()
+        -- Removed tab:Show() method definition - using direct visibility instead
+        function tab:Hide()
+            tab.Active = false
+            TabPage.Visible = false
+            
+            -- Update button appearance
+            TweenService:Create(TabButton, THEME.FastTween, {
+                BackgroundTransparency = 0.7,
+                BackgroundColor3 = THEME.Secondary
+            }):Play()
+            TweenService:Create(TabText, THEME.FastTween, {TextColor3 = THEME.TextDark}):Play()
+            TweenService:Create(TabIcon, THEME.FastTween, {ImageColor3 = THEME.TextDark}):Play()
+            ActiveIndicator.Visible = false
+        end
+
+        -- Added direct tab activation method instead of Show
+        function tab:Activate()
             -- Hide all other tabs
             for _, otherTab in pairs(Window._tabs) do
                 if otherTab ~= tab then
@@ -969,29 +985,6 @@ function Lynk:CreateWindow(opts)
             TweenService:Create(TabIcon, THEME.FastTween, {ImageColor3 = Window._accent}):Play()
             ActiveIndicator.Visible = true
         end
-        
-        function tab:Hide()
-            tab.Active = false
-            
-            -- Animate tab disappearance
-            if TabPage.Visible then
-                TweenService:Create(TabPage, THEME.FastTween, {
-                    Position = UDim2.new(-1, 0, 0, 0)
-                }):Play()
-                
-                task.wait(0.15)
-                TabPage.Visible = false
-                TabPage.Position = UDim2.new(0, 0, 0, 0)
-            end
-            
-            -- Reset button appearance
-            TweenService:Create(TabButton, THEME.FastTween, {
-                BackgroundTransparency = 1
-            }):Play()
-            TweenService:Create(TabText, THEME.FastTween, {TextColor3 = THEME.TextMuted}):Play()
-            TweenService:Create(TabIcon, THEME.FastTween, {ImageColor3 = THEME.TextMuted}):Play()
-            ActiveIndicator.Visible = false
-        end
 
         -- Button hover effects
         TabButton.MouseEnter:Connect(function()
@@ -1012,7 +1005,8 @@ function Lynk:CreateWindow(opts)
         end)
 
         TabButton.MouseButton1Click:Connect(function()
-            tab:Show()
+            -- Changed tab:Show() to tab:Activate()
+            tab:Activate()
         end)
 
         -- Store references
@@ -1504,7 +1498,8 @@ local function createTabs()
     populateSettingsTab(settingsTab.Page)
 
     -- Ensure home tab shows first
-    homeTab:Show()
+    -- Changed homeTab:Show() to homeTab:Activate()
+    homeTab:Activate()
     
     return homeTab, updatesTab, creditsTab, settingsTab
 end
@@ -2335,6 +2330,9 @@ end
         end
     end
 
+-- Completely removed Window:Show() method definition as it was causing errors
+-- Direct UI creation is now handled in key system validation
+
 -- Removed duplicate LoadScriptCards function that was only creating Home tab
 -- Modified LoadScriptCards to populate all tabs with embedded content
 function Window:LoadScriptCards()
@@ -2354,7 +2352,8 @@ function Window:LoadScriptCards()
         populateSettingsTab(settingsTab.Page)
 
         -- Ensure home tab shows first
-        homeTab:Show()
+        -- Changed homeTab:Show() to homeTab:Activate()
+        homeTab:Activate()
     end
 end
 
