@@ -1,10 +1,10 @@
--- Universal Script Hub - Fixed Integration Version
--- This properly integrates with your lynkUI library
+-- Universal Script Hub - Fixed Version
+-- This works with the updated key system that creates UI directly after validation
 
 -- Load your UI library
 local Lynk = loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/source"))()
 
--- Create window first
+-- Create window - the key system will handle everything else
 local Window = Lynk:CreateWindow({
     Name = "Universal Script Hub",
     Title = "LYNK | No.1 Scripthub", 
@@ -13,35 +13,10 @@ local Window = Lynk:CreateWindow({
     DefaultKeybind = Enum.KeyCode.Insert
 })
 
--- Removed Window:Show() call - let key system control UI display
--- Window:Show() -- This conflicts with key system
+-- Updated comments to reflect the new direct UI creation approach
+-- The key system now creates the main UI directly after validation
+-- No Window:Show() calls needed - everything is handled automatically
 
--- Store tab creation logic for after key validation
-Window._pendingTabCreation = function()
-    -- Create tabs manually with your specified icons
-    local HomeTab = Window:CreateTab("Home", "rbxassetid://10734950309")
-    local UpdatesTab = Window:CreateTab("Updates", "rbxassetid://7733674079")
-    local CreditsTab = Window:CreateTab("Credits", "rbxassetid://7733955511") 
-    local SettingsTab = Window:CreateTab("Settings", "rbxassetid://10734950020")
-    
-    print("🎉 LYNK Script Hub loaded successfully!")
-    print("📱 Press Insert to toggle the UI")
-    print("🔍 All tabs should now load properly with search bar and script cards!")
-end
-
--- Success message for key system
 print("🔑 Key system initialized - enter your key to access the script hub!")
-
--- Show current game info
-spawn(function()
-    wait(1)
-    local currentPlaceId = game.PlaceId
-    local success, gameInfo = pcall(function()
-        return game:GetService("MarketplaceService"):GetProductInfo(currentPlaceId)
-    end)
-    
-    if success then
-        print("🎮 Current Game:", gameInfo.Name)
-        print("📝 The UI library will automatically load appropriate scripts after key validation!")
-    end
-end)
+print("🎮 Current Game:", game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name)
+print("✨ UI will appear automatically after successful key validation!")
