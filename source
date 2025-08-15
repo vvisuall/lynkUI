@@ -2363,6 +2363,50 @@ end
     local isVisible = true
     
     -- Removed duplicate Show call and setVisibility call that was causing conflicts
+
+-- Modified key system success to directly create and show main UI instead of calling Show method
+local function onKeySuccess()
+    print("[v0] Key validation successful, creating main UI directly")
+    
+    -- Fade out key system
+    local fadeOutTween = TweenService:Create(keySystemFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {
+        BackgroundTransparency = 1
+    })
+    
+    -- Fade out all key system elements
+    for _, element in pairs(keySystemFrame:GetChildren()) do
+        if element:IsA("GuiObject") then
+            local elementTween = TweenService:Create(element, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {
+                BackgroundTransparency = 1,
+                TextTransparency = 1
+            })
+            elementTween:Play()
+        end
+    end
+    
+    fadeOutTween:Play()
+    fadeOutTween.Completed:Connect(function()
+        keySystemFrame:Destroy()
+        
+        -- Wait 1 second then create main UI directly
+        wait(1)
+        
+        -- Create main UI directly without calling Show method
+        Window._shown = true
+        setVisibility(true)
+        
+        -- Create main UI structure
+        TweenService:Create(Outline, THEME.SlowTween, {
+            Size = THEME.WindowSize
+        }):Play()
+        
+        -- Load script cards
+        Window:LoadScriptCards()
+        
+        print("[v0] Main UI created successfully after key validation")
+    end)
+end
+
     setmetatable(Window, {__index = Lynk})
 
     return Window
