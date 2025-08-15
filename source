@@ -333,8 +333,8 @@ local function createKeySystem(Window)
             statusMessage.Text = "Success!"
             statusMessage.TextColor3 = THEME.Success
             
+            -- Fixed key system completion to properly create main UI
             -- Improved fade-out animation to fade all elements and destroy UI
-            -- Fade out all elements
             local fadeOutTweens = {}
             
             -- Fade background
@@ -357,14 +357,14 @@ local function createKeySystem(Window)
                 tween:Play()
             end
             
-            -- Wait for fade to complete then destroy
+            -- Wait for fade to complete then destroy and create main UI
             wait(THEME.MediumTween.Time + 0.1)
             keyScreen:Destroy()
             
             wait(1)
             
-            -- Show main UI
-            Window:Show()
+            -- Create main UI directly instead of calling problematic Show method
+            createMainUIAfterKeyValidation()
         else
             statusMessage.Text = "Invalid key!"
             statusMessage.TextColor3 = THEME.Danger
@@ -379,6 +379,140 @@ local function createKeySystem(Window)
     end)
 
     return keyScreen
+end
+
+-- Added function to create main UI after key validation
+local function createMainUIAfterKeyValidation()
+    print("[v0] Creating main UI after key validation")
+    
+    -- Create ScreenGui
+    screen = new("ScreenGui", {
+        Name = "lynkUI",
+        ResetOnSpawn = false,
+        DisplayOrder = 10000,
+        IgnoreGuiInset = true,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    })
+    screen.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+    -- Main container with blur effect
+    BlurFrame = new("Frame", {
+        Name = "BlurContainer",
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundColor3 = Color3.new(0, 0, 0),
+        BackgroundTransparency = 0.3,
+        BorderSizePixel = 0,
+        Visible = true
+    })
+    BlurFrame.Parent = screen
+
+    -- Main window outline
+    Outline = new("Frame", {
+        Name = "Outline",
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0, 0, 0, 0),
+        BackgroundColor3 = THEME.Border,
+        BorderSizePixel = 0,
+        ZIndex = 2
+    })
+    Outline.Parent = BlurFrame
+    
+    local outlineCorner = new("UICorner")
+    outlineCorner.CornerRadius = THEME.CornerRadius
+    outlineCorner.Parent = Outline
+
+    -- Add subtle glow to outline
+    createGlow(Outline, Window._accent)
+
+    -- Main content frame
+    MainFrame = new("Frame", {
+        Name = "MainFrame",
+        Position = UDim2.new(0, 2, 0, 2),
+        Size = UDim2.new(1, -4, 1, -4),
+        BackgroundColor3 = THEME.Background,
+        BorderSizePixel = 0
+    })
+    MainFrame.Parent = Outline
+    
+    local mainCorner = new("UICorner")
+    mainCorner.CornerRadius = THEME.CornerRadius
+    mainCorner.Parent = MainFrame
+
+    -- Sidebar (left panel)
+    Sidebar = new("Frame", {
+        Name = "Sidebar",
+        Size = UDim2.new(0, 280, 1, 0),
+        BackgroundColor3 = THEME.Surface,
+        BorderSizePixel = 0
+    })
+    Sidebar.Parent = MainFrame
+    
+    local sidebarCorner = new("UICorner")
+    sidebarCorner.CornerRadius = THEME.CornerRadius
+    sidebarCorner.Parent = Sidebar
+
+    -- Sidebar gradient
+    createGradient(Sidebar, {
+        ColorSequenceKeypoint.new(0, THEME.Surface),
+        ColorSequenceKeypoint.new(1, THEME.Panel)
+    }, 90)
+
+    -- Tabs container
+    TabsContainer = new("Frame", {
+        Name = "TabsContainer",
+        Position = UDim2.new(0, 20, 0, 120),
+        Size = UDim2.new(1, -40, 1, -140),
+        BackgroundTransparency = 1
+    })
+    TabsContainer.Parent = Sidebar
+
+    local tabsLayout = new("UIListLayout")
+    tabsLayout.Parent = TabsContainer
+    tabsLayout.Padding = UDim.new(0, 8)
+    tabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    -- Content area
+    ContentArea = new("Frame", {
+        Name = "ContentArea",
+        Position = UDim2.new(0, 280, 0, 0),
+        Size = UDim2.new(1, -280, 1, 0),
+        BackgroundTransparency = 1
+    })
+    ContentArea.Parent = MainFrame
+
+    -- Pages container
+    PagesContainer = new("Frame", {
+        Name = "PagesContainer",
+        Position = UDim2.new(0, 30, 0, 80),
+        Size = UDim2.new(1, -60, 1, -100),
+        BackgroundTransparency = 1,
+        ClipsDescendants = true
+    })
+    PagesContainer.Parent = ContentArea
+
+    -- Store references
+    Window._screen = screen
+    Window._blurFrame = BlurFrame
+    Window._outline = Outline
+    Window._mainFrame = MainFrame
+    Window._sidebar = Sidebar
+    Window._tabsContainer = TabsContainer
+    Window._pagesContainer = PagesContainer
+
+    -- Set window as shown and make visible
+    Window._shown = true
+    isVisible = true
+    
+    -- Animate window appearance
+    TweenService:Create(Outline, THEME.SlowTween, {
+        Size = THEME.WindowSize
+    }):Play()
+    
+    -- Load script cards and create tabs
+    Window:LoadScriptCards()
+    
+    print("[v0] Main UI created successfully after key validation")
 end
 
 local Lynk = {}
@@ -828,30 +962,14 @@ function Lynk:CreateWindow(opts)
         end
     end)
 
+    -- Removed problematic Window:Show() method entirely
     -- Window visibility toggle
-    -- Set initial visibility to true so UI opens automatically
     local isVisible = true
     
-    local function setVisibility(visible)
-        isVisible = visible
-        BlurFrame.Visible = visible
-        
-        if visible then
-            -- Animate window opening
-            Outline.Size = UDim2.new(0, 0, 0, 0)
-            TweenService:Create(Outline, THEME.SlowTween, {
-                Size = THEME.WindowSize
-            }):Play()
-        else
-            -- Animate window closing
-            TweenService:Create(Outline, THEME.MediumTween, {
-                Size = UDim2.new(0, 0, 0, 0)
-            }):Play()
-            
-            task.wait(0.25)
-            if not isVisible then
-                BlurFrame.Visible = false
-            end
+    function setVisibility(visible)
+        if Window._blurFrame then
+            isVisible = visible
+            Window._blurFrame.Visible = visible
         end
     end
 
