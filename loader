@@ -1,10 +1,10 @@
--- Universal Script Hub - Fixed Integration Version
--- This properly integrates with your lynkUI library
+-- Fixed Universal Script Hub - Properly Integrates with lynkUI library
+-- This loads the fixed UI library and ensures proper database integration
 
--- Load your UI library
-local Lynk = loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/source"))()
+-- Load the fixed UI library
+local Lynk = loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/fixed-source"))()
 
--- Create window first
+-- Create window
 local Window = Lynk:CreateWindow({
     Name = "Universal Script Hub",
     Title = "LYNK | No.1 Scripthub", 
@@ -12,8 +12,6 @@ local Window = Lynk:CreateWindow({
     Accent = Color3.fromRGB(88, 101, 242),
     DefaultKeybind = Enum.KeyCode.Insert
 })
-
-Window:Show()
 
 -- Load script database from GitHub with proper error handling
 local function loadScriptDatabase()
@@ -32,14 +30,14 @@ local function loadScriptDatabase()
                 gameName = "Universal Scripts",
                 scripts = {
                     {
-                        Title = "Infinite Yield", 
-                        Description = "Admin commands for any game", 
+                        title = "Infinite Yield", 
+                        description = "Admin commands for any game", 
                         LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()', 
                         RequiresKey = false
                     },
                     {
-                        Title = "Fly Script", 
-                        Description = "Universal fly script", 
+                        title = "Fly Script", 
+                        description = "Universal fly script", 
                         LoadString = 'print("Fly script would execute here")', 
                         RequiresKey = false
                     }
@@ -52,79 +50,13 @@ end
 -- Load the database
 local SCRIPT_DATABASE = loadScriptDatabase()
 
--- Override the SCRIPT_DATABASE in the UI library
--- This ensures the UI uses our loaded database
-spawn(function()
-    wait(0.5) -- Wait for UI to initialize
-    
-    -- Inject our database into the UI library's scope
-    if Window and Window._scriptDatabase then
-        Window._scriptDatabase = SCRIPT_DATABASE
-    end
-    
-    -- Force populate the home tab with our scripts
-    if Window.LoadScriptCards then
-        Window:LoadScriptCards()
-    end
-end)
+-- Inject our database into the UI library
+Window._scriptDatabase = SCRIPT_DATABASE
 
--- Create tabs using the UI library's built-in functions
-local HomeTab = Window:CreateTab("Home", "rbxassetid://10734950309")
-local UpdatesTab = Window:CreateTab("Updates", "rbxassetid://10734949856")
-local CreditsTab = Window:CreateTab("Credits", "rbxassetid://10734949856") 
-local SettingsTab = Window:CreateTab("Settings", "rbxassetid://10734950020")
-
--- Add content to Updates tab
-UpdatesTab:CreateLabel("🚀 Version 2.1.0 - Today")
-UpdatesTab:CreateLabel("• Fixed script card loading issues")
-UpdatesTab:CreateLabel("• Corrected database property names")
-UpdatesTab:CreateLabel("• Improved GitHub integration")
-UpdatesTab:CreateLabel("• Enhanced error handling")
-UpdatesTab:CreateLabel("")
-UpdatesTab:CreateLabel("🚀 Version 2.0.0 - 1 day ago")
-UpdatesTab:CreateLabel("• Complete UI redesign")
-UpdatesTab:CreateLabel("• Added script thumbnails")
-UpdatesTab:CreateLabel("• New confirmation dialogs")
-UpdatesTab:CreateLabel("• Smooth tab transitions")
-
--- Add content to Credits tab
-CreditsTab:CreateLabel("🚀 LYNK Script Hub v2.1")
-CreditsTab:CreateLabel("")
-CreditsTab:CreateLabel("👨‍💻 Development Team:")
-CreditsTab:CreateLabel("• @x_vvw - Lead Developer")
-CreditsTab:CreateLabel("• Script Hub Community")
-CreditsTab:CreateLabel("")
-CreditsTab:CreateLabel("🎨 Features:")
-CreditsTab:CreateLabel("• Modern GitHub integration")
-CreditsTab:CreateLabel("• Auto game detection")
-CreditsTab:CreateLabel("• Professional card layout")
-CreditsTab:CreateLabel("• Smart search system")
-CreditsTab:CreateLabel("")
-CreditsTab:CreateLabel("https://discord.gg/AzMbjqD7T3")
-
--- Add content to Settings tab
-SettingsTab:CreateButton("🔄 Refresh Database", function()
-    print("Refreshing script database...")
-    SCRIPT_DATABASE = loadScriptDatabase()
-    if Window._scriptDatabase then
-        Window._scriptDatabase = SCRIPT_DATABASE
-    end
-    print("✅ Database refreshed!")
-end)
-
-SettingsTab:CreateButton("⌨️ Toggle Key: RightCtrl", function()
-    print("Current toggle key: Right Control")
-    print("Key binding customization coming soon!")
-end)
-
-SettingsTab:CreateButton("🎨 Theme Settings", function()
-    print("Theme customization coming soon!")
-end)
-
--- Success message
+-- Success messages
 print("🎉 LYNK Script Hub loaded successfully!")
-print("📱 Press RightCtrl to toggle the UI")
-print("🔍 Script cards should now load properly!")
+print("📱 Press Insert to toggle the UI")
+print("🔗 Get key from: https://sub4unlock.io/afvuE")
 
 -- Show current game info
 spawn(function()
