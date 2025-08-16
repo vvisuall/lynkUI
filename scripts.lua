@@ -8,14 +8,27 @@ local SCRIPT_DATABASE = {
         scripts = {
             {
                 title = "Aimbot", 
-                description = "Advanced aimbot system", 
+                description = "Advanced Aimbot Script", 
                 url = "https://raw.githubusercontent.com/yourusername/yourrepo/main/scripts/aimbot.lua", 
                 hasKey = true
             },
             {
                 title = "ESP", 
-                description = "Player ESP with customization", 
+                description = "Advanced ESP Script", 
                 url = "https://raw.githubusercontent.com/yourusername/yourrepo/main/scripts/esp.lua", 
+                hasKey = false
+            }
+        }
+    },
+
+    -- ✅ New game-specific scripts
+    [9791603388] = {
+        gameName = "Underground War 2.0",
+        scripts = {
+            {
+                title = "Silent Aim Fixed",
+                description = "Advanced Silent Aim Fixed Script",
+                url = "https://raw.githubusercontent.com/vvisuall/WITHERCC/refs/heads/main/un",
                 hasKey = false
             }
         }
@@ -27,38 +40,38 @@ local SCRIPT_DATABASE = {
         scripts = {
             {
                 title = "Fly Script", 
-                description = "Universal fly with speed control", 
-                url = "https://raw.githubusercontent.com/yourusername/yourrepo/main/scripts/fly.lua", 
+                description = "Advanced Fly Script", 
+                url = "https://raw.githubusercontent.com/vvisuall/WITHERCC/refs/heads/main/universal%20fly", 
                 hasKey = false
             },
             {
-                title = "Noclip", 
-                description = "Walk through walls", 
-                url = "https://raw.githubusercontent.com/yourusername/yourrepo/main/scripts/noclip.lua", 
+                title = "Fps Booster", 
+                description = "Advanced Fps Booster Script", 
+                url = "https://raw.githubusercontent.com/vvisuall/WITHERCC/refs/heads/main/fps%20booster", 
                 hasKey = false
             },
             {
                 title = "Speed Hack", 
-                description = "Increase walkspeed and jumppower", 
+                description = "Advanced Speed Hack Script", 
                 url = "https://raw.githubusercontent.com/yourusername/yourrepo/main/scripts/speed.lua", 
                 hasKey = false
             },
             {
                 title = "Infinite Jump", 
-                description = "Jump infinitely in the air", 
+                description = "Advanced Infinite Jump Script", 
                 url = "https://raw.githubusercontent.com/yourusername/yourrepo/main/scripts/infinitejump.lua", 
                 hasKey = false
             }
         }
     },
     
-    -- Add more games here
-    [987654321] = { -- Another game's PlaceId
+    -- Another example game
+    [987654321] = {
         gameName = "Another Game",
         scripts = {
             {
                 title = "Auto Farm", 
-                description = "Automatic farming script", 
+                description = "Advanced Auto Farm Script", 
                 url = "https://raw.githubusercontent.com/yourusername/yourrepo/main/scripts/autofarm.lua", 
                 hasKey = true
             }
