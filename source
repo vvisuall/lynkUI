@@ -357,14 +357,15 @@ local function createKeySystem(Window)
                 tween:Play()
             end
             
-            -- Wait for fade to complete then destroy
+            -- Wait for fade to complete then destroy and unlock window
             wait(THEME.MediumTween.Time + 0.1)
             keyScreen:Destroy()
             
-            wait(1)
-            
-            -- Show main UI
-            Window:Show()
+            -- FIXED: Unlock the window and show it
+            Window._locked = false
+            task.delay(0.1, function()
+                Window:Show()
+            end)
         else
             statusMessage.Text = "Invalid key!"
             statusMessage.TextColor3 = THEME.Danger
@@ -397,12 +398,8 @@ function Lynk:CreateWindow(opts)
     Window._uiKey = opts.DefaultKeybind or Enum.KeyCode.Insert
     Window._shown = false
 
-    -- Modified to show key system first if enabled
-    if KEY_SYSTEM_ENABLED then
-        createKeySystem(Window)
-        -- Don't create main UI yet, it will be created after key validation
-        return Window
-    end
+    -- FIXED: Gate the window but still build it (no early return)
+    Window._locked = KEY_SYSTEM_ENABLED == true
 
     -- Create ScreenGui with enhanced properties
     local screen = new("ScreenGui", {
@@ -699,7 +696,6 @@ function Lynk:CreateWindow(opts)
         Position = UDim2.new(0, 20, 0, 60),
         Size = UDim2.new(1, -40, 0, 60),
         BackgroundTransparency = 1,
-        -- Updated popup message to reflect Insert key instead of RightCtrl
         Text = "Are you sure you want to close?\nInstead press Insert to toggle the UI.",
         Font = Enum.Font.Gotham,
         TextSize = 14,
@@ -828,9 +824,8 @@ function Lynk:CreateWindow(opts)
         end
     end)
 
-    -- Window visibility toggle
-    -- Set initial visibility to true so UI opens automatically
-    local isVisible = true
+    -- FIXED: Window visibility toggle with proper locking
+    local isVisible = false
     
     local function setVisibility(visible)
         isVisible = visible
@@ -855,11 +850,33 @@ function Lynk:CreateWindow(opts)
         end
     end
 
-    -- Keybind listener
+    -- FIXED: Show/Hide functions that respect the lock
+    function Window:Show()
+        if Window._locked then return end
+        if isVisible then return end
+        setVisibility(true)
+        -- Load script cards on first show
+        if not Window._cardsLoaded then
+            Window:LoadScriptCards()
+            Window._cardsLoaded = true
+        end
+    end
+
+    function Window:Hide()
+        if not isVisible then return end
+        setVisibility(false)
+    end
+
+    -- FIXED: Keybind listener that ignores presses while locked
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
         if input.KeyCode == Window._uiKey then
-            setVisibility(not isVisible)
+            if Window._locked then return end -- ignore until unlocked
+            if isVisible then
+                Window:Hide()
+            else
+                Window:Show()
+            end
         end
     end)
 
@@ -1156,358 +1173,340 @@ function Lynk:CreateWindow(opts)
         end
     end
 
--- Added populate functions for Updates, Credits, and Settings tabs
-
--- Restoring the populateUpdatesTab function that was removed
-local function populateUpdatesTab(updatesTab)
-    -- Clear existing content
-    for _, child in pairs(updatesTab:GetChildren()) do
-        if child:IsA("GuiObject") then
-            child:Destroy()
-        end
+    -- FIXED: Database helper function
+    local function DB()
+        return Window._scriptDatabase or SCRIPT_DATABASE
     end
-    
-    -- Create scroll frame for updates content
-    local ScrollFrame = new("ScrollingFrame", {
-        Name = "UpdatesScrollFrame",
-        Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        ScrollBarThickness = 6,
-        ScrollBarImageColor3 = THEME.TextMuted,
-        CanvasSize = UDim2.new(0, 0, 0, 0),
-        AutomaticCanvasSize = Enum.AutomaticSize.Y
-    })
-    ScrollFrame.Parent = updatesTab
-    
-    local layout = new("UIListLayout")
-    layout.Parent = ScrollFrame
-    layout.Padding = UDim.new(0, 8)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    
-    local padding = new("UIPadding")
-    padding.Parent = ScrollFrame
-    padding.PaddingAll = UDim.new(0, 20)
-    
-    -- Add updates content
-    local updates = {
-        {text = "📋 Recent Updates", size = 18, color = Window._accent, bold = true},
-        {text = "", size = 10, color = THEME.Text, bold = false},
-        {text = "🔄 Version 2.1.0:", size = 16, color = THEME.Text, bold = true},
-        {text = "• Improved UI performance", size = 14, color = THEME.Text, bold = false},
-        {text = "• Added new script categories", size = 14, color = THEME.Text, bold = false},
-        {text = "• Enhanced search functionality", size = 14, color = THEME.Text, bold = false},
-        {text = "", size = 10, color = THEME.Text, bold = false},
-        {text = "🔄 Version 2.0.5:", size = 16, color = THEME.Text, bold = true},
-        {text = "• Fixed loading issues", size = 14, color = THEME.Text, bold = false},
-        {text = "• Updated script database", size = 14, color = THEME.Text, bold = false},
-        {text = "• Improved stability", size = 14, color = THEME.Text, bold = false}
-    }
-    
-    for i, update in ipairs(updates) do
-        local updateLabel = new("TextLabel", {
-            Name = "Update" .. i,
-            Size = UDim2.new(1, 0, 0, update.size + 5),
+
+    -- Added populate functions for Updates, Credits, and Settings tabs
+    local function populateUpdatesTab(updatesTab)
+        -- Clear existing content
+        for _, child in pairs(updatesTab:GetChildren()) do
+            if child:IsA("GuiObject") then
+                child:Destroy()
+            end
+        end
+        
+        -- Create scroll frame for updates content
+        local ScrollFrame = new("ScrollingFrame", {
+            Name = "UpdatesScrollFrame",
+            Position = UDim2.new(0, 0, 0, 0),
+            Size = UDim2.new(1, 0, 1, 0),
             BackgroundTransparency = 1,
-            Text = update.text,
-            Font = update.bold and Enum.Font.GothamBold or Enum.Font.Gotham,
-            TextSize = update.size,
-            TextColor3 = update.color,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            LayoutOrder = i
+            BorderSizePixel = 0,
+            ScrollBarThickness = 6,
+            ScrollBarImageColor3 = THEME.TextMuted,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y
         })
-        updateLabel.Parent = ScrollFrame
-    end
-end
-
-local function populateCreditsTab(creditsTab)
-    -- Clear existing content
-    for _, child in pairs(creditsTab:GetChildren()) do
-        if child:IsA("GuiObject") then
-            child:Destroy()
+        ScrollFrame.Parent = updatesTab
+        
+        local layout = new("UIListLayout")
+        layout.Parent = ScrollFrame
+        layout.Padding = UDim.new(0, 8)
+        layout.SortOrder = Enum.SortOrder.LayoutOrder
+        
+        local padding = new("UIPadding")
+        padding.Parent = ScrollFrame
+        padding.PaddingAll = UDim.new(0, 20)
+        
+        -- Add updates content
+        local updates = {
+            {text = "📋 Recent Updates", size = 18, color = Window._accent, bold = true},
+            {text = "", size = 10, color = THEME.Text, bold = false},
+            {text = "🔄 Version 2.1.0:", size = 16, color = THEME.Text, bold = true},
+            {text = "• Improved UI performance", size = 14, color = THEME.Text, bold = false},
+            {text = "• Added new script categories", size = 14, color = THEME.Text, bold = false},
+            {text = "• Enhanced search functionality", size = 14, color = THEME.Text, bold = false},
+            {text = "", size = 10, color = THEME.Text, bold = false},
+            {text = "🔄 Version 2.0.5:", size = 16, color = THEME.Text, bold = true},
+            {text = "• Fixed loading issues", size = 14, color = THEME.Text, bold = false},
+            {text = "• Updated script database", size = 14, color = THEME.Text, bold = false},
+            {text = "• Improved stability", size = 14, color = THEME.Text, bold = false}
+        }
+        
+        for i, update in ipairs(updates) do
+            local updateLabel = new("TextLabel", {
+                Name = "Update" .. i,
+                Size = UDim2.new(1, 0, 0, update.size + 5),
+                BackgroundTransparency = 1,
+                Text = update.text,
+                Font = update.bold and Enum.Font.GothamBold or Enum.Font.Gotham,
+                TextSize = update.size,
+                TextColor3 = update.color,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                LayoutOrder = i
+            })
+            updateLabel.Parent = ScrollFrame
         end
     end
-    
-    -- Create scroll frame for credits content
-    local ScrollFrame = new("ScrollingFrame", {
-        Name = "CreditsScrollFrame",
-        Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        ScrollBarThickness = 6,
-        ScrollBarImageColor3 = THEME.TextMuted,
-        CanvasSize = UDim2.new(0, 0, 0, 0),
-        AutomaticCanvasSize = Enum.AutomaticSize.Y
-    })
-    ScrollFrame.Parent = creditsTab
-    
-    local layout = new("UIListLayout")
-    layout.Parent = ScrollFrame
-    layout.Padding = UDim.new(0, 8)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    
-    local padding = new("UIPadding")
-    padding.Parent = ScrollFrame
-    padding.PaddingAll = UDim.new(0, 20)
-    
-    -- Add credits content
-    local credits = {
-        {text = "🚀 LYNK Script Hub v2.1", size = 18, color = Window._accent, bold = true},
-        {text = "", size = 10, color = THEME.Text, bold = false},
-        {text = "👨‍💻 Development Team:", size = 16, color = THEME.Text, bold = true},
-        {text = "• @x_vvw - Lead Developer", size = 14, color = THEME.Text, bold = false},
-        {text = "• Script Hub Community", size = 14, color = THEME.Text, bold = false},
-        {text = "", size = 10, color = THEME.Text, bold = false},
-        {text = "🎨 Features:", size = 16, color = THEME.Text, bold = true},
-        {text = "• Modern GitHub integration", size = 14, color = THEME.Text, bold = false},
-        {text = "• Auto game detection", size = 14, color = THEME.Text, bold = false},
-        {text = "• Professional card layout", size = 14, color = THEME.Text, bold = false},
-        {text = "• Smart search system", size = 14, color = THEME.Text, bold = false},
-        {text = "", size = 10, color = THEME.Text, bold = false},
-        {text = "https://discord.gg/AzMbjqD7T3", size = 14, color = Window._accent, bold = false}
-    }
-    
-    for i, credit in ipairs(credits) do
-        local creditLabel = new("TextLabel", {
-            Name = "Credit" .. i,
-            Size = UDim2.new(1, 0, 0, credit.size + 5),
+
+    local function populateCreditsTab(creditsTab)
+        -- Clear existing content
+        for _, child in pairs(creditsTab:GetChildren()) do
+            if child:IsA("GuiObject") then
+                child:Destroy()
+            end
+        end
+        
+        -- Create scroll frame for credits content
+        local ScrollFrame = new("ScrollingFrame", {
+            Name = "CreditsScrollFrame",
+            Position = UDim2.new(0, 0, 0, 0),
+            Size = UDim2.new(1, 0, 1, 0),
             BackgroundTransparency = 1,
-            Text = credit.text,
-            Font = credit.bold and Enum.Font.GothamBold or Enum.Font.Gotham,
-            TextSize = credit.size,
-            TextColor3 = credit.color,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            LayoutOrder = i
+            BorderSizePixel = 0,
+            ScrollBarThickness = 6,
+            ScrollBarImageColor3 = THEME.TextMuted,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y
         })
-        creditLabel.Parent = ScrollFrame
-    end
-end
-
-local function populateSettingsTab(settingsTab)
-    -- Clear existing content
-    for _, child in pairs(settingsTab:GetChildren()) do
-        if child:IsA("GuiObject") then
-            child:Destroy()
+        ScrollFrame.Parent = creditsTab
+        
+        local layout = new("UIListLayout")
+        layout.Parent = ScrollFrame
+        layout.Padding = UDim.new(0, 8)
+        layout.SortOrder = Enum.SortOrder.LayoutOrder
+        
+        local padding = new("UIPadding")
+        padding.Parent = ScrollFrame
+        padding.PaddingAll = UDim.new(0, 20)
+        
+        -- Add credits content
+        local credits = {
+            {text = "🚀 LYNK Script Hub v2.1", size = 18, color = Window._accent, bold = true},
+            {text = "", size = 10, color = THEME.Text, bold = false},
+            {text = "👨‍💻 Development Team:", size = 16, color = THEME.Text, bold = true},
+            {text = "• @x_vvw - Lead Developer", size = 14, color = THEME.Text, bold = false},
+            {text = "• Script Hub Community", size = 14, color = THEME.Text, bold = false},
+            {text = "", size = 10, color = THEME.Text, bold = false},
+            {text = "🎨 Features:", size = 16, color = THEME.Text, bold = true},
+            {text = "• Modern GitHub integration", size = 14, color = THEME.Text, bold = false},
+            {text = "• Auto game detection", size = 14, color = THEME.Text, bold = false},
+            {text = "• Professional card layout", size = 14, color = THEME.Text, bold = false},
+            {text = "• Smart search system", size = 14, color = THEME.Text, bold = false},
+            {text = "", size = 10, color = THEME.Text, bold = false},
+            {text = "https://discord.gg/AzMbjqD7T3", size = 14, color = Window._accent, bold = false}
+        }
+        
+        for i, credit in ipairs(credits) do
+            local creditLabel = new("TextLabel", {
+                Name = "Credit" .. i,
+                Size = UDim2.new(1, 0, 0, credit.size + 5),
+                BackgroundTransparency = 1,
+                Text = credit.text,
+                Font = credit.bold and Enum.Font.GothamBold or Enum.Font.Gotham,
+                TextSize = credit.size,
+                TextColor3 = credit.color,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                LayoutOrder = i
+            })
+            creditLabel.Parent = ScrollFrame
         end
     end
-    
-    -- Create scroll frame for settings content
-    local ScrollFrame = new("ScrollingFrame", {
-        Name = "SettingsScrollFrame",
-        Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        ScrollBarThickness = 6,
-        ScrollBarImageColor3 = THEME.TextMuted,
-        CanvasSize = UDim2.new(0, 0, 0, 0),
-        AutomaticCanvasSize = Enum.AutomaticSize.Y
-    })
-    ScrollFrame.Parent = settingsTab
-    
-    local layout = new("UIListLayout")
-    layout.Parent = ScrollFrame
-    layout.Padding = UDim.new(0, 15)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    
-    local padding = new("UIPadding")
-    padding.Parent = ScrollFrame
-    padding.PaddingAll = UDim.new(0, 20)
-    
-    -- Key selector for UI toggle
-    local keyBindFrame = new("Frame", {
-        Name = "KeyBindFrame",
-        Size = UDim2.new(1, 0, 0, 50),
-        BackgroundColor3 = Color3.fromRGB(40, 40, 40),
-        BorderSizePixel = 0,
-        LayoutOrder = 1
-    })
-    keyBindFrame.Parent = ScrollFrame
-    
-    local keyCorner = new("UICorner")
-    keyCorner.CornerRadius = UDim.new(0, 8)
-    keyCorner.Parent = keyBindFrame
-    
-    local keyTitle = new("TextLabel", {
-        Name = "KeyTitle",
-        Position = UDim2.new(0, 15, 0, 0),
-        Size = UDim2.new(0.6, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Text = "UI Toggle Key",
-        Font = Enum.Font.GothamSemibold,
-        TextSize = 14,
-        TextColor3 = THEME.Text,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        TextYAlignment = Enum.TextYAlignment.Center
-    })
-    keyTitle.Parent = keyBindFrame
-    
-    local keyButton = new("TextButton", {
-        Name = "KeyButton",
-        Position = UDim2.new(1, -120, 0.5, -15),
-        Size = UDim2.new(0, 100, 0, 30),
-        BackgroundColor3 = Color3.fromRGB(60, 60, 60),
-        BorderSizePixel = 0,
-        Text = "Insert",
-        Font = Enum.Font.Gotham,
-        TextSize = 12,
-        TextColor3 = THEME.Text,
-        AutoButtonColor = false
-    })
-    keyButton.Parent = keyBindFrame
-    
-    local buttonCorner = new("UICorner")
-    buttonCorner.CornerRadius = UDim.new(0, 6)
-    buttonCorner.Parent = keyButton
-    
-    -- Key mapping for display names
-    local keyNames = {
-        [Enum.KeyCode.Insert] = "Insert",
-        [Enum.KeyCode.Home] = "Home",
-        [Enum.KeyCode.End] = "End",
-        [Enum.KeyCode.PageUp] = "PgUp",
-        [Enum.KeyCode.PageDown] = "PgDn",
-        [Enum.KeyCode.Delete] = "Delete",
-        [Enum.KeyCode.F1] = "F1",
-        [Enum.KeyCode.F2] = "F2",
-        [Enum.KeyCode.F3] = "F3",
-        [Enum.KeyCode.F4] = "F4",
-        [Enum.KeyCode.F5] = "F5",
-        [Enum.KeyCode.F6] = "F6",
-        [Enum.KeyCode.F7] = "F7",
-        [Enum.KeyCode.F8] = "F8",
-        [Enum.KeyCode.F9] = "F9",
-        [Enum.KeyCode.F10] = "F10",
-        [Enum.KeyCode.F11] = "F11",
-        [Enum.KeyCode.F12] = "F12",
-        [Enum.KeyCode.LeftControl] = "LCtrl",
-        [Enum.KeyCode.RightControl] = "RCtrl",
-        [Enum.KeyCode.LeftShift] = "LShift",
-        [Enum.KeyCode.RightShift] = "RShift"
-    }
-    
-    local isBinding = false
-    
-    keyButton.MouseButton1Click:Connect(function()
-        if not isBinding then
-            isBinding = true
-            keyButton.Text = "..."
-            keyButton.TextColor3 = Window._accent
+
+    local function populateSettingsTab(settingsTab)
+        -- Clear existing content
+        for _, child in pairs(settingsTab:GetChildren()) do
+            if child:IsA("GuiObject") then
+                child:Destroy()
+            end
+        end
+        
+        -- Create scroll frame for settings content
+        local ScrollFrame = new("ScrollingFrame", {
+            Name = "SettingsScrollFrame",
+            Position = UDim2.new(0, 0, 0, 0),
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ScrollBarThickness = 6,
+            ScrollBarImageColor3 = THEME.TextMuted,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y
+        })
+        ScrollFrame.Parent = settingsTab
+        
+        local layout = new("UIListLayout")
+        layout.Parent = ScrollFrame
+        layout.Padding = UDim.new(0, 15)
+        layout.SortOrder = Enum.SortOrder.LayoutOrder
+        
+        local padding = new("UIPadding")
+        padding.Parent = ScrollFrame
+        padding.PaddingAll = UDim.new(0, 20)
+        
+        -- Key selector for UI toggle
+        local keyBindFrame = new("Frame", {
+            Name = "KeyBindFrame",
+            Size = UDim2.new(1, 0, 0, 50),
+            BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+            BorderSizePixel = 0,
+            LayoutOrder = 1
+        })
+        keyBindFrame.Parent = ScrollFrame
+        
+        local keyCorner = new("UICorner")
+        keyCorner.CornerRadius = UDim.new(0, 8)
+        keyCorner.Parent = keyBindFrame
+        
+        local keyTitle = new("TextLabel", {
+            Name = "KeyTitle",
+            Position = UDim2.new(0, 15, 0, 0),
+            Size = UDim2.new(0.6, 0, 1, 0),
+            BackgroundTransparency = 1,
+            Text = "UI Toggle Key",
+            Font = Enum.Font.GothamSemibold,
+            TextSize = 14,
+            TextColor3 = THEME.Text,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextYAlignment = Enum.TextYAlignment.Center
+        })
+        keyTitle.Parent = keyBindFrame
+        
+        local keyButton = new("TextButton", {
+            Name = "KeyButton",
+            Position = UDim2.new(1, -120, 0.5, -15),
+            Size = UDim2.new(0, 100, 0, 30),
+            BackgroundColor3 = Color3.fromRGB(60, 60, 60),
+            BorderSizePixel = 0,
+            Text = "Insert",
+            Font = Enum.Font.Gotham,
+            TextSize = 12,
+            TextColor3 = THEME.Text,
+            AutoButtonColor = false
+        })
+        keyButton.Parent = keyBindFrame
+        
+        local buttonCorner = new("UICorner")
+        buttonCorner.CornerRadius = UDim.new(0, 6)
+        buttonCorner.Parent = keyButton
+        
+        -- Key mapping for display names
+        local keyNames = {
+            [Enum.KeyCode.Insert] = "Insert",
+            [Enum.KeyCode.Home] = "Home",
+            [Enum.KeyCode.End] = "End",
+            [Enum.KeyCode.PageUp] = "PgUp",
+            [Enum.KeyCode.PageDown] = "PgDn",
+            [Enum.KeyCode.Delete] = "Delete",
+            [Enum.KeyCode.F1] = "F1",
+            [Enum.KeyCode.F2] = "F2",
+            [Enum.KeyCode.F3] = "F3",
+            [Enum.KeyCode.F4] = "F4",
+            [Enum.KeyCode.F5] = "F5",
+            [Enum.KeyCode.F6] = "F6",
+            [Enum.KeyCode.F7] = "F7",
+            [Enum.KeyCode.F8] = "F8",
+            [Enum.KeyCode.F9] = "F9",
+            [Enum.KeyCode.F10] = "F10",
+            [Enum.KeyCode.F11] = "F11",
+            [Enum.KeyCode.F12] = "F12",
+            [Enum.KeyCode.LeftControl] = "LCtrl",
+            [Enum.KeyCode.RightControl] = "RCtrl",
+            [Enum.KeyCode.LeftShift] = "LShift",
+            [Enum.KeyCode.RightShift] = "RShift"
+        }
+        
+        local isBinding = false
+        
+        keyButton.MouseButton1Click:Connect(function()
+            if not isBinding then
+                isBinding = true
+                keyButton.Text = "..."
+                keyButton.TextColor3 = Window._accent
+                
+                local connection
+                connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                    if gameProcessed then return end
+                    if input.UserInputType == Enum.UserInputType.Keyboard then
+                        local newKey = input.KeyCode
+                        local keyName = keyNames[newKey] or tostring(newKey):gsub("Enum.KeyCode.", "")
+                        
+                        -- Update the UI key
+                        Window._uiKey = newKey
+                        keyButton.Text = keyName
+                        keyButton.TextColor3 = THEME.Text
+                        
+                        connection:Disconnect()
+                        isBinding = false
+                    end
+                end)
+            end
+        end)
+        
+        -- Refresh Database Button
+        local refreshFrame = new("Frame", {
+            Name = "RefreshFrame",
+            Size = UDim2.new(1, 0, 0, 50),
+            BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+            BorderSizePixel = 0,
+            LayoutOrder = 2
+        })
+        refreshFrame.Parent = ScrollFrame
+        
+        local refreshCorner = new("UICorner")
+        refreshCorner.CornerRadius = UDim.new(0, 8)
+        refreshCorner.Parent = refreshFrame
+        
+        local refreshButton = new("TextButton", {
+            Name = "RefreshButton",
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundTransparency = 1,
+            Text = "🔄 Refresh Database",
+            Font = Enum.Font.GothamSemibold,
+            TextSize = 14,
+            TextColor3 = THEME.Text,
+            AutoButtonColor = false
+        })
+        refreshButton.Parent = refreshFrame
+        
+        refreshButton.MouseButton1Click:Connect(function()
+            refreshButton.Text = "🔄 Refreshing..."
+            refreshButton.TextColor3 = Window._accent
             
-            local connection
-            connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-                if gameProcessed then return end
-                if input.UserInputType == Enum.UserInputType.Keyboard then
-                    local newKey = input.KeyCode
-                    local keyName = keyNames[newKey] or tostring(newKey):gsub("Enum.KeyCode.", "")
-                    
-                    -- Update the UI key
-                    Window._uiKey = newKey
-                    keyButton.Text = keyName
-                    keyButton.TextColor3 = THEME.Text
-                    
-                    connection:Disconnect()
-                    isBinding = false
-                end
-            end)
-        end
-    end)
-    
-    -- Refresh Database Button
-    local refreshFrame = new("Frame", {
-        Name = "RefreshFrame",
-        Size = UDim2.new(1, 0, 0, 50),
-        BackgroundColor3 = Color3.fromRGB(40, 40, 40),
-        BorderSizePixel = 0,
-        LayoutOrder = 2
-    })
-    refreshFrame.Parent = ScrollFrame
-    
-    local refreshCorner = new("UICorner")
-    refreshCorner.CornerRadius = UDim.new(0, 8)
-    refreshCorner.Parent = refreshFrame
-    
-    local refreshButton = new("TextButton", {
-        Name = "RefreshButton",
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Text = "🔄 Refresh Database",
-        Font = Enum.Font.GothamSemibold,
-        TextSize = 14,
-        TextColor3 = THEME.Text,
-        AutoButtonColor = false
-    })
-    refreshButton.Parent = refreshFrame
-    
-    refreshButton.MouseButton1Click:Connect(function()
-        refreshButton.Text = "🔄 Refreshing..."
-        refreshButton.TextColor3 = Window._accent
+            task.wait(0.5)
+            
+            refreshButton.Text = "✅ Database Refreshed!"
+            task.wait(1)
+            refreshButton.Text = "🔄 Refresh Database"
+            refreshButton.TextColor3 = THEME.Text
+        end)
         
-        task.wait(0.5)
+        -- Theme Settings Button
+        local themeFrame = new("Frame", {
+            Name = "ThemeFrame",
+            Size = UDim2.new(1, 0, 0, 50),
+            BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+            BorderSizePixel = 0,
+            LayoutOrder = 3
+        })
+        themeFrame.Parent = ScrollFrame
         
-        refreshButton.Text = "✅ Database Refreshed!"
-        task.wait(1)
-        refreshButton.Text = "🔄 Refresh Database"
-        refreshButton.TextColor3 = THEME.Text
-    end)
-    
-    -- Theme Settings Button
-    local themeFrame = new("Frame", {
-        Name = "ThemeFrame",
-        Size = UDim2.new(1, 0, 0, 50),
-        BackgroundColor3 = Color3.fromRGB(40, 40, 40),
-        BorderSizePixel = 0,
-        LayoutOrder = 3
-    })
-    themeFrame.Parent = ScrollFrame
-    
-    local themeCorner = new("UICorner")
-    themeCorner.CornerRadius = UDim.new(0, 8)
-    themeCorner.Parent = themeFrame
-    
-    local themeButton = new("TextButton", {
-        Name = "ThemeButton",
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Text = "🎨 Theme Settings",
-        Font = Enum.Font.GothamSemibold,
-        TextSize = 14,
-        TextColor3 = THEME.Text,
-        AutoButtonColor = false
-    })
-    themeButton.Parent = themeFrame
-    
-    themeButton.MouseButton1Click:Connect(function()
-        themeButton.Text = "🎨 Coming Soon!"
-        themeButton.TextColor3 = Window._accent
-        task.wait(1)
-        themeButton.Text = "🎨 Theme Settings"
-        themeButton.TextColor3 = THEME.Text
-    end)
-end
-
-    -- Fixed tab creation to use your specified icons and ensure all tabs load
-local function createTabs()
-    -- Create tabs with your specified icons in the correct order
-    local homeTab = Window:CreateTab("Home", "rbxassetid://10734950309", 1)
-    populateHomeTab(homeTab.Page)
-
-    local updatesTab = Window:CreateTab("Updates", "rbxassetid://7733674079", 2)
-    populateUpdatesTab(updatesTab.Page)
-
-    local creditsTab = Window:CreateTab("Credits", "rbxassetid://7733955511", 3)
-    populateCreditsTab(creditsTab.Page)
-
-    local settingsTab = Window:CreateTab("Settings", "rbxassetid://10734950020", 4)
-    populateSettingsTab(settingsTab.Page)
-
-    -- Ensure home tab shows first
-    homeTab:Show()
-    
-    return homeTab, updatesTab, creditsTab, settingsTab
-end
+        local themeCorner = new("UICorner")
+        themeCorner.CornerRadius = UDim.new(0, 8)
+        themeCorner.Parent = themeFrame
+        
+        local themeButton = new("TextButton", {
+            Name = "ThemeButton",
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundTransparency = 1,
+            Text = "🎨 Theme Settings",
+            Font = Enum.Font.GothamSemibold,
+            TextSize = 14,
+            TextColor3 = THEME.Text,
+            AutoButtonColor = false
+        })
+        themeButton.Parent = themeFrame
+        
+        themeButton.MouseButton1Click:Connect(function()
+            themeButton.Text = "🎨 Coming Soon!"
+            themeButton.TextColor3 = Window._accent
+            task.wait(1)
+            themeButton.Text = "🎨 Theme Settings"
+            themeButton.TextColor3 = THEME.Text
+        end)
+    end
 
     -- Fixed GitHub URL placeholder and improved error handling
     -- Replaced GitHub loading with embedded script database
@@ -1739,12 +1738,12 @@ end
         ScriptNameLabel.Parent = Window._sidebarContent
         
         -- Description (if available)
-        if script.Description then
+        if script.Description or script.description then
             local DescriptionLabel = new("TextLabel", {
                 Name = "SidebarDescription",
                 Size = UDim2.new(1, 0, 0, 0),
                 BackgroundTransparency = 1,
-                Text = script.Description,
+                Text = script.Description or script.description,
                 Font = Enum.Font.Gotham,
                 TextSize = 13,
                 TextColor3 = THEME.TextMuted,
@@ -2123,7 +2122,7 @@ end
 
         -- Get current game's scripts
         local currentPlaceId = getCurrentPlaceId()
-        local currentGameData = SCRIPT_DATABASE[currentPlaceId]
+        local currentGameData = DB()[currentPlaceId]
         
         local cardIndex = 0
         
@@ -2144,7 +2143,7 @@ end
         end
         
         -- Add universal scripts
-        local universalData = SCRIPT_DATABASE["Universal"]
+        local universalData = DB()["Universal"]
         if universalData then
             for _, script in pairs(universalData.scripts) do
                 -- Removed position parameter since UIGridLayout handles positioning
@@ -2161,7 +2160,7 @@ end
         end
         
         -- Add other games' scripts
-        for placeId, gameData in pairs(SCRIPT_DATABASE) do
+        for placeId, gameData in pairs(DB()) do
             if placeId ~= currentPlaceId and placeId ~= "Universal" then
                 for _, script in pairs(gameData.scripts) do
                     -- Removed position parameter since UIGridLayout handles positioning
@@ -2179,166 +2178,46 @@ end
         end
     end
 
+    -- FIXED: LoadScriptCards to populate all tabs with embedded content
+    function Window:LoadScriptCards()
+        -- Only create tabs if none exist yet
+        if #Window._tabs == 0 then
+            -- Create tabs with your specified icons and order
+            local homeTab = Window:CreateTab("Home", "rbxassetid://10734950309", 1)
+            populateHomeTab(homeTab.Page)
+            
+            local updatesTab = Window:CreateTab("Updates", "rbxassetid://7733674079", 2)
+            populateUpdatesTab(updatesTab.Page)
+            
+            local creditsTab = Window:CreateTab("Credits", "rbxassetid://7733955511", 3)
+            populateCreditsTab(creditsTab.Page)
 
-    -- Modified Show function to always populate home tab regardless of manual tab creation
-    function Window:Show()
-        if Window._shown then
-            -- Toggle visibility if already created
-            setVisibility(not isVisible)
-        elseif not KEY_SYSTEM_ENABLED then
-            -- Normal show when no key system
-            Window._shown = true
-            setVisibility(true)
-            
-            TweenService:Create(Outline, THEME.SlowTween, {
-                Size = THEME.WindowSize
-            }):Play()
-            
-            -- Load script cards after UI is shown
-            if #Window._tabs == 0 then
-                Window:LoadScriptCards()
-            end
-        else
-            -- Fixed incomplete UI creation when called from key system
-            -- When called from key system, create complete main UI
-            -- Create ScreenGui with enhanced properties
-            local screen = new("ScreenGui", {
-                Name = opts.Name or "lynkUI",
-                ResetOnSpawn = false,
-                DisplayOrder = 10000,
-                IgnoreGuiInset = true,
-                ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-            })
-            screen.Parent = LocalPlayer:WaitForChild("PlayerGui")
+            local settingsTab = Window:CreateTab("Settings", "rbxassetid://10734950020", 4)
+            populateSettingsTab(settingsTab.Page)
 
-            -- Main container with blur effect
-            local BlurFrame = new("Frame", {
-                Name = "BlurContainer",
-                Size = UDim2.new(1, 0, 1, 0),
-                BackgroundColor3 = Color3.new(0, 0, 0),
-                BackgroundTransparency = 0.3,
-                BorderSizePixel = 0,
-                Visible = true
-            })
-            BlurFrame.Parent = screen
-
-            -- Main window outline
-            local Outline = new("Frame", {
-                Name = "Outline",
-                AnchorPoint = Vector2.new(0.5, 0.5),
-                Position = UDim2.new(0.5, 0, 0.5, 0),
-                Size = UDim2.new(0, 0, 0, 0),
-                BackgroundColor3 = THEME.Border,
-                BorderSizePixel = 0,
-                ZIndex = 2
-            })
-            Outline.Parent = BlurFrame
-            
-            local outlineCorner = new("UICorner")
-            outlineCorner.CornerRadius = THEME.CornerRadius
-            outlineCorner.Parent = Outline
-
-            -- Add subtle glow to outline
-            createGlow(Outline, Window._accent)
-
-            -- Main content frame
-            local MainFrame = new("Frame", {
-                Name = "MainFrame",
-                Position = UDim2.new(0, 2, 0, 2),
-                Size = UDim2.new(1, -4, 1, -4),
-                BackgroundColor3 = THEME.Background,
-                BorderSizePixel = 0
-            })
-            MainFrame.Parent = Outline
-            
-            local mainCorner = new("UICorner")
-            mainCorner.CornerRadius = THEME.CornerRadius
-            mainCorner.Parent = MainFrame
-
-            -- Added complete UI creation by calling the original UI creation logic
-            -- Store references for visibility toggle
-            Window._screen = screen
-            Window._blurFrame = BlurFrame
-            Window._outline = Outline
-            Window._mainFrame = MainFrame
-            
-            -- Set up visibility system
-            isVisible = true
-            
-            local function setVisibility(visible)
-                isVisible = visible
-                BlurFrame.Visible = visible
-                
-                if visible then
-                    -- Animate window opening
-                    Outline.Size = UDim2.new(0, 0, 0, 0)
-                    TweenService:Create(Outline, THEME.SlowTween, {
-                        Size = THEME.WindowSize
-                    }):Play()
-                else
-                    -- Animate window closing
-                    TweenService:Create(Outline, THEME.MediumTween, {
-                        Size = UDim2.new(0, 0, 0, 0)
-                    }):Play()
-                    
-                    task.wait(0.25)
-                    if not isVisible then
-                        BlurFrame.Visible = false
-                    end
-                end
-            end
-
-            -- Keybind listener
-            UserInputService.InputBegan:Connect(function(input, gameProcessed)
-                if gameProcessed then return end
-                if input.KeyCode == Window._uiKey then
-                    setVisibility(not isVisible)
-                end
-            end)
-            
-            -- Create the complete UI structure by calling original UI creation logic
-            -- Recreate the original UI creation logic here
-            -- This ensures all UI elements are properly created after key validation
-            
-            Window._shown = true
-            
-            TweenService:Create(Outline, THEME.SlowTween, {
-                Size = THEME.WindowSize
-            }):Play()
-            
-            -- Load script cards after UI is shown
-            Window:LoadScriptCards()
+            -- Ensure home tab shows first
+            homeTab:Show()
         end
     end
 
--- Removed duplicate LoadScriptCards function that was only creating Home tab
--- Modified LoadScriptCards to populate all tabs with embedded content
-function Window:LoadScriptCards()
-    -- Only create tabs if none exist yet
-    if #Window._tabs == 0 then
-        -- Create tabs with your specified icons and order
-        local homeTab = Window:CreateTab("Home", "rbxassetid://10734950309", 1)
-        populateHomeTab(homeTab.Page)
-        
-        local updatesTab = Window:CreateTab("Updates", "rbxassetid://7733674079", 2)
-        populateUpdatesTab(updatesTab.Page)
-        
-        local creditsTab = Window:CreateTab("Credits", "rbxassetid://7733955511", 3)
-        populateCreditsTab(creditsTab.Page)
-
-        local settingsTab = Window:CreateTab("Settings", "rbxassetid://10734950020", 4)
-        populateSettingsTab(settingsTab.Page)
-
-        -- Ensure home tab shows first
-        homeTab:Show()
+    function Window:Destroy()
+        if screen and screen.Parent then
+            screen:Destroy()
+        end
     end
-end
 
-    -- Window visibility toggle
-    -- Set initial visibility to true for auto-show
-    local isVisible = true
-    
-    -- Removed duplicate Show call and setVisibility call that was causing conflicts
+    -- FIXED: Start hidden by default; show key screen or hub based on lock state
+    setVisibility(false)
+
+    if Window._locked then
+        -- Show key system; main hub stays hidden until unlocked
+        createKeySystem(Window)
+    else
+        -- No key system; show hub immediately
+        Window:Show()
+    end
+
+    -- FIXED: Always apply metatable regardless of key system state
     setmetatable(Window, {__index = Lynk})
 
     return Window
