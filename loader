@@ -2,7 +2,7 @@
 -- This loads the fixed UI library and ensures proper database integration
 
 -- Load the fixed UI library
-local Lynk = loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/fixed-source"))()
+local Lynk = loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/source"))()
 
 -- Create window
 local Window = Lynk:CreateWindow({
