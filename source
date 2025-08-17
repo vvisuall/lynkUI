@@ -1784,7 +1784,16 @@ function Lynk:CreateWindow(opts)
             
             spawn(function()
                 local success, result = pcall(function()
-                    loadstring(script.LoadString)()
+                    -- Updated to support both url and LoadString formats
+                    if script.url then
+                        -- New format: load script from URL
+                        loadstring(game:HttpGet(script.url))()
+                    elseif script.LoadString then
+                        -- Legacy format: execute embedded LoadString
+                        loadstring(script.LoadString)()
+                    else
+                        error("No valid script entry found (url or LoadString missing)")
+                    end
                 end)
                 
                 wait(1)
@@ -1795,7 +1804,7 @@ function Lynk:CreateWindow(opts)
                 else
                     ExecuteButton.Text = "Execution Failed ✗"
                     ExecuteButton.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
-                    warn("Script execution failed:", result)
+                    warn("❌ Script execution failed:", result)
                 end
                 
                 wait(3)
@@ -1803,6 +1812,7 @@ function Lynk:CreateWindow(opts)
                 ExecuteButton.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
             end)
         end)
+
         
         -- Animate sidebar in
         TweenService:Create(Window._scriptSidebar, THEME.MediumTween, {
