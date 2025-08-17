@@ -3,19 +3,19 @@
 
 local SCRIPT_DATABASE = {
     -- Game-specific scripts (use PlaceId as key)
-    [1234567890] = { -- Replace with actual PlaceId
-        gameName = "Example Game",
+    [286090429] = { -- Replace with actual PlaceId
+        gameName = "Arsenal",
         scripts = {
             {
-                title = "Aimbot", 
-                description = "Advanced Aimbot Script", 
-                url = "https://raw.githubusercontent.com/yourusername/yourrepo/main/scripts/aimbot.lua", 
-                hasKey = true
+                title = "TBAO Hub", 
+                description = "Advanced Arsenal Script", 
+                url = "https://raw.githubusercontent.com/tbao143/thaibao/main/TbaoHubArsenal", 
+                hasKey = false
             },
             {
                 title = "ESP", 
                 description = "Advanced ESP Script", 
-                url = "https://raw.githubusercontent.com/yourusername/yourrepo/main/scripts/esp.lua", 
+                url = "https://raw.githubusercontent.com/vvisuall/WITHERCC/refs/heads/main/advancedesp", 
                 hasKey = false
             }
         }
@@ -51,15 +51,21 @@ local SCRIPT_DATABASE = {
                 hasKey = false
             },
             {
-                title = "Speed Hack", 
-                description = "Advanced Speed Hack Script", 
-                url = "https://raw.githubusercontent.com/yourusername/yourrepo/main/scripts/speed.lua", 
+                title = "Dex Explorer"
+                description = "Advanced Dex Script",
+                url = "https://raw.githubusercontent.com/vvisuall/WITHERCC/refs/heads/main/dex",
+                hasKey = false
+            },    
+            {
+                title = "Infinite Yield", 
+                description = "Advanced ESP Script", 
+                url = "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source", 
                 hasKey = false
             },
             {
-                title = "Infinite Jump", 
-                description = "Advanced Infinite Jump Script", 
-                url = "https://raw.githubusercontent.com/yourusername/yourrepo/main/scripts/infinitejump.lua", 
+                title = "Nameless Admin", 
+                description = "Advanced ESP Script", 
+                url = "https://raw.githubusercontent.com/FilteringEnabled/NamelessAdmin/main/Source", 
                 hasKey = false
             }
         }
