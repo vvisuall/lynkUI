@@ -56,7 +56,7 @@ Window._scriptDatabase = SCRIPT_DATABASE
 -- Success messages
 print("🎉 LYNK Script Hub loaded successfully!")
 print("📱 Press Insert to toggle the UI")
-print("🔗 Get key from: https://sub4unlock.io/afvuE")
+print("🔗 Get key from: https://sub4unlock.io/3HTi5")
 
 -- Show current game info
 spawn(function()
