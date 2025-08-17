@@ -51,7 +51,7 @@ local SCRIPT_DATABASE = {
                 hasKey = false
             },
             {
-                title = "Dex Explorer"
+                title = "Dex Explorer",
                 description = "Advanced Dex Script",
                 url = "https://raw.githubusercontent.com/vvisuall/WITHERCC/refs/heads/main/dex",
                 hasKey = false
