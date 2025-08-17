@@ -87,8 +87,8 @@ local THEME = {
 
 -- Added key system variables and functions
 local KEY_SYSTEM_ENABLED = true
-local VALID_KEY = "x7d9A2bQf1Lm38K"
-local KEY_LINK = "https://sub4unlock.io/afvuE"
+local VALID_KEY = "4tB8vW1pR6sY9Jq"
+local KEY_LINK = "https://sub2unlock.io/3HTi5"
 
 local function createKeySystem(Window)
     -- Key system ScreenGui
