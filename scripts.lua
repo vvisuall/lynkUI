@@ -126,15 +126,27 @@ local SCRIPT_DATABASE = {
     },
     
     -- Another example game
-    [987654321] = {
-        gameName = "Another Game",
+    [79546208627805] = {
+        gameName = "99 Nights In The Forest",
         scripts = {
             {
-                title = "Auto Farm", 
-                description = "Advanced Auto Farm Script", 
-                url = "https://raw.githubusercontent.com/yourusername/yourrepo/main/scripts/autofarm.lua", 
+                title = "Kenniel Keyless", 
+                description = "Advanced 99 Nights Script", 
+                url = "https://raw.githubusercontent.com/Kenniel123/99-Nights-in-the-Forest/refs/heads/main/99%20Nights%20in%20the%20Forest", 
+                hasKey = false
+            },
+            {
+                title = "Item Manager",
+                description = "Advanced 99 Nights Item Manager Script",
+                url = "https://raw.githubusercontent.com/Bac0nHck/Scripts/refs/heads/main/bringitems.lua",
+                hasKey = false
+            },    
+            {
+                title = "Ather Hub",
+                description = "Advanced 99 Nights Script",
+                url = "https://api.luarmor.net/files/v3/loaders/2529a5f9dfddd5523ca4e22f21cceffa.lua",
                 hasKey = true
-            }
+            }   
         }
     }
 }
