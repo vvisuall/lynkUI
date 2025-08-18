@@ -33,7 +33,31 @@ local SCRIPT_DATABASE = {
             }
         }
     },
-    
+
+    [6961824067] = {
+        gameName = "Fling Things And People",
+        scripts = {
+            {
+                title = "Blitz Hub",
+                description = "Advanced FTAP Script",
+                url = "https://rawscripts.net/raw/Fling-Things-and-People-FTAP-BLITZ-43504",
+                hasKey = false
+            },
+            {
+                title = "Verbal Hub v3",
+                description = "Advanced FTAP Script",
+                url = "https://rawscripts.net/raw/Fling-Things-and-People-VERBAL-HUB-V3-v01-42147",
+                hasKey = false
+            },
+            {
+                title = "Cosmic Hub",
+                description = "Advanced FTAP Script",
+                url = "https://rawscripts.net/raw/Fling-Things-and-People-Cosmic-Hub-The-Next-Generation-38608",
+                hasKey = true
+            }    
+        }
+    },    
+      
     -- Universal scripts (works on all games)
     ["Universal"] = {
         gameName = "Universal Scripts",
@@ -145,6 +169,12 @@ local SCRIPT_DATABASE = {
                 title = "Ather Hub",
                 description = "Advanced 99 Nights Script",
                 url = "https://api.luarmor.net/files/v3/loaders/2529a5f9dfddd5523ca4e22f21cceffa.lua",
+                hasKey = true
+            },   
+            {
+                title = "Get All Items + More",
+                description = "Advanced 99 Nights Script",
+                url = "https://api.luarmor.net/files/v3/loaders/d5ed1fbd4301b1d18d75153c5b47181d.lua",
                 hasKey = true
             }   
         }
