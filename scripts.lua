@@ -51,9 +51,63 @@ local SCRIPT_DATABASE = {
                 hasKey = false
             },
             {
+                title = "Owl Hub Aimbot",
+                description = "Advanced Universal Aimbot",
+                url = "https://raw.githubusercontent.com/CriShoux/OwlHub/master/OwlHub.txt",
+                hasKey = false
+            },   
+            {
+                title = "System Broken",
+                description = "Advanced Universal",
+                url = "https://raw.githubusercontent.com/H20CalibreYT/SystemBroken/main/script",
+                hasKey = false
+            },               
+            {
+                title = "Fedora Admin",
+                description = "Advanced Universal Cmds Script",
+                url = "https://raw.githubusercontent.com/alexx1212/fedoratoomutch/main/toomucth",
+                hasKey = false
+            },
+            {
+                title = "GX Admin",
+                description = "Advanced Universal",
+                url = "https://pastebin.com/raw/v6E9BmFK",
+                hasKey = false
+            },    
+            {
+                title = "Universal PC Aimbot",
+                description = "Advanced Universal PC Aimbot",
+                url = "https://raw.githubusercontent.com/agreed69-scripts/open-src-scripts/refs/heads/main/Universal%20Aimbot.lua",
+                hasKey = false
+            },    
+            {
+                title = "FE Ball Roller",
+                description = "Advanced FE Ball Roller",
+                url = "https://pastebin.com/raw/BZr9bGDy",
+                hasKey = false
+            },    
+            {
                 title = "Dex Explorer",
                 description = "Advanced Dex Script",
                 url = "https://raw.githubusercontent.com/vvisuall/WITHERCC/refs/heads/main/dex",
+                hasKey = false
+            },   
+            {
+                title = "Fling All",
+                description = "Advanced Fling All Script",
+                url = "https://pastebin.com/raw/zqyDSUWX",
+                hasKey = false
+            },    
+            {
+                title = "FE Punch Tool",
+                description = "Advanced FE Punch Tool",
+                url = "http://pastefy.app/GvnHVjT5/raw",
+                hasKey = false
+            },    
+            {
+                title = "UNC Test",
+                description = "Advanced UNC Test",
+                url = "https://raw.githubusercontent.com/unified-naming-convention/NamingStandard/main/UNCCheckEnv.lua",
                 hasKey = false
             },    
             {
