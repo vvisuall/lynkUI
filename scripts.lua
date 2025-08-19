@@ -148,6 +148,30 @@ local SCRIPT_DATABASE = {
             }
         }
     },
+
+    [662417684] = {
+        gameName = "Lucky Block Battlegrounds",
+        scripts = {
+            {
+                title = "Vortex Hub",
+                description = "Advanced LBB Script",
+                url = "https://raw.githubusercontent.com/vortex-script/Lucky-Block-BattleGround-script/main/Main.lua",
+                hasKey = false
+            },
+            {
+                title = "Starskys Hub",
+                description = "Advanced LBB Script",
+                url = "https://pandadevelopment.net/virtual/file/b26d90990ddc4cbb",
+                hasKey = false
+            },   
+            {
+                title = "Get All Items",
+                description = "Advanced LBB Script",
+                url = "https://raw.githubusercontent.com/v0c0n1337/scripts/refs/heads/main/script1649.lua",
+                hasKey = false
+            }   
+        }    
+    },    
     
     -- Another example game
     [79546208627805] = {
