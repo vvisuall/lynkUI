@@ -596,28 +596,37 @@ function Lynk:CreateWindow(opts)
     -- FIXED: Gate the window but still build it (no early return)
     Window._locked = KEY_SYSTEM_ENABLED == true
 
-    -- Create ScreenGui with enhanced properties
+    -- Create ScreenGui with maximum display order for UI override
     local screen = new("ScreenGui", {
         Name = opts.Name or "lynkUI",
         ResetOnSpawn = false,
-        DisplayOrder = 10000,
+        DisplayOrder = 999999997, -- Maximum display order to override everything
         IgnoreGuiInset = true,
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     })
-    screen.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    
+    -- Try to parent to CoreGui for maximum override capability
+    local success = pcall(function()
+        screen.Parent = game:GetService("CoreGui")
+    end)
+    
+    if not success then
+        screen.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    end
 
-    -- Main container with blur effect
+    -- Main container with maximum z-index for UI override
     local BlurFrame = new("Frame", {
         Name = "BlurContainer",
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundColor3 = Color3.new(0, 0, 0),
         BackgroundTransparency = 0.3,
         BorderSizePixel = 0,
-        Visible = false
+        Visible = false,
+        ZIndex = 999999996 -- Maximum z-index for blur background
     })
     BlurFrame.Parent = screen
 
-    -- Main window outline
+    -- Main window outline with maximum z-index
     local Outline = new("Frame", {
         Name = "Outline",
         AnchorPoint = Vector2.new(0.5, 0.5),
@@ -625,7 +634,7 @@ function Lynk:CreateWindow(opts)
         Size = UDim2.new(0, 0, 0, 0),
         BackgroundColor3 = THEME.Border,
         BorderSizePixel = 0,
-        ZIndex = 2
+        ZIndex = 999999997 -- Maximum z-index for main window
     })
     Outline.Parent = BlurFrame
     
@@ -636,16 +645,16 @@ function Lynk:CreateWindow(opts)
     -- Add subtle glow to outline
     createGlow(Outline, Window._accent)
 
-    -- FIXED: Create minimized taskbar (initially hidden)
+    -- Create minimized taskbar with proper styling and maximum z-index
     local MinimizedTaskbar = new("Frame", {
         Name = "MinimizedTaskbar",
         AnchorPoint = Vector2.new(0.5, 1),
         Position = UDim2.new(0.5, 0, 1, -20),
-        Size = UDim2.new(0, 200, 0, 40),
+        Size = UDim2.new(0, 280, 0, 40), -- Wider to accommodate title and buttons
         BackgroundColor3 = THEME.Background,
         BorderSizePixel = 0,
         Visible = false,
-        ZIndex = 100
+        ZIndex = 999999995 -- Maximum z-index for taskbar
     })
     MinimizedTaskbar.Parent = BlurFrame
     
@@ -653,48 +662,68 @@ function Lynk:CreateWindow(opts)
     taskbarCorner.CornerRadius = THEME.SmallCornerRadius
     taskbarCorner.Parent = MinimizedTaskbar
     
-    -- Taskbar border
+    -- Taskbar border with theme primary color
     local taskbarBorder = new("UIStroke", {
         Color = THEME.Primary,
         Thickness = 2
     })
     taskbarBorder.Parent = MinimizedTaskbar
     
-    -- Taskbar title
+    -- Taskbar title showing "Lynk Universal" as requested
     local TaskbarTitle = new("TextLabel", {
         Name = "TaskbarTitle",
         Position = UDim2.new(0, 15, 0, 0),
-        Size = UDim2.new(1, -50, 1, 0),
+        Size = UDim2.new(1, -100, 1, 0), -- Leave space for buttons
         BackgroundTransparency = 1,
-        Text = "Lynk Universal",
+        Text = "Lynk Universal", -- Changed to match user request
         Font = Enum.Font.GothamBold,
         TextSize = 14,
         TextColor3 = THEME.Text,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextYAlignment = Enum.TextYAlignment.Center,
-        ZIndex = 101
+        ZIndex = 999999996 -- Maximum z-index for taskbar text
     })
     TaskbarTitle.Parent = MinimizedTaskbar
     
-    -- Expand button
-    local ExpandButton = new("TextButton", {
-        Name = "ExpandButton",
-        Position = UDim2.new(1, -35, 0.5, -12),
+    -- Add maximize button (+ symbol) as shown in the image
+    local MaximizeButton = new("TextButton", {
+        Name = "MaximizeButton",
+        Position = UDim2.new(1, -70, 0.5, -12),
         Size = UDim2.new(0, 24, 0, 24),
-        BackgroundColor3 = THEME.Primary,
+        BackgroundColor3 = THEME.Success, -- Green color for maximize
         BorderSizePixel = 0,
-        Text = "⬜",
+        Text = "+", -- Plus symbol as shown in image
         Font = Enum.Font.GothamBold,
-        TextSize = 12,
-        TextColor3 = THEME.Text,
+        TextSize = 16,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
         AutoButtonColor = false,
-        ZIndex = 101
+        ZIndex = 999999996 -- Maximum z-index for button
     })
-    ExpandButton.Parent = MinimizedTaskbar
+    MaximizeButton.Parent = MinimizedTaskbar
     
-    local expandCorner = new("UICorner")
-    expandCorner.CornerRadius = UDim.new(0, 4)
-    expandCorner.Parent = ExpandButton
+    local maximizeCorner = new("UICorner")
+    maximizeCorner.CornerRadius = UDim.new(0, 4)
+    maximizeCorner.Parent = MaximizeButton
+    
+    -- Close button (X symbol) as shown in the image
+    local TaskbarCloseButton = new("TextButton", {
+        Name = "TaskbarCloseButton",
+        Position = UDim2.new(1, -40, 0.5, -12),
+        Size = UDim2.new(0, 24, 0, 24),
+        BackgroundColor3 = THEME.Danger, -- Red color for close
+        BorderSizePixel = 0,
+        Text = "×", -- X symbol as shown in image
+        Font = Enum.Font.GothamBold,
+        TextSize = 16,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        AutoButtonColor = false,
+        ZIndex = 999999996 -- Maximum z-index for button
+    })
+    TaskbarCloseButton.Parent = MinimizedTaskbar
+    
+    local taskbarCloseCorner = new("UICorner")
+    taskbarCloseCorner.CornerRadius = UDim.new(0, 4)
+    taskbarCloseCorner.Parent = TaskbarCloseButton
     
     -- Make taskbar draggable
     local taskbarDragging = false
@@ -722,13 +751,14 @@ function Lynk:CreateWindow(opts)
         end
     end)
 
-    -- Main content frame
+    -- Main window frame with maximum z-index
     local MainFrame = new("Frame", {
         Name = "MainFrame",
         Position = UDim2.new(0, 2, 0, 2),
         Size = UDim2.new(1, -4, 1, -4),
         BackgroundColor3 = THEME.Background,
-        BorderSizePixel = 0
+        BorderSizePixel = 0,
+        ZIndex = 999999998 -- Maximum z-index for main content
     })
     MainFrame.Parent = Outline
     
@@ -863,12 +893,19 @@ function Lynk:CreateWindow(opts)
     ContentArea.Parent = MainFrame
 
     -- Top bar in content area
+    -- Top bar with maximum z-index
     local TopBar = new("Frame", {
         Name = "TopBar",
         Size = UDim2.new(1, 0, 0, 80),
-        BackgroundTransparency = 1
+        BackgroundColor3 = THEME.Surface,
+        BorderSizePixel = 0,
+        ZIndex = 999999999 -- Maximum z-index for top bar
     })
-    TopBar.Parent = ContentArea
+    TopBar.Parent = MainFrame
+    
+    local topCorner = new("UICorner")
+    topCorner.CornerRadius = THEME.CornerRadius
+    topCorner.Parent = TopBar
 
     -- Title section
     local TitleContainer = new("Frame", {
@@ -905,6 +942,7 @@ function Lynk:CreateWindow(opts)
     Subtitle.Parent = TitleContainer
 
     -- FIXED: Minimize button (yellow)
+    -- Minimize button with maximum z-index
     local MinimizeButton = new("TextButton", {
         Name = "MinimizeButton",
         Position = UDim2.new(1, -110, 0, 20),
@@ -914,7 +952,8 @@ function Lynk:CreateWindow(opts)
         Font = Enum.Font.GothamBold,
         TextSize = 20,
         TextColor3 = Color3.fromRGB(0, 0, 0),
-        AutoButtonColor = false
+        AutoButtonColor = false,
+        ZIndex = 999999999 -- Maximum z-index for minimize button
     })
     MinimizeButton.Parent = TopBar
     
@@ -923,6 +962,7 @@ function Lynk:CreateWindow(opts)
     minimizeCorner.Parent = MinimizeButton
 
     -- Close button (enhanced)
+    -- Close button with maximum z-index
     local CloseButton = new("TextButton", {
         Name = "CloseButton",
         Position = UDim2.new(1, -60, 0, 20),
@@ -932,7 +972,8 @@ function Lynk:CreateWindow(opts)
         Font = Enum.Font.GothamBold,
         TextSize = 20,
         TextColor3 = THEME.Text,
-        AutoButtonColor = false
+        AutoButtonColor = false,
+        ZIndex = 999999999 -- Maximum z-index for close button
     })
     CloseButton.Parent = TopBar
     
@@ -954,6 +995,7 @@ function Lynk:CreateWindow(opts)
     animateButton(CloseButton, Color3.fromRGB(220, 50, 50), THEME.Danger)
 
     -- FIXED: Create confirmation popup with better fade animation
+    -- Confirmation popup with maximum z-index
     local ConfirmationPopup = new("Frame", {
         Name = "ConfirmationPopup",
         AnchorPoint = Vector2.new(0.5, 0.5),
@@ -962,7 +1004,7 @@ function Lynk:CreateWindow(opts)
         BackgroundColor3 = THEME.Background,
         BorderSizePixel = 0,
         Visible = false,
-        ZIndex = 100
+        ZIndex = 999999999 -- Maximum z-index for popup
     })
     ConfirmationPopup.Parent = BlurFrame
     
@@ -1047,6 +1089,17 @@ function Lynk:CreateWindow(opts)
     animateButton(NoButton, Color3.fromRGB(240, 70, 70), Color3.fromRGB(220, 50, 50))
 
     -- FIXED: Minimize button functionality
+    -- Maximize button functionality (from taskbar)
+    MaximizeButton.MouseButton1Click:Connect(function()
+        Window:Maximize()
+    end)
+    
+    -- Taskbar close button functionality
+    TaskbarCloseButton.MouseButton1Click:Connect(function()
+        Window:Destroy()
+    end)
+
+    -- Minimize button functionality
     MinimizeButton.MouseButton1Click:Connect(function()
         Window:Minimize()
     end)
