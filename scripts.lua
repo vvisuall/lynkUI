@@ -187,6 +187,12 @@ local SCRIPT_DATABASE = {
                 description = "Advanced SAB Script",
                 url = "https://pandadevelopment.net/virtual/file/0988845b2372c5ee",
                 hasKey = false
+            },    
+            {
+                title = "Instant Steal",
+                description = "SAB Script",
+                url = "https://api.luarmor.net/files/v3/loaders/a65257606a15465ac83a5ad62d1f5d92.lua",
+                hasKey = true
             }    
         }
     },    
@@ -265,7 +271,7 @@ local SCRIPT_DATABASE = {
                 description = "Doors Script",
                 url = "https://pastebin.com/raw/U4FaFJAt",
                 hasKey = false
-            },   
+            }   
         }
     },
     
