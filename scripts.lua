@@ -45,6 +45,18 @@ local SCRIPT_DATABASE = {
         }
     },
 
+    [83942919686609] = {
+        gameName = "Build A Scam Empire",
+        scripts = {
+            {
+                title = "Auto Collect + Sell",
+                description = "BASE Script",
+                url = "https://raw.githubusercontent.com/vvisuall/WITHERCC/refs/heads/main/sce",
+                hasKey = false
+            }
+        }
+    },    
+
     -- ✅ New game-specific scripts
     [9791603388] = {
         gameName = "Underground War 2.0",
