@@ -70,6 +70,42 @@ local SCRIPT_DATABASE = {
         }
     },
 
+    [17516596118] = {
+        gameName = "Hypershot",
+        scripts = {
+            {
+                title = "Hypershot Script",
+                description = "Hypershot Script",
+                url = "https://pastebin.com/raw/bseZ6tCm",
+                hasKey = false
+            }
+        }
+    },    
+
+    [301549746] = {
+        gameName = "Counter Blox",
+        scripts = {
+            {
+                title = "Lynk CB",
+                description = "OP CB Script",
+                url = "https://raw.githubusercontent.com/vvisuall/lynkcb/refs/heads/main/counterblox",
+                hasKey = true
+            },    
+            {
+                title = "Simple Rage",
+                description = "CB Script",
+                url = "https://raw.githubusercontent.com/matpro0A/counterbloxsimplerage/refs/heads/main/Loader.lua",
+                hasKey = false
+            },
+            {
+                title = "Vyno CB",
+                description = "OP CB Script",
+                url = "http://vyno.iminsane.ru/vyno/cbro.lua",
+                hasKey = false
+            }    
+        }
+    },
+    
     [6961824067] = {
         gameName = "Fling Things And People",
         scripts = {
