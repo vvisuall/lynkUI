@@ -17,7 +17,19 @@ local SCRIPT_DATABASE = {
                 description = "Advanced ESP Script", 
                 url = "https://raw.githubusercontent.com/vvisuall/WITHERCC/refs/heads/main/advancedesp", 
                 hasKey = false
-            }
+            },
+            {
+                title = "Astro Hub",
+                description = "Advanced Arsenal Script",
+                url = "https://raw.githubusercontent.com/Storm99999/AstrohubV2/main/astrohub.lua",
+                hasKey = false
+            },
+            {
+                title = "Valor Hub",
+                description = "Advanced Arsenal Script",
+                url = "https://raw.githubusercontent.com/eselfins31/Valor-Hub/main/Arsenal%20Advanced/Unified_protected.lua",
+                hasKey = false
+            }    
         }
     },
 
@@ -149,6 +161,36 @@ local SCRIPT_DATABASE = {
         }
     },
 
+    [109983668079237] = {
+        gameName = "Steal A Brainrot",
+        scripts = {
+            {
+                title = "Chilli Hub (Detected)",
+                description = "Advanced SAB Script",
+                url = "https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua",
+                hasKey = false
+            },
+            {
+                title = "Lyez Hub",
+                description = "Advanced SAB Script",
+                url = "https://pandadevelopment.net/virtual/file/0988845b2372c5ee",
+                hasKey = false
+            }    
+        }
+    },    
+
+    [6872265039] = {
+        gameName = "Bedwars",
+        scripts = {
+            {
+                title = "Voidware V4",
+                description = "Advanced Bedwars Script",
+                url = "https://raw.githubusercontent.com/VapeVoidware/vapevoidware/main/NewMainScript.lua",
+                hasKey = false
+            }
+        }
+    },
+    
     [662417684] = {
         gameName = "Lucky Block Battlegrounds",
         scripts = {
