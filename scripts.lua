@@ -25,6 +25,18 @@ local SCRIPT_DATABASE = {
                 hasKey = false
             },
             {
+                title = "Aimbot",
+                description = "Arsenal Aimbot",
+                url = "https://gist.githubusercontent.com/Benmuhammed7/9ae846760bbb37f703b86a1194a472f1/raw/2d5186a60c1cbb4f9d1cde0476e23cbf61219189/Jailbird.v2.madebysanormall",
+                hasKey = false
+            },    
+            {
+                title = "Knife All",
+                description = "Knife All Arsenal Script",
+                url = "https://raw.githubusercontent.com/curseddamndemon/script/refs/heads/main/script",
+                hasKey = false
+            },    
+            {
                 title = "Valor Hub",
                 description = "Advanced Arsenal Script",
                 url = "https://raw.githubusercontent.com/eselfins31/Valor-Hub/main/Arsenal%20Advanced/Unified_protected.lua",
@@ -214,6 +226,48 @@ local SCRIPT_DATABASE = {
             }   
         }    
     },    
+
+    [6516141723] = {
+        gameName = "Doors",
+        scripts = {
+            {
+                title = "Velocity X",
+                description = "Advanced Doors Script",
+                url = "https://raw.githubusercontent.com/DasVelocity/VelocityX/refs/heads/main/VelocityX.lua",
+                hasKey = false
+            },
+            {
+                title = "ProHax V3",
+                description = "Advanced Doors Script",
+                url = "https://raw.githubusercontent.com/TheHunterSolo1/Scripts/main/Protected_2809220311826785.lua.txt",
+                hasKey = false
+            },
+            {
+                title = "Astral Hub",
+                description = "Doors Script",
+                url = "https://raw.githubusercontent.com/PlayzlxD0tmatter/AstralHub/refs/heads/main/AstralHub",
+                hasKey = true
+            },
+            {
+                title = "Fly, Esp & Brightness",
+                description = "Doors Script",
+                url = "https://raw.githubusercontent.com/rolezeay/doors/refs/heads/main/hmmmmm",
+                hasKey = false
+            },
+            {
+                title = "Iron Doors",
+                description = "Doors Script",
+                url = "https://raw.githubusercontent.com/Qiwikox12/stubrawl/refs/heads/main/Doors/IronDoors.txt",
+                hasKey = false
+            },
+            {
+                title = "Auto doors",
+                description = "Doors Script",
+                url = "https://pastebin.com/raw/U4FaFJAt",
+                hasKey = false
+            },   
+        }
+    },
     
     -- Another example game
     [79546208627805] = {
