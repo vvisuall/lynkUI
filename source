@@ -16,6 +16,7 @@ local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
+local CoreGui = game:GetService("CoreGui")
 
 local LocalPlayer = Players.LocalPlayer
 if not LocalPlayer then
