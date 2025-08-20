@@ -9,10 +9,6 @@
 
 ]]--
 
--- lynkUI v2.0 - Professional Script Hub UI Library
--- Author: Enhanced by Claude for universal script hub
--- Features: Modern design, smooth animations, player profile, search functionality
--- Four main tabs: Home (Script Hub), Updates, Credits, Settings
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
