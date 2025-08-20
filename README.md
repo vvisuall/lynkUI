@@ -63,7 +63,7 @@ Some scripts may need keys depending on the creator.
 
 ### 👤 Credits
 
-Hub & UI: @x_vvw
+Hub & UI: @x_vvw on discord
 
 Community: Script contributors and testers
 
