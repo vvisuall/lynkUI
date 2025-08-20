@@ -47,6 +47,8 @@ local function loadScriptDatabase()
     end
 end
 
+UpdatesTab:Label("📢 Latest Updates")
+
 -- Load the database
 local SCRIPT_DATABASE = loadScriptDatabase()
 
