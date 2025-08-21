@@ -89,7 +89,7 @@ local SCRIPT_DATABASE = {
                 title = "Lynk CB",
                 description = "OP CB Script",
                 url = "https://raw.githubusercontent.com/vvisuall/lynkcb/refs/heads/main/counterblox",
-                hasKey = true
+                RequiresKey = true
             },    
             {
                 title = "Simple Rage",
