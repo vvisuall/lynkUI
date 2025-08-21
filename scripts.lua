@@ -125,7 +125,7 @@ local SCRIPT_DATABASE = {
                 title = "Cosmic Hub",
                 description = "Advanced FTAP Script",
                 url = "https://rawscripts.net/raw/Fling-Things-and-People-Cosmic-Hub-The-Next-Generation-38608",
-                hasKey = true
+                RequiresKey = true
             }    
         }
     },    
@@ -240,7 +240,7 @@ local SCRIPT_DATABASE = {
                 title = "Instant Steal",
                 description = "SAB Script",
                 url = "https://api.luarmor.net/files/v3/loaders/a65257606a15465ac83a5ad62d1f5d92.lua",
-                hasKey = true
+                RequiresKey = true
             }    
         }
     },    
@@ -300,7 +300,7 @@ local SCRIPT_DATABASE = {
                 title = "Astral Hub",
                 description = "Doors Script",
                 url = "https://raw.githubusercontent.com/PlayzlxD0tmatter/AstralHub/refs/heads/main/AstralHub",
-                hasKey = true
+                RequiresKey = true
             },
             {
                 title = "Fly, Esp & Brightness",
@@ -343,13 +343,13 @@ local SCRIPT_DATABASE = {
                 title = "Ather Hub",
                 description = "Advanced 99 Nights Script",
                 url = "https://api.luarmor.net/files/v3/loaders/2529a5f9dfddd5523ca4e22f21cceffa.lua",
-                hasKey = true
+                RequiresKey = true
             },   
             {
                 title = "Get All Items + More",
                 description = "Advanced 99 Nights Script",
                 url = "https://api.luarmor.net/files/v3/loaders/d5ed1fbd4301b1d18d75153c5b47181d.lua",
-                hasKey = true
+                RequiresKey = true
             }   
         }
     }
