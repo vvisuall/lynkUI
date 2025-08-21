@@ -1,4 +1,4 @@
--- Fixed Universal Script Hub - Properly Integrates with lynkUI library
+-- Fixed Universal Script Hub - Complete Integration with Mobile Support
 -- This loads the fixed UI library and ensures proper database integration
 
 -- Load the fixed UI library
@@ -38,8 +38,14 @@ local function loadScriptDatabase()
                     {
                         title = "Fly Script", 
                         description = "Universal fly script", 
-                        LoadString = 'print("Fly script would execute here")', 
+                        LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/fly.lua"))()', 
                         RequiresKey = false
+                    },
+                    {
+                        title = "Noclip Script", 
+                        description = "Walk through walls", 
+                        LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/noclip.lua"))()', 
+                        RequiresKey = true
                     }
                 }
             }
@@ -54,9 +60,9 @@ local SCRIPT_DATABASE = loadScriptDatabase()
 Window._scriptDatabase = SCRIPT_DATABASE
 
 -- Success messages
-print("🎉 LYNK Script Hub loaded successfully!")
-print("📱 Press Insert to toggle the UI")
-print("🔗 Get key from: https://sub4unlock.io/3HTi5")
+print("🎉 LYNK Script Hub v2.2 loaded successfully!")
+print("📱 Press Insert to toggle the UI (or use mobile button)")
+print("🔗 Get key from: https://sub2unlock.io/3HTi5")
 
 -- Show current game info
 spawn(function()
