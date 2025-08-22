@@ -1,1 +1,2302 @@
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
+-- @x_vvw
 
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+
+local LocalPlayer = Players.LocalPlayer
+if not LocalPlayer then
+    error("lynkUI: LocalPlayer not found - run as a LocalScript / exploit local")
+end
+
+-- Enhanced Utilities
+local function new(class, props)
+    local inst = Instance.new(class)
+    if type(props) == "table" then
+        for k,v in pairs(props) do
+            pcall(function() inst[k] = v end)
+        end
+    end
+    return inst
+end
+
+local function createGradient(parent, colors, rotation)
+    local gradient = new("UIGradient", {
+        Color = ColorSequence.new(colors),
+        Rotation = rotation or 0
+    })
+    gradient.Parent = parent
+    return gradient
+end
+
+local function createGlow(parent, color, size)
+    local glow = new("ImageLabel", {
+        Name = "Glow",
+        Parent = parent,
+        BackgroundTransparency = 1,
+        Image = "rbxasset://textures/ui/Glow.png",
+        ImageColor3 = color or Color3.new(1,1,1),
+        ImageTransparency = 0.8,
+        Size = size or UDim2.new(1, 20, 1, 20),
+        Position = UDim2.new(0, -10, 0, -10),
+        ZIndex = parent.ZIndex - 1
+    })
+    return glow
+end
+
+-- Mobile-optimized Color Palette
+local THEME = {
+    WindowSize = UDim2.new(0, 700, 0, 450), -- Smaller for mobile
+    
+    -- Dark theme colors
+    Background = Color3.fromRGB(11, 11, 13),
+    Surface = Color3.fromRGB(15, 15, 17),
+    Panel = Color3.fromRGB(19, 19, 22),
+    Card = Color3.fromRGB(23, 23, 27),
+    
+    -- Accent colors
+    Primary = Color3.fromRGB(88, 101, 242),
+    Secondary = Color3.fromRGB(114, 137, 218),
+    Success = Color3.fromRGB(67, 181, 129),
+    Warning = Color3.fromRGB(250, 166, 26),
+    Danger = Color3.fromRGB(237, 66, 69),
+    
+    -- Text colors
+    Text = Color3.fromRGB(255, 255, 255),
+    TextSecondary = Color3.fromRGB(185, 187, 190),
+    TextMuted = Color3.fromRGB(114, 118, 125),
+    
+    -- Border and dividers
+    Border = Color3.fromRGB(35, 35, 40),
+    Divider = Color3.fromRGB(45, 45, 50),
+    
+    -- Corner radius
+    CornerRadius = UDim.new(0, 12),
+    SmallCornerRadius = UDim.new(0, 8),
+    
+    -- Animation settings
+    FastTween = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    MediumTween = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    SlowTween = TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+}
+
+-- Key system variables
+local KEY_SYSTEM_ENABLED = true
+local VALID_KEY = "4tB8vW1pR6sY9Jq"
+local KEY_LINK = "https://sub2unlock.io/3HTi5"
+
+-- Global notification settings
+local NOTIFICATIONS_ENABLED = true
+
+-- FIXED: Emoji constants to prevent obfuscation issues
+local EMOJIS = {
+    GLOBE = utf8.char(127760), -- 🌐
+    KEY = utf8.char(128273),   -- 🔑
+    SEARCH = utf8.char(128269), -- 🔍
+    REFRESH = utf8.char(128260), -- 🔄
+    SETTINGS = utf8.char(9881),  -- ⚙️
+    SUCCESS = utf8.char(9989),   -- ✅
+    WARNING = utf8.char(9888),   -- ⚠️
+    INFO = utf8.char(8505),      -- ℹ️
+    MINIMIZE = utf8.char(8722),  -- −
+    MAXIMIZE = utf8.char(9633),  -- ⬜
+    CLOSE = utf8.char(10005),    -- ✕
+    ARROW_RIGHT = utf8.char(9654), -- ▶
+}
+
+-- Mobile toggle button
+local function createMobileToggle(Window)
+    local toggleScreen = new("ScreenGui", {
+        Name = "MobileToggle",
+        ResetOnSpawn = false,
+        DisplayOrder = 999999997,
+        IgnoreGuiInset = true,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    })
+    toggleScreen.Parent = game:GetService("CoreGui")
+    
+    local toggleButton = new("TextButton", {
+        Name = "ToggleButton",
+        Position = UDim2.new(1, -60, 0.5, -30),
+        Size = UDim2.new(0, 50, 0, 60),
+        BackgroundColor3 = THEME.Primary,
+        BorderSizePixel = 0,
+        Text = EMOJIS.ARROW_RIGHT,
+        Font = Enum.Font.GothamBold,
+        TextSize = 20,
+        TextColor3 = THEME.Text,
+        AutoButtonColor = false,
+        ZIndex = 999999
+    })
+    toggleButton.Parent = toggleScreen
+    
+    local toggleCorner = new("UICorner")
+    toggleCorner.CornerRadius = UDim.new(0, 15)
+    toggleCorner.Parent = toggleButton
+    
+    -- Make draggable
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+    
+    toggleButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = toggleButton.Position
+        end
+    end)
+    
+    toggleButton.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            toggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    
+    toggleButton.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+    
+    -- Toggle functionality
+    toggleButton.MouseButton1Click:Connect(function()
+        if Window._minimized then
+            Window:Maximize()
+        elseif Window._shown then
+            Window:Hide()
+        else
+            Window:Show()
+        end
+    end)
+    
+    return toggleScreen
+end
+
+-- Notification system (mobile optimized)
+local NotificationQueue = {}
+local ActiveNotifications = {}
+
+local function createNotification(title, message, duration, notificationType)
+    if not NOTIFICATIONS_ENABLED then return end
+    
+    duration = duration or 4
+    notificationType = notificationType or "info"
+    
+    local notifScreen = new("ScreenGui", {
+        Name = "LynkNotification",
+        ResetOnSpawn = false,
+        DisplayOrder = 999999999,
+        IgnoreGuiInset = true,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    })
+    notifScreen.Parent = game:GetService("CoreGui")
+    
+    -- Mobile-optimized notification container
+    local notifContainer = new("Frame", {
+        Name = "NotificationContainer",
+        Position = UDim2.new(0.5, -120, 0, 20 + (#ActiveNotifications * 70)),
+        Size = UDim2.new(0, 240, 0, 50), -- Smaller for mobile
+        BackgroundColor3 = THEME.Background,
+        BorderSizePixel = 0,
+        ZIndex = 1000
+    })
+    notifContainer.Parent = notifScreen
+    
+    local notifCorner = new("UICorner")
+    notifCorner.CornerRadius = THEME.SmallCornerRadius
+    notifCorner.Parent = notifContainer
+    
+    -- Notification icon
+    local iconColors = {
+        success = THEME.Success,
+        warning = THEME.Warning,
+        error = THEME.Danger,
+        info = THEME.Primary
+    }
+    
+    local iconEmojis = {
+        success = EMOJIS.SUCCESS,
+        warning = EMOJIS.WARNING,
+        error = EMOJIS.CLOSE,
+        info = EMOJIS.INFO
+    }
+    
+    local notifIcon = new("TextLabel", {
+        Name = "NotificationIcon",
+        Position = UDim2.new(0, 10, 0.5, -8),
+        Size = UDim2.new(0, 16, 0, 16),
+        BackgroundTransparency = 1,
+        Text = iconEmojis[notificationType] or EMOJIS.INFO,
+        Font = Enum.Font.GothamBold,
+        TextSize = 14,
+        TextColor3 = iconColors[notificationType] or THEME.Primary,
+        TextXAlignment = Enum.TextXAlignment.Center,
+        TextYAlignment = Enum.TextYAlignment.Center,
+        ZIndex = 1001
+    })
+    notifIcon.Parent = notifContainer
+    
+    -- Notification title
+    local notifTitle = new("TextLabel", {
+        Name = "NotificationTitle",
+        Position = UDim2.new(0, 35, 0, 5),
+        Size = UDim2.new(1, -45, 0, 16),
+        BackgroundTransparency = 1,
+        Text = title,
+        Font = Enum.Font.GothamBold,
+        TextSize = 11,
+        TextColor3 = THEME.Text,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        ZIndex = 1001
+    })
+    notifTitle.Parent = notifContainer
+    
+    -- Notification message
+    local notifMessage = new("TextLabel", {
+        Name = "NotificationMessage",
+        Position = UDim2.new(0, 35, 0, 22),
+        Size = UDim2.new(1, -45, 0, 20),
+        BackgroundTransparency = 1,
+        Text = message,
+        Font = Enum.Font.Gotham,
+        TextSize = 9,
+        TextColor3 = THEME.TextSecondary,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextWrapped = true,
+        ZIndex = 1001
+    })
+    notifMessage.Parent = notifContainer
+    
+    table.insert(ActiveNotifications, notifScreen)
+    
+    -- Slide in animation
+    TweenService:Create(notifContainer, THEME.MediumTween, {
+        Position = UDim2.new(0.5, -120, 0, 20 + ((#ActiveNotifications - 1) * 70))
+    }):Play()
+    
+    -- Play notification sound
+    spawn(function()
+        local success, sound = pcall(function()
+            local notifSound = new("Sound", {
+                SoundId = "rbxassetid://131961136",
+                Volume = 0.2, -- Lower volume for mobile
+                Pitch = 1.2
+            })
+            notifSound.Parent = SoundService
+            notifSound:Play()
+            
+            notifSound.Ended:Connect(function()
+                notifSound:Destroy()
+            end)
+        end)
+    end)
+    
+    -- Auto dismiss
+    spawn(function()
+        wait(duration)
+        
+        TweenService:Create(notifContainer, THEME.FastTween, {
+            Position = UDim2.new(0.5, -120, 0, -70)
+        }):Play()
+        
+        wait(0.2)
+        
+        for i, notif in ipairs(ActiveNotifications) do
+            if notif == notifScreen then
+                table.remove(ActiveNotifications, i)
+                break
+            end
+        end
+        
+        if notifScreen and notifScreen.Parent then
+            notifScreen:Destroy()
+        end
+    end)
+    
+    -- Fallback cleanup
+    spawn(function()
+        wait(8)
+        if notifScreen and notifScreen.Parent then
+            for i, notif in ipairs(ActiveNotifications) do
+                if notif == notifScreen then
+                    table.remove(ActiveNotifications, i)
+                    break
+                end
+            end
+            notifScreen:Destroy()
+        end
+    end)
+end
+
+local function createKeySystem(Window)
+    -- Force mouse unlock for first-person games
+    UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+    
+    local keyScreen = new("ScreenGui", {
+        Name = "KeySystem",
+        ResetOnSpawn = false,
+        DisplayOrder = 999999999,
+        IgnoreGuiInset = true,
+        ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    })
+    keyScreen.Parent = game:GetService("CoreGui")
+
+    local keyBlurFrame = new("Frame", {
+        Name = "KeyBlurContainer",
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundColor3 = Color3.new(0, 0, 0),
+        BackgroundTransparency = 0.3,
+        BorderSizePixel = 0,
+        Visible = true,
+        ZIndex = 999999
+    })
+    keyBlurFrame.Parent = keyScreen
+
+    -- Mobile-optimized key window
+    local keyWindow = new("Frame", {
+        Name = "KeyWindow",
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0, 320, 0, 220), -- Smaller for mobile
+        BackgroundColor3 = THEME.Background,
+        BorderSizePixel = 0,
+        ZIndex = 1000000
+    })
+    keyWindow.Parent = keyBlurFrame
+    
+    local keyCorner = new("UICorner")
+    keyCorner.CornerRadius = THEME.CornerRadius
+    keyCorner.Parent = keyWindow
+
+    createGlow(keyWindow, THEME.Primary)
+
+    -- Close button
+    local closeButton = new("TextButton", {
+        Name = "CloseButton",
+        Position = UDim2.new(1, -30, 0, 8),
+        Size = UDim2.new(0, 22, 0, 22),
+        BackgroundColor3 = THEME.Danger,
+        BorderSizePixel = 0,
+        Text = EMOJIS.CLOSE,
+        Font = Enum.Font.GothamBold,
+        TextSize = 14,
+        TextColor3 = THEME.Text,
+        AutoButtonColor = false,
+        ZIndex = 1000001
+    })
+    closeButton.Parent = keyWindow
+    
+    local closeCorner = new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 6)
+    closeCorner.Parent = closeButton
+
+    -- Title
+    local title = new("TextLabel", {
+        Name = "Title",
+        Position = UDim2.new(0, 0, 0, 15),
+        Size = UDim2.new(1, 0, 0, 25),
+        BackgroundTransparency = 1,
+        Text = "Lynk Universal",
+        Font = Enum.Font.GothamBold,
+        TextSize = 16,
+        TextColor3 = THEME.Text,
+        TextXAlignment = Enum.TextXAlignment.Center,
+        ZIndex = 1000001
+    })
+    title.Parent = keyWindow
+
+    -- Subtitle
+    local subtitle = new("TextLabel", {
+        Name = "Subtitle",
+        Position = UDim2.new(0, 0, 0, 45),
+        Size = UDim2.new(1, 0, 0, 18),
+        BackgroundTransparency = 1,
+        Text = "Key Login",
+        Font = Enum.Font.Gotham,
+        TextSize = 12,
+        TextColor3 = THEME.TextSecondary,
+        TextXAlignment = Enum.TextXAlignment.Center,
+        ZIndex = 1000001
+    })
+    subtitle.Parent = keyWindow
+
+    -- Key input
+    local keyInput = new("TextBox", {
+        Name = "KeyInput",
+        Position = UDim2.new(0, 20, 0, 80),
+        Size = UDim2.new(1, -40, 0, 30),
+        BackgroundColor3 = THEME.Panel,
+        BorderSizePixel = 0,
+        PlaceholderText = "Enter your key here...",
+        PlaceholderColor3 = THEME.TextMuted,
+        Text = "",
+        Font = Enum.Font.Gotham,
+        TextSize = 11,
+        TextColor3 = THEME.Text,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ClearTextOnFocus = false,
+        ZIndex = 1000001
+    })
+    keyInput.Parent = keyWindow
+    
+    local inputCorner = new("UICorner")
+    inputCorner.CornerRadius = THEME.SmallCornerRadius
+    inputCorner.Parent = keyInput
+
+    local inputPadding = new("UIPadding", {
+        PaddingLeft = UDim.new(0, 8),
+        PaddingRight = UDim.new(0, 8)
+    })
+    inputPadding.Parent = keyInput
+
+    -- Mobile-optimized buttons
+    local activateButton = new("TextButton", {
+        Name = "ActivateButton",
+        Position = UDim2.new(0, 20, 0, 130),
+        Size = UDim2.new(0, 130, 0, 30),
+        BackgroundColor3 = THEME.Warning,
+        BorderSizePixel = 0,
+        Text = "Activate Key",
+        Font = Enum.Font.GothamSemibold,
+        TextSize = 11,
+        TextColor3 = Color3.new(0, 0, 0),
+        AutoButtonColor = false,
+        ZIndex = 1000001
+    })
+    activateButton.Parent = keyWindow
+    
+    local activateCorner = new("UICorner")
+    activateCorner.CornerRadius = THEME.SmallCornerRadius
+    activateCorner.Parent = activateButton
+
+    local getKeyButton = new("TextButton", {
+        Name = "GetKeyButton",
+        Position = UDim2.new(0, 170, 0, 130),
+        Size = UDim2.new(0, 130, 0, 30),
+        BackgroundColor3 = THEME.Panel,
+        BorderSizePixel = 0,
+        Text = "Get Key",
+        Font = Enum.Font.GothamSemibold,
+        TextSize = 11,
+        TextColor3 = THEME.Text,
+        AutoButtonColor = false,
+        ZIndex = 1000001
+    })
+    getKeyButton.Parent = keyWindow
+    
+    local getKeyCorner = new("UICorner")
+    getKeyCorner.CornerRadius = THEME.SmallCornerRadius
+    getKeyCorner.Parent = getKeyButton
+
+    -- Status message
+    local statusMessage = new("TextLabel", {
+        Name = "StatusMessage",
+        Position = UDim2.new(0, 20, 0, 175),
+        Size = UDim2.new(1, -40, 0, 18),
+        BackgroundTransparency = 1,
+        Text = "",
+        Font = Enum.Font.Gotham,
+        TextSize = 10,
+        TextColor3 = THEME.TextSecondary,
+        TextXAlignment = Enum.TextXAlignment.Center,
+        ZIndex = 1000001
+    })
+    statusMessage.Parent = keyWindow
+
+    -- Touch-friendly dragging
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+
+    keyWindow.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = keyWindow.Position
+        end
+    end)
+
+    keyWindow.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            keyWindow.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    keyWindow.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+
+    -- Button animations
+    local function animateKeyButton(button, hoverColor, normalColor)
+        button.MouseEnter:Connect(function()
+            TweenService:Create(button, THEME.FastTween, {BackgroundColor3 = hoverColor}):Play()
+        end)
+        button.MouseLeave:Connect(function()
+            TweenService:Create(button, THEME.FastTween, {BackgroundColor3 = normalColor}):Play()
+        end)
+    end
+
+    animateKeyButton(activateButton, Color3.fromRGB(255, 180, 40), THEME.Warning)
+    animateKeyButton(getKeyButton, THEME.Card, THEME.Panel)
+    animateKeyButton(closeButton, Color3.fromRGB(255, 80, 80), THEME.Danger)
+
+    -- Button functionality
+    getKeyButton.MouseButton1Click:Connect(function()
+        setclipboard(KEY_LINK)
+        statusMessage.Text = "Link copied to clipboard!"
+        statusMessage.TextColor3 = THEME.Success
+        wait(3)
+        statusMessage.Text = ""
+    end)
+
+    closeButton.MouseButton1Click:Connect(function()
+        keyScreen:Destroy()
+    end)
+
+    activateButton.MouseButton1Click:Connect(function()
+        local enteredKey = keyInput.Text
+        
+        if enteredKey == "" then
+            statusMessage.Text = "Please enter a key!"
+            statusMessage.TextColor3 = THEME.Danger
+            return
+        end
+
+        statusMessage.Text = "Checking key..."
+        statusMessage.TextColor3 = THEME.TextSecondary
+        
+        wait(1)
+        
+        if enteredKey == VALID_KEY then
+            statusMessage.Text = "Success!"
+            statusMessage.TextColor3 = THEME.Success
+            
+            local fadeOutTweens = {}
+            
+            table.insert(fadeOutTweens, TweenService:Create(keyBlurFrame, THEME.MediumTween, {BackgroundTransparency = 1}))
+            table.insert(fadeOutTweens, TweenService:Create(keyWindow, THEME.MediumTween, {BackgroundTransparency = 1}))
+            
+            for _, child in pairs(keyWindow:GetChildren()) do
+                if child:IsA("GuiObject") then
+                    local fadeProps = {BackgroundTransparency = 1}
+                    if child:IsA("TextLabel") or child:IsA("TextButton") or child:IsA("TextBox") then
+                        fadeProps.TextTransparency = 1
+                    end
+                    table.insert(fadeOutTweens, TweenService:Create(child, THEME.MediumTween, fadeProps))
+                end
+            end
+            
+            for _, tween in pairs(fadeOutTweens) do
+                tween:Play()
+            end
+            
+            wait(THEME.MediumTween.Time + 0.1)
+            keyScreen:Destroy()
+            
+            Window._locked = false
+            task.delay(0.1, function()
+                Window:Show()
+            end)
+        else
+            statusMessage.Text = "Invalid key!"
+            statusMessage.TextColor3 = THEME.Danger
+        end
+    end)
+
+    keyInput.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            activateButton.MouseButton1Click:Fire()
+        end
+    end)
+
+    return keyScreen
+end
+
+local Lynk = {}
+Lynk.__index = Lynk
+
+function Lynk:CreateWindow(opts)
+    opts = opts or {}
+    local Window = {}
+    Window._tabs = {}
+    Window._currentTab = nil
+    Window._accent = opts.Accent or THEME.Primary
+    Window._logo = opts.Logo or "rbxassetid://17673929618"
+    Window._title = opts.Title or (opts.Name or "lynkUI v2.0")
+    Window._subtitle = opts.Subtitle or "Universal Script Hub"
+    Window._shown = false
+    Window._minimized = false
+
+    Window._locked = KEY_SYSTEM_ENABLED == true
+
+    -- Create mobile toggle button
+    local mobileToggle = createMobileToggle(Window)
+
+    local screen = new("ScreenGui", {
+        Name = opts.Name or "lynkUI",
+        ResetOnSpawn = false,
+        DisplayOrder = 999999998,
+        IgnoreGuiInset = true,
+        ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    })
+    screen.Parent = game:GetService("CoreGui")
+
+    local BlurFrame = new("Frame", {
+        Name = "BlurContainer",
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundColor3 = Color3.new(0, 0, 0),
+        BackgroundTransparency = 0.3,
+        BorderSizePixel = 0,
+        Visible = false,
+        ZIndex = 999998
+    })
+    BlurFrame.Parent = screen
+
+    -- Mobile-optimized main window
+    local Outline = new("Frame", {
+        Name = "Outline",
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0, 0, 0, 0),
+        BackgroundColor3 = THEME.Border,
+        BorderSizePixel = 0,
+        ZIndex = 999999
+    })
+    Outline.Parent = BlurFrame
+    
+    local outlineCorner = new("UICorner")
+    outlineCorner.CornerRadius = THEME.CornerRadius
+    outlineCorner.Parent = Outline
+
+    createGlow(Outline, Window._accent)
+
+    local MainFrame = new("Frame", {
+        Name = "MainFrame",
+        Position = UDim2.new(0, 2, 0, 2),
+        Size = UDim2.new(1, -4, 1, -4),
+        BackgroundColor3 = THEME.Background,
+        BorderSizePixel = 0,
+        ZIndex = 1000000
+    })
+    MainFrame.Parent = Outline
+    
+    local mainCorner = new("UICorner")
+    mainCorner.CornerRadius = THEME.CornerRadius
+    mainCorner.Parent = MainFrame
+
+    -- Mobile-optimized sidebar (narrower)
+    local Sidebar = new("Frame", {
+        Name = "Sidebar",
+        Size = UDim2.new(0, 200, 1, 0), -- Narrower for mobile
+        BackgroundColor3 = THEME.Surface,
+        BorderSizePixel = 0,
+        ZIndex = 1000001
+    })
+    Sidebar.Parent = MainFrame
+    
+    local sidebarCorner = new("UICorner")
+    sidebarCorner.CornerRadius = THEME.CornerRadius
+    sidebarCorner.Parent = Sidebar
+
+    createGradient(Sidebar, {
+        ColorSequenceKeypoint.new(0, THEME.Surface),
+        ColorSequenceKeypoint.new(1, THEME.Panel)
+    }, 90)
+
+    -- Mobile-optimized profile section
+    local ProfileContainer = new("Frame", {
+        Name = "ProfileContainer",
+        Position = UDim2.new(0, 15, 0, 15),
+        Size = UDim2.new(1, -30, 0, 60), -- Smaller for mobile
+        BackgroundColor3 = THEME.Card,
+        BorderSizePixel = 0,
+        ZIndex = 1000002
+    })
+    ProfileContainer.Parent = Sidebar
+    
+    local profileCorner = new("UICorner")
+    profileCorner.CornerRadius = THEME.SmallCornerRadius
+    profileCorner.Parent = ProfileContainer
+
+    -- Smaller avatar for mobile
+    local AvatarContainer = new("Frame", {
+        Name = "AvatarContainer",
+        Position = UDim2.new(0, 8, 0, 8),
+        Size = UDim2.new(0, 44, 0, 44),
+        BackgroundColor3 = THEME.Primary,
+        BorderSizePixel = 0,
+        ZIndex = 1000003
+    })
+    AvatarContainer.Parent = ProfileContainer
+    
+    local avatarCorner = new("UICorner")
+    avatarCorner.CornerRadius = UDim.new(0.5, 0)
+    avatarCorner.Parent = AvatarContainer
+
+    local PlayerAvatar = new("ImageLabel", {
+        Name = "PlayerAvatar",
+        Position = UDim2.new(0, 2, 0, 2),
+        Size = UDim2.new(1, -4, 1, -4),
+        Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420),
+        BackgroundTransparency = 1,
+        ScaleType = Enum.ScaleType.Crop,
+        ZIndex = 1000004
+    })
+    PlayerAvatar.Parent = AvatarContainer
+    
+    local playerAvatarCorner = new("UICorner")
+    playerAvatarCorner.CornerRadius = UDim.new(0.5, 0)
+    playerAvatarCorner.Parent = PlayerAvatar
+
+    -- Mobile-optimized player name
+    local PlayerName = new("TextLabel", {
+        Name = "PlayerName",
+        Position = UDim2.new(0, 60, 0, 10),
+        Size = UDim2.new(1, -70, 0, 20),
+        BackgroundTransparency = 1,
+        Text = "@" .. LocalPlayer.Name,
+        Font = Enum.Font.GothamBold,
+        TextSize = 13, -- Smaller for mobile
+        TextColor3 = THEME.Text,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        ZIndex = 1000003
+    })
+    PlayerName.Parent = ProfileContainer
+
+    -- Status indicator
+    local StatusIndicator = new("Frame", {
+        Name = "StatusIndicator",
+        Position = UDim2.new(0, 60, 0, 32),
+        Size = UDim2.new(0, 6, 0, 6),
+        BackgroundColor3 = THEME.Success,
+        BorderSizePixel = 0,
+        ZIndex = 1000003
+    })
+    StatusIndicator.Parent = ProfileContainer
+    
+    local statusCorner = new("UICorner")
+    statusCorner.CornerRadius = UDim.new(0.5, 0)
+    statusCorner.Parent = StatusIndicator
+
+    local StatusText = new("TextLabel", {
+        Name = "StatusText",
+        Position = UDim2.new(0, 72, 0, 28),
+        Size = UDim2.new(1, -82, 0, 14),
+        BackgroundTransparency = 1,
+        Text = "Online",
+        Font = Enum.Font.Gotham,
+        TextSize = 10,
+        TextColor3 = THEME.TextSecondary,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 1000003
+    })
+    StatusText.Parent = ProfileContainer
+
+    -- Mobile-optimized tabs container
+    local TabsContainer = new("Frame", {
+        Name = "TabsContainer",
+        Position = UDim2.new(0, 15, 0, 90),
+        Size = UDim2.new(1, -30, 1, -105),
+        BackgroundTransparency = 1,
+        ZIndex = 1000002
+    })
+    TabsContainer.Parent = Sidebar
+
+    local tabsLayout = new("UIListLayout")
+    tabsLayout.Parent = TabsContainer
+    tabsLayout.Padding = UDim.new(0, 6)
+    tabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    -- Mobile-optimized content area
+    local ContentArea = new("Frame", {
+        Name = "ContentArea",
+        Position = UDim2.new(0, 200, 0, 0),
+        Size = UDim2.new(1, -200, 1, 0),
+        BackgroundTransparency = 1,
+        ZIndex = 1000001
+    })
+    ContentArea.Parent = MainFrame
+
+    -- Mobile-optimized top bar
+    local TopBar = new("Frame", {
+        Name = "TopBar",
+        Size = UDim2.new(1, 0, 0, 60), -- Smaller for mobile
+        BackgroundTransparency = 1,
+        ZIndex = 1000002
+    })
+    TopBar.Parent = ContentArea
+
+    -- Title section
+    local TitleContainer = new("Frame", {
+        Name = "TitleContainer",
+        Position = UDim2.new(0, 20, 0, 15),
+        Size = UDim2.new(0.6, 0, 0, 30),
+        BackgroundTransparency = 1,
+        ZIndex = 1000003
+    })
+    TitleContainer.Parent = TopBar
+
+    local MainTitle = new("TextLabel", {
+        Name = "MainTitle",
+        Size = UDim2.new(1, 0, 0, 18),
+        BackgroundTransparency = 1,
+        Text = Window._title,
+        Font = Enum.Font.GothamBold,
+        TextSize = 18, -- Smaller for mobile
+        TextColor3 = THEME.Text,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 1000004
+    })
+    MainTitle.Parent = TitleContainer
+
+    local Subtitle = new("TextLabel", {
+        Name = "Subtitle",
+        Position = UDim2.new(0, 0, 0, 18),
+        Size = UDim2.new(1, 0, 0, 12),
+        BackgroundTransparency = 1,
+        Text = Window._subtitle,
+        Font = Enum.Font.Gotham,
+        TextSize = 11,
+        TextColor3 = THEME.TextMuted,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 1000004
+    })
+    Subtitle.Parent = TitleContainer
+
+    -- Mobile-optimized buttons
+    local MinimizeButton = new("TextButton", {
+        Name = "MinimizeButton",
+        Position = UDim2.new(1, -80, 0, 15),
+        Size = UDim2.new(0, 30, 0, 30),
+        BackgroundColor3 = THEME.Panel,
+        Text = EMOJIS.MINIMIZE,
+        Font = Enum.Font.GothamBold,
+        TextSize = 16,
+        TextColor3 = THEME.Text,
+        AutoButtonColor = false,
+        ZIndex = 1000003
+    })
+    MinimizeButton.Parent = TopBar
+    
+    local minimizeCorner = new("UICorner")
+    minimizeCorner.CornerRadius = THEME.SmallCornerRadius
+    minimizeCorner.Parent = MinimizeButton
+
+    local CloseButton = new("TextButton", {
+        Name = "CloseButton",
+        Position = UDim2.new(1, -45, 0, 15),
+        Size = UDim2.new(0, 30, 0, 30),
+        BackgroundColor3 = THEME.Surface,
+        Text = EMOJIS.CLOSE,
+        Font = Enum.Font.GothamBold,
+        TextSize = 16,
+        TextColor3 = THEME.Text,
+        AutoButtonColor = false,
+        ZIndex = 1000003
+    })
+    CloseButton.Parent = TopBar
+    
+    local closeCorner = new("UICorner")
+    closeCorner.CornerRadius = THEME.SmallCornerRadius
+    closeCorner.Parent = CloseButton
+
+    -- Button hover effects
+    local function animateButton(button, hoverColor, normalColor)
+        button.MouseEnter:Connect(function()
+            TweenService:Create(button, THEME.FastTween, {BackgroundColor3 = hoverColor}):Play()
+        end)
+        button.MouseLeave:Connect(function()
+            TweenService:Create(button, THEME.FastTween, {BackgroundColor3 = normalColor}):Play()
+        end)
+    end
+    
+    animateButton(MinimizeButton, THEME.Card, THEME.Panel)
+    animateButton(CloseButton, THEME.Danger, THEME.Surface)
+
+    -- Mobile-optimized minimized taskbar
+    local MinimizedTaskbar = new("Frame", {
+        Name = "MinimizedTaskbar",
+        AnchorPoint = Vector2.new(0.5, 1),
+        Position = UDim2.new(0.5, 0, 1, -15),
+        Size = UDim2.new(0, 160, 0, 35), -- Smaller for mobile
+        BackgroundColor3 = THEME.Background,
+        BorderSizePixel = 0,
+        Visible = false,
+        ZIndex = 999999
+    })
+    MinimizedTaskbar.Parent = screen
+    
+    local taskbarCorner = new("UICorner")
+    taskbarCorner.CornerRadius = THEME.SmallCornerRadius
+    taskbarCorner.Parent = MinimizedTaskbar
+    
+    local taskbarOutline = new("UIStroke", {
+        Color = THEME.Border,
+        Thickness = 1
+    })
+    taskbarOutline.Parent = MinimizedTaskbar
+
+    local TaskbarTitle = new("TextLabel", {
+        Name = "TaskbarTitle",
+        Position = UDim2.new(0, 10, 0, 0),
+        Size = UDim2.new(1, -60, 1, 0),
+        BackgroundTransparency = 1,
+        Text = "Lynk Universal",
+        Font = Enum.Font.GothamBold,
+        TextSize = 11,
+        TextColor3 = THEME.Text,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Center,
+        ZIndex = 1000000
+    })
+    TaskbarTitle.Parent = MinimizedTaskbar
+
+    local ExpandButton = new("TextButton", {
+        Name = "ExpandButton",
+        Position = UDim2.new(1, -50, 0.5, -10),
+        Size = UDim2.new(0, 20, 0, 20),
+        BackgroundColor3 = THEME.Primary,
+        Text = EMOJIS.MAXIMIZE,
+        Font = Enum.Font.GothamBold,
+        TextSize = 10,
+        TextColor3 = THEME.Text,
+        AutoButtonColor = false,
+        ZIndex = 1000001
+    })
+    ExpandButton.Parent = MinimizedTaskbar
+    
+    local expandCorner = new("UICorner")
+    expandCorner.CornerRadius = UDim.new(0, 4)
+    expandCorner.Parent = ExpandButton
+
+    local TaskbarCloseButton = new("TextButton", {
+        Name = "TaskbarCloseButton",
+        Position = UDim2.new(1, -25, 0.5, -10),
+        Size = UDim2.new(0, 20, 0, 20),
+        BackgroundColor3 = THEME.Danger,
+        Text = EMOJIS.CLOSE,
+        Font = Enum.Font.GothamBold,
+        TextSize = 10,
+        TextColor3 = THEME.Text,
+        AutoButtonColor = false,
+        ZIndex = 1000001
+    })
+    TaskbarCloseButton.Parent = MinimizedTaskbar
+    
+    local taskbarCloseCorner = new("UICorner")
+    taskbarCloseCorner.CornerRadius = UDim.new(0, 4)
+    taskbarCloseCorner.Parent = TaskbarCloseButton
+
+    -- Touch-friendly taskbar dragging
+    local taskbarDragging = false
+    local taskbarDragStart = nil
+    local taskbarStartPos = nil
+
+    TaskbarTitle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            taskbarDragging = true
+            taskbarDragStart = input.Position
+            taskbarStartPos = MinimizedTaskbar.Position
+        end
+    end)
+
+    TaskbarTitle.InputChanged:Connect(function(input)
+        if taskbarDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - taskbarDragStart
+            MinimizedTaskbar.Position = UDim2.new(taskbarStartPos.X.Scale, taskbarStartPos.X.Offset + delta.X, taskbarStartPos.Y.Scale, taskbarStartPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    TaskbarTitle.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            taskbarDragging = false
+        end
+    end)
+
+    -- Mobile-optimized confirmation popup
+    local ConfirmationPopup = new("Frame", {
+        Name = "ConfirmationPopup",
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0, 0, 0, 0),
+        BackgroundColor3 = THEME.Background,
+        BorderSizePixel = 0,
+        Visible = false,
+        ZIndex = 1000100
+    })
+    ConfirmationPopup.Parent = BlurFrame
+    
+    local popupCorner = new("UICorner")
+    popupCorner.CornerRadius = THEME.CornerRadius
+    popupCorner.Parent = ConfirmationPopup
+
+    local PopupOutline = new("UIStroke", {
+        Color = THEME.Border,
+        Thickness = 2
+    })
+    PopupOutline.Parent = ConfirmationPopup
+
+    local PopupTitle = new("TextLabel", {
+        Name = "PopupTitle",
+        Position = UDim2.new(0, 15, 0, 15),
+        Size = UDim2.new(1, -30, 0, 25),
+        BackgroundTransparency = 1,
+        Text = "Confirm Close",
+        Font = Enum.Font.GothamBold,
+        TextSize = 16,
+        TextColor3 = THEME.Text,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 1000101
+    })
+    PopupTitle.Parent = ConfirmationPopup
+
+    local PopupMessage = new("TextLabel", {
+        Name = "PopupMessage",
+        Position = UDim2.new(0, 15, 0, 45),
+        Size = UDim2.new(1, -30, 0, 50),
+        BackgroundTransparency = 1,
+        Text = "Are you sure you want to close?\nUse the mobile toggle button to show/hide the UI.",
+        Font = Enum.Font.Gotham,
+        TextSize = 12,
+        TextColor3 = THEME.TextSecondary,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextWrapped = true,
+        ZIndex = 1000101
+    })
+    PopupMessage.Parent = ConfirmationPopup
+
+    local YesButton = new("TextButton", {
+        Name = "YesButton",
+        Position = UDim2.new(0, 15, 1, -50),
+        Size = UDim2.new(0, 80, 0, 35),
+        BackgroundColor3 = Color3.fromRGB(46, 160, 67),
+        Text = "Yes",
+        Font = Enum.Font.GothamSemibold,
+        TextSize = 14,
+        TextColor3 = Color3.new(1, 1, 1),
+        AutoButtonColor = false,
+        ZIndex = 1000101
+    })
+    YesButton.Parent = ConfirmationPopup
+    
+    local yesCorner = new("UICorner")
+    yesCorner.CornerRadius = THEME.SmallCornerRadius
+    yesCorner.Parent = YesButton
+
+    local NoButton = new("TextButton", {
+        Name = "NoButton",
+        Position = UDim2.new(1, -95, 1, -50),
+        Size = UDim2.new(0, 80, 0, 35),
+        BackgroundColor3 = Color3.fromRGB(220, 50, 50),
+        Text = "No",
+        Font = Enum.Font.GothamSemibold,
+        TextSize = 14,
+        TextColor3 = Color3.new(1, 1, 1),
+        AutoButtonColor = false,
+        ZIndex = 1000101
+    })
+    NoButton.Parent = ConfirmationPopup
+    
+    local noCorner = new("UICorner")
+    noCorner.CornerRadius = THEME.SmallCornerRadius
+    noCorner.Parent = NoButton
+
+    animateButton(YesButton, Color3.fromRGB(56, 180, 77), Color3.fromRGB(46, 160, 67))
+    animateButton(NoButton, Color3.fromRGB(240, 70, 70), Color3.fromRGB(220, 50, 50))
+
+    -- Mobile-optimized pages container
+    local PagesContainer = new("Frame", {
+        Name = "PagesContainer",
+        Position = UDim2.new(0, 20, 0, 60),
+        Size = UDim2.new(1, -40, 1, -75),
+        BackgroundTransparency = 1,
+        ClipsDescendants = true,
+        ZIndex = 1000002
+    })
+    PagesContainer.Parent = ContentArea
+
+    -- Store references
+    Window._screen = screen
+    Window._blurFrame = BlurFrame
+    Window._outline = Outline
+    Window._mainFrame = MainFrame
+    Window._sidebar = Sidebar
+    Window._tabsContainer = TabsContainer
+    Window._pagesContainer = PagesContainer
+    Window._titleLabel = MainTitle
+    Window._subtitleLabel = Subtitle
+    Window._minimizedTaskbar = MinimizedTaskbar
+    Window._mobileToggle = mobileToggle
+
+    -- Touch-friendly dragging
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+
+    local function updateDrag(input)
+        if dragging then
+            local delta = input.Position - dragStart
+            local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, 
+                                   startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            TweenService:Create(Outline, THEME.FastTween, {Position = newPos}):Play()
+        end
+    end
+
+    TopBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = Outline.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    TopBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            updateDrag(input)
+        end
+    end)
+
+    -- Window visibility functions
+    local isVisible = false
+    
+    local function setVisibility(visible)
+        isVisible = visible
+        BlurFrame.Visible = visible
+        
+        if visible then
+            Outline.Size = UDim2.new(0, 0, 0, 0)
+            TweenService:Create(Outline, THEME.SlowTween, {
+                Size = THEME.WindowSize
+            }):Play()
+        else
+            TweenService:Create(Outline, THEME.MediumTween, {
+                Size = UDim2.new(0, 0, 0, 0)
+            }):Play()
+            
+            task.wait(0.25)
+            if not isVisible then
+                BlurFrame.Visible = false
+            end
+        end
+    end
+
+    function Window:Show()
+        if Window._locked then return end
+        if isVisible then return end
+        Window._shown = true
+        Window._minimized = false
+        MinimizedTaskbar.Visible = false
+        setVisibility(true)
+        createNotification("UI Shown", "User interface is now visible", 3, "info")
+        if not Window._cardsLoaded then
+            Window:LoadScriptCards()
+            Window._cardsLoaded = true
+        end
+    end
+
+    function Window:Hide()
+        if not isVisible then return end
+        Window._shown = false
+        Window._minimized = false
+        MinimizedTaskbar.Visible = false
+        setVisibility(false)
+        createNotification("UI Hidden", "User interface is now hidden", 3, "info")
+    end
+
+    function Window:Minimize()
+        if not isVisible then return end
+        Window._shown = false
+        Window._minimized = true
+        setVisibility(false)
+        MinimizedTaskbar.Visible = true
+        createNotification("UI Minimized", "User interface minimized to taskbar", 3, "info")
+    end
+
+    function Window:Maximize()
+        if not Window._minimized then return end
+        Window._shown = true
+        Window._minimized = false
+        MinimizedTaskbar.Visible = false
+        setVisibility(true)
+        createNotification("UI Maximized", "User interface restored from taskbar", 3, "info")
+    end
+
+    -- Button click handlers
+    MinimizeButton.MouseButton1Click:Connect(function()
+        Window:Minimize()
+    end)
+
+    ExpandButton.MouseButton1Click:Connect(function()
+        Window:Maximize()
+    end)
+
+    TaskbarCloseButton.MouseButton1Click:Connect(function()
+        Window:Destroy()
+    end)
+
+    CloseButton.MouseButton1Click:Connect(function()
+        ConfirmationPopup.Visible = true
+        ConfirmationPopup.Size = UDim2.new(0, 0, 0, 0)
+        TweenService:Create(ConfirmationPopup, THEME.MediumTween, {
+            Size = UDim2.new(0, 300, 0, 150) -- Smaller for mobile
+        }):Play()
+    end)
+
+    YesButton.MouseButton1Click:Connect(function()
+        Window:Destroy()
+    end)
+
+    NoButton.MouseButton1Click:Connect(function()
+        local fadeOutTweens = {}
+        
+        for _, child in pairs(ConfirmationPopup:GetChildren()) do
+            if child:IsA("GuiObject") then
+                local fadeProps = {BackgroundTransparency = 1}
+                if child:IsA("TextLabel") or child:IsA("TextButton") then
+                    fadeProps.TextTransparency = 1
+                end
+                table.insert(fadeOutTweens, TweenService:Create(child, THEME.FastTween, fadeProps))
+            end
+        end
+        
+        table.insert(fadeOutTweens, TweenService:Create(ConfirmationPopup, THEME.FastTween, {BackgroundTransparency = 1}))
+        
+        for _, tween in pairs(fadeOutTweens) do
+            tween:Play()
+        end
+        
+        wait(0.2)
+        ConfirmationPopup.Visible = false
+        
+        for _, child in pairs(ConfirmationPopup:GetChildren()) do
+            if child:IsA("GuiObject") then
+                child.BackgroundTransparency = 0
+                if child:IsA("TextLabel") or child:IsA("TextButton") then
+                    child.TextTransparency = 0
+                end
+            end
+        end
+        ConfirmationPopup.BackgroundTransparency = 0
+    end)
+
+    -- Mobile-optimized tab creation
+    function Window:CreateTab(name, icon, layoutOrder)
+        local tab = {
+            Name = name,
+            Icon = icon or "",
+            LayoutOrder = layoutOrder or (#Window._tabs + 1),
+            Active = false
+        }
+
+        local TabButton = new("TextButton", {
+            Name = name .. "_TabButton",
+            Size = UDim2.new(1, 0, 0, 40), -- Smaller for mobile
+            BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            Text = "",
+            AutoButtonColor = false,
+            LayoutOrder = tab.LayoutOrder,
+            ZIndex = 1000003
+        })
+        TabButton.Parent = TabsContainer
+        
+        local tabCorner = new("UICorner")
+        tabCorner.CornerRadius = THEME.SmallCornerRadius
+        tabCorner.Parent = TabButton
+
+        local TabIcon = new("ImageLabel", {
+            Name = "TabIcon",
+            Position = UDim2.new(0, 12, 0.5, -8),
+            Size = UDim2.new(0, 16, 0, 16), -- Smaller for mobile
+            BackgroundTransparency = 1,
+            Image = tab.Icon,
+            ImageColor3 = THEME.TextMuted,
+            ScaleType = Enum.ScaleType.Fit,
+            ZIndex = 1000004
+        })
+        TabIcon.Parent = TabButton
+
+        local TabText = new("TextLabel", {
+            Name = "TabText",
+            Position = UDim2.new(0, 36, 0, 0),
+            Size = UDim2.new(1, -48, 1, 0),
+            BackgroundTransparency = 1,
+            Text = name,
+            Font = Enum.Font.GothamSemibold,
+            TextSize = 12, -- Smaller for mobile
+            TextColor3 = THEME.TextMuted,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            ZIndex = 1000004
+        })
+        TabText.Parent = TabButton
+
+        local ActiveIndicator = new("Frame", {
+            Name = "ActiveIndicator",
+            Position = UDim2.new(0, 0, 0.5, -10),
+            Size = UDim2.new(0, 3, 0, 20),
+            BackgroundColor3 = Window._accent,
+            BorderSizePixel = 0,
+            Visible = false,
+            ZIndex = 1000004
+        })
+        ActiveIndicator.Parent = TabButton
+        
+        local indicatorCorner = new("UICorner")
+        indicatorCorner.CornerRadius = UDim.new(0, 2)
+        indicatorCorner.Parent = ActiveIndicator
+
+        -- Mobile-optimized tab page
+        local TabPage = new("ScrollingFrame", {
+            Name = name .. "_Page",
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ScrollBarThickness = 4, -- Thinner for mobile
+            ScrollBarImageColor3 = THEME.Primary,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y,
+            Visible = false,
+            ZIndex = 1000003
+        })
+        TabPage.Parent = PagesContainer
+
+        local pageLayout = new("UIListLayout")
+        pageLayout.Parent = TabPage
+        pageLayout.Padding = UDim.new(0, 6) -- Smaller padding for mobile
+        pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+        local pagePadding = new("UIPadding")
+        pagePadding.Parent = TabPage
+        pagePadding.PaddingAll = UDim.new(0, 10) -- Smaller padding for mobile
+
+        -- Tab functions (same as PC version but mobile-optimized)
+        function tab:Show()
+            for _, otherTab in pairs(Window._tabs) do
+                if otherTab ~= tab then
+                    otherTab:Hide()
+                end
+            end
+            
+            tab.Active = true
+            Window._currentTab = tab
+            
+            TabPage.Position = UDim2.new(1, 0, 0, 0)
+            TabPage.Visible = true
+            
+            TweenService:Create(TabPage, THEME.MediumTween, {
+                Position = UDim2.new(0, 0, 0, 0)
+            }):Play()
+            
+            TweenService:Create(TabButton, THEME.FastTween, {
+                BackgroundTransparency = 0,
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255):lerp(Window._accent, 0.9)
+            }):Play()
+            TweenService:Create(TabText, THEME.FastTween, {TextColor3 = THEME.Text}):Play()
+            TweenService:Create(TabIcon, THEME.FastTween, {ImageColor3 = Window._accent}):Play()
+            ActiveIndicator.Visible = true
+        end
+        
+        function tab:Hide()
+            tab.Active = false
+            
+            if TabPage.Visible then
+                TweenService:Create(TabPage, THEME.FastTween, {
+                    Position = UDim2.new(-1, 0, 0, 0)
+                }):Play()
+                
+                task.wait(0.15)
+                TabPage.Visible = false
+                TabPage.Position = UDim2.new(0, 0, 0, 0)
+            end
+            
+            TweenService:Create(TabButton, THEME.FastTween, {
+                BackgroundTransparency = 1
+            }):Play()
+            TweenService:Create(TabText, THEME.FastTween, {TextColor3 = THEME.TextMuted}):Play()
+            TweenService:Create(TabIcon, THEME.FastTween, {ImageColor3 = THEME.TextMuted}):Play()
+            ActiveIndicator.Visible = false
+        end
+
+        -- Mobile-optimized UI Library Functions
+        function tab:CreateSection(title)
+            local section = new("TextLabel", {
+                Name = "Section_" .. title,
+                Size = UDim2.new(1, 0, 0, 25), -- Smaller for mobile
+                BackgroundTransparency = 1,
+                Text = title,
+                Font = Enum.Font.GothamBold,
+                TextSize = 14, -- Smaller for mobile
+                TextColor3 = Window._accent,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                LayoutOrder = #TabPage:GetChildren(),
+                ZIndex = 1000004
+            })
+            section.Parent = TabPage
+            return section
+        end
+
+        function tab:CreateLabel(text, textSize)
+            local label = new("TextLabel", {
+                Name = "Label_" .. tostring(#TabPage:GetChildren()),
+                Size = UDim2.new(1, 0, 0, textSize and (textSize + 8) or 20), -- Smaller for mobile
+                BackgroundTransparency = 1,
+                Text = text or "Label",
+                Font = Enum.Font.Gotham,
+                TextSize = textSize or 12, -- Smaller for mobile
+                TextColor3 = THEME.Text,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextYAlignment = Enum.TextYAlignment.Center,
+                TextWrapped = true,
+                LayoutOrder = #TabPage:GetChildren(),
+                ZIndex = 1000004
+            })
+            label.Parent = TabPage
+            return label
+        end
+
+        function tab:CreateButton(text, callback)
+            local button = new("TextButton", {
+                Name = "Button_" .. tostring(#TabPage:GetChildren()),
+                Size = UDim2.new(1, 0, 0, 35), -- Smaller for mobile
+                BackgroundColor3 = Window._accent,
+                BorderSizePixel = 0,
+                Text = text or "Button",
+                Font = Enum.Font.GothamSemibold,
+                TextSize = 12, -- Smaller for mobile
+                TextColor3 = THEME.Text,
+                AutoButtonColor = false,
+                LayoutOrder = #TabPage:GetChildren(),
+                ZIndex = 1000004
+            })
+            button.Parent = TabPage
+            
+            local corner = new("UICorner")
+            corner.CornerRadius = THEME.SmallCornerRadius
+            corner.Parent = button
+
+            button.MouseEnter:Connect(function()
+                TweenService:Create(button, THEME.FastTween, {
+                    BackgroundColor3 = button.BackgroundColor3:lerp(Color3.new(1,1,1), 0.1)
+                }):Play()
+            end)
+            
+            button.MouseLeave:Connect(function()
+                TweenService:Create(button, THEME.FastTween, {
+                    BackgroundColor3 = Window._accent
+                }):Play()
+            end)
+
+            if callback then
+                button.MouseButton1Click:Connect(callback)
+            end
+
+            return button
+        end
+
+        function tab:CreateToggle(text, default, callback)
+            local toggleFrame = new("Frame", {
+                Name = "Toggle_" .. tostring(#TabPage:GetChildren()),
+                Size = UDim2.new(1, 0, 0, 35), -- Smaller for mobile
+                BackgroundColor3 = THEME.Card,
+                BorderSizePixel = 0,
+                LayoutOrder = #TabPage:GetChildren(),
+                ZIndex = 1000004
+            })
+            toggleFrame.Parent = TabPage
+            
+            local toggleCorner = new("UICorner")
+            toggleCorner.CornerRadius = THEME.SmallCornerRadius
+            toggleCorner.Parent = toggleFrame
+
+            local toggleLabel = new("TextLabel", {
+                Position = UDim2.new(0, 12, 0, 0),
+                Size = UDim2.new(1, -60, 1, 0),
+                BackgroundTransparency = 1,
+                Text = text or "Toggle",
+                Font = Enum.Font.GothamSemibold,
+                TextSize = 12, -- Smaller for mobile
+                TextColor3 = THEME.Text,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextYAlignment = Enum.TextYAlignment.Center,
+                ZIndex = 1000005
+            })
+            toggleLabel.Parent = toggleFrame
+
+            local toggleButton = new("TextButton", {
+                Position = UDim2.new(1, -45, 0.5, -8),
+                Size = UDim2.new(0, 32, 0, 16), -- Smaller for mobile
+                BackgroundColor3 = default and THEME.Success or THEME.Surface,
+                BorderSizePixel = 0,
+                Text = "",
+                AutoButtonColor = false,
+                ZIndex = 1000005
+            })
+            toggleButton.Parent = toggleFrame
+            
+            local toggleButtonCorner = new("UICorner")
+            toggleButtonCorner.CornerRadius = UDim.new(0, 8)
+            toggleButtonCorner.Parent = toggleButton
+
+            local toggleIndicator = new("Frame", {
+                Position = default and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6),
+                Size = UDim2.new(0, 12, 0, 12), -- Smaller for mobile
+                BackgroundColor3 = THEME.Text,
+                BorderSizePixel = 0,
+                ZIndex = 1000006
+            })
+            toggleIndicator.Parent = toggleButton
+            
+            local indicatorCorner = new("UICorner")
+            indicatorCorner.CornerRadius = UDim.new(0, 6)
+            indicatorCorner.Parent = toggleIndicator
+
+            local isToggled = default or false
+
+            local function updateToggle()
+                TweenService:Create(toggleButton, THEME.FastTween, {
+                    BackgroundColor3 = isToggled and THEME.Success or THEME.Surface
+                }):Play()
+                TweenService:Create(toggleIndicator, THEME.FastTween, {
+                    Position = isToggled and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
+                }):Play()
+            end
+
+            toggleButton.MouseButton1Click:Connect(function()
+                isToggled = not isToggled
+                updateToggle()
+                if callback then
+                    callback(isToggled)
+                end
+            end)
+
+            local function getToggleState()
+                return isToggled
+            end
+
+            return toggleFrame, getToggleState
+        end
+
+        function tab:CreateTextBox(placeholder, callback)
+            local textboxFrame = new("Frame", {
+                Name = "TextBox_" .. tostring(#TabPage:GetChildren()),
+                Size = UDim2.new(1, 0, 0, 35), -- Smaller for mobile
+                BackgroundColor3 = THEME.Card,
+                BorderSizePixel = 0,
+                LayoutOrder = #TabPage:GetChildren(),
+                ZIndex = 1000004
+            })
+            textboxFrame.Parent = TabPage
+            
+            local textboxCorner = new("UICorner")
+            textboxCorner.CornerRadius = THEME.SmallCornerRadius
+            textboxCorner.Parent = textboxFrame
+
+            local textbox = new("TextBox", {
+                Position = UDim2.new(0, 12, 0, 0),
+                Size = UDim2.new(1, -24, 1, 0),
+                BackgroundTransparency = 1,
+                PlaceholderText = placeholder or "Enter text...",
+                PlaceholderColor3 = THEME.TextMuted,
+                Text = "",
+                Font = Enum.Font.Gotham,
+                TextSize = 12, -- Smaller for mobile
+                TextColor3 = THEME.Text,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                ClearTextOnFocus = false,
+                ZIndex = 1000005
+            })
+            textbox.Parent = textboxFrame
+
+            if callback then
+                textbox.FocusLost:Connect(function(enterPressed)
+                    callback(textbox.Text, enterPressed)
+                end)
+            end
+
+            return textbox
+        end
+
+        function tab:CreateKeybind(text, defaultKey, callback)
+            local keybindFrame = new("Frame", {
+                Name = "Keybind_" .. tostring(#TabPage:GetChildren()),
+                Size = UDim2.new(1, 0, 0, 35), -- Smaller for mobile
+                BackgroundColor3 = THEME.Card,
+                BorderSizePixel = 0,
+                LayoutOrder = #TabPage:GetChildren(),
+                ZIndex = 1000004
+            })
+            keybindFrame.Parent = TabPage
+            
+            local keybindCorner = new("UICorner")
+            keybindCorner.CornerRadius = THEME.SmallCornerRadius
+            keybindCorner.Parent = keybindFrame
+
+            local keybindLabel = new("TextLabel", {
+                Position = UDim2.new(0, 12, 0, 0),
+                Size = UDim2.new(1, -90, 1, 0),
+                BackgroundTransparency = 1,
+                Text = text or "Keybind",
+                Font = Enum.Font.GothamSemibold,
+                TextSize = 12, -- Smaller for mobile
+                TextColor3 = THEME.Text,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextYAlignment = Enum.TextYAlignment.Center,
+                ZIndex = 1000005
+            })
+            keybindLabel.Parent = keybindFrame
+
+            local keybindButton = new("TextButton", {
+                Position = UDim2.new(1, -75, 0.5, -12),
+                Size = UDim2.new(0, 65, 0, 24), -- Smaller for mobile
+                BackgroundColor3 = THEME.Surface,
+                BorderSizePixel = 0,
+                Text = tostring(defaultKey):gsub("Enum.KeyCode.", ""),
+                Font = Enum.Font.Gotham,
+                TextSize = 10, -- Smaller for mobile
+                TextColor3 = THEME.Text,
+                AutoButtonColor = false,
+                ZIndex = 1000005
+            })
+            keybindButton.Parent = keybindFrame
+            
+            local keybindButtonCorner = new("UICorner")
+            keybindButtonCorner.CornerRadius = UDim.new(0, 4)
+            keybindButtonCorner.Parent = keybindButton
+
+            local currentKey = defaultKey
+            local isBinding = false
+
+            keybindButton.MouseButton1Click:Connect(function()
+                if not isBinding then
+                    isBinding = true
+                    keybindButton.Text = "..."
+                    keybindButton.TextColor3 = Window._accent
+                    
+                    local connection
+                    connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                        if gameProcessed then return end
+                        if input.UserInputType == Enum.UserInputType.Keyboard then
+                            local newKey = input.KeyCode
+                            currentKey = newKey
+                            keybindButton.Text = tostring(newKey):gsub("Enum.KeyCode.", "")
+                            keybindButton.TextColor3 = THEME.Text
+                            
+                            if callback then
+                                callback(newKey)
+                            end
+                            
+                            connection:Disconnect()
+                            isBinding = false
+                        end
+                    end)
+                end
+            end)
+
+            local function getKeybind()
+                return currentKey
+            end
+
+            return keybindFrame, getKeybind
+        end
+
+        -- Touch-friendly button hover effects
+        TabButton.MouseEnter:Connect(function()
+            if not tab.Active then
+                TweenService:Create(TabButton, THEME.FastTween, {
+                    BackgroundTransparency = 0.95,
+                    BackgroundColor3 = THEME.TextMuted
+                }):Play()
+            end
+        end)
+        
+        TabButton.MouseLeave:Connect(function()
+            if not tab.Active then
+                TweenService:Create(TabButton, THEME.FastTween, {
+                    BackgroundTransparency = 1
+                }):Play()
+            end
+        end)
+
+        TabButton.MouseButton1Click:Connect(function()
+            tab:Show()
+        end)
+
+        tab.Button = TabButton
+        tab.Page = TabPage
+        tab.Icon = TabIcon
+        tab.Text = TabText
+
+        Window._tabs[#Window._tabs + 1] = tab
+        return tab
+    end
+
+    function Window:Destroy()
+        for i = #ActiveNotifications, 1, -1 do
+            local notif = ActiveNotifications[i]
+            if notif and notif.Parent then
+                notif:Destroy()
+            end
+            table.remove(ActiveNotifications, i)
+        end
+        
+        if mobileToggle and mobileToggle.Parent then
+            mobileToggle:Destroy()
+        end
+        
+        if screen and screen.Parent then
+            screen:Destroy()
+        end
+    end
+
+    -- Database helper function
+    local function DB()
+        return Window._scriptDatabase or SCRIPT_DATABASE
+    end
+
+    -- Mobile-optimized script database
+    local SCRIPT_DATABASE = {
+        [301549746] = {
+            gameName = "Counter Blox",
+            scripts = {
+                {title = "Lynk CB", description = "Advanced Counter Blox script", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkcb/refs/heads/main/counterblox"))()', RequiresKey = true}
+            }
+        },
+        [9791603388] = {
+            gameName = "Underground War 2.0",
+            scripts = {
+                {title = "Silent Aim Fixed", description = "Silent aim for Underground War", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/WITHERCC/refs/heads/main/un"))()', RequiresKey = false}
+            }
+        },
+        ["Universal"] = {
+            gameName = "Universal Scripts",
+            scripts = {
+                {title = "Infinite Yield", description = "Admin commands for any game", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()', RequiresKey = false},
+                {title = "Fly Script", description = "Universal fly with speed control", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/fly.lua"))()', RequiresKey = false},
+                {title = "Noclip", description = "Walk through walls", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/lynkUI/refs/heads/main/noclip.lua"))()', RequiresKey = false},
+                {title = "Universal Fly", description = "Universal fly script", LoadString = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/vvisuall/WITHERCC/refs/heads/main/universal%20fly"))()', RequiresKey = false}
+            }
+        }
+    }
+
+    local function getCurrentPlaceId()
+        return game.PlaceId
+    end
+
+    -- Mobile-optimized script card creation
+    local function createScriptCard(parent, gameData, script, position)
+        local placeId = gameData.placeId or "Universal"
+        
+        local Card = new("Frame", {
+            Name = "ScriptCard",
+            Size = UDim2.new(1, 0, 0, 120), -- Full width, smaller height for mobile
+            BackgroundColor3 = THEME.Card,
+            BorderSizePixel = 0,
+            ZIndex = 1000004
+        })
+        Card.Parent = parent
+        
+        local cardCorner = new("UICorner")
+        cardCorner.CornerRadius = THEME.SmallCornerRadius
+        cardCorner.Parent = Card
+        
+        createGlow(Card, THEME.Primary, 0.8)
+        
+        -- Mobile layout: thumbnail on left, info on right
+        local ThumbnailContainer = new("Frame", {
+            Name = "ThumbnailContainer",
+            Position = UDim2.new(0, 8, 0, 8),
+            Size = UDim2.new(0, 100, 1, -16), -- Fixed width for mobile
+            BackgroundColor3 = THEME.Surface,
+            BorderSizePixel = 0,
+            ZIndex = 1000005
+        })
+        ThumbnailContainer.Parent = Card
+        
+        local thumbCorner = new("UICorner")
+        thumbCorner.CornerRadius = THEME.SmallCornerRadius
+        thumbCorner.Parent = ThumbnailContainer
+        
+        local GameThumbnail = new("ImageLabel", {
+            Name = "GameThumbnail",
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundTransparency = 1,
+            Image = placeId ~= "Universal" and string.format("https://www.roblox.com/asset-thumbnail/image?assetId=%d&width=768&height=432&format=png", placeId) or "rbxassetid://83202805728510",
+            ScaleType = Enum.ScaleType.Crop,
+            ZIndex = 1000005
+        })
+        GameThumbnail.Parent = ThumbnailContainer
+        
+        local imageCorner = new("UICorner")
+        imageCorner.CornerRadius = THEME.SmallCornerRadius
+        imageCorner.Parent = GameThumbnail
+        
+        if placeId == "Universal" then
+            local UniversalIcon = new("TextLabel", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Text = EMOJIS.GLOBE,
+                Font = Enum.Font.GothamBold,
+                TextSize = 32, -- Smaller for mobile
+                TextColor3 = THEME.Primary,
+                TextXAlignment = Enum.TextXAlignment.Center,
+                TextYAlignment = Enum.TextYAlignment.Center,
+                ZIndex = 1000006
+            })
+            UniversalIcon.Parent = ThumbnailContainer
+        end
+        
+        if script.RequiresKey == true then
+            local KeyIndicator = new("Frame", {
+                Name = "KeyIndicator",
+                Position = UDim2.new(1, -20, 0, 5),
+                Size = UDim2.new(0, 15, 0, 15), -- Smaller for mobile
+                BackgroundColor3 = Color3.fromRGB(255, 193, 7),
+                BorderSizePixel = 0,
+                ZIndex = 1000006
+            })
+            KeyIndicator.Parent = ThumbnailContainer
+            
+            local keyCorner = new("UICorner")
+            keyCorner.CornerRadius = UDim.new(0.5, 0)
+            keyCorner.Parent = KeyIndicator
+            
+            local KeyIcon = new("TextLabel", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Text = EMOJIS.KEY,
+                Font = Enum.Font.GothamBold,
+                TextSize = 8, -- Smaller for mobile
+                TextColor3 = Color3.fromRGB(0, 0, 0),
+                TextXAlignment = Enum.TextXAlignment.Center,
+                TextYAlignment = Enum.TextYAlignment.Center,
+                ZIndex = 1000007
+            })
+            KeyIcon.Parent = KeyIndicator
+        end
+        
+        -- Info container
+        local InfoContainer = new("Frame", {
+            Name = "InfoContainer",
+            Position = UDim2.new(0, 116, 0, 8),
+            Size = UDim2.new(1, -124, 1, -16),
+            BackgroundTransparency = 1,
+            ZIndex = 1000005
+        })
+        InfoContainer.Parent = Card
+        
+        local GameName = new("TextLabel", {
+            Name = "GameName",
+            Size = UDim2.new(1, 0, 0, 16),
+            BackgroundTransparency = 1,
+            Text = gameData.gameName,
+            Font = Enum.Font.Gotham,
+            TextSize = 10, -- Smaller for mobile
+            TextColor3 = THEME.TextMuted,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextTruncate = Enum.TextTruncate.AtEnd,
+            ZIndex = 1000005
+        })
+        GameName.Parent = InfoContainer
+        
+        local ScriptName = new("TextLabel", {
+            Name = "ScriptName",
+            Position = UDim2.new(0, 0, 0, 18),
+            Size = UDim2.new(1, 0, 0, 20),
+            BackgroundTransparency = 1,
+            Text = script.Title or script.title,
+            Font = Enum.Font.GothamBold,
+            TextSize = 14, -- Smaller for mobile
+            TextColor3 = THEME.Text,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextTruncate = Enum.TextTruncate.AtEnd,
+            ZIndex = 1000005
+        })
+        ScriptName.Parent = InfoContainer
+        
+        -- Description for mobile
+        local Description = new("TextLabel", {
+            Name = "Description",
+            Position = UDim2.new(0, 0, 0, 40),
+            Size = UDim2.new(1, 0, 1, -45),
+            BackgroundTransparency = 1,
+            Text = script.description or script.Description or "No description available",
+            Font = Enum.Font.Gotham,
+            TextSize = 9, -- Smaller for mobile
+            TextColor3 = THEME.TextMuted,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextYAlignment = Enum.TextYAlignment.Top,
+            TextWrapped = true,
+            ZIndex = 1000005
+        })
+        Description.Parent = InfoContainer
+        
+        -- Execute button for mobile
+        local ExecuteButton = new("TextButton", {
+            Name = "ExecuteButton",
+            Position = UDim2.new(1, -60, 1, -25),
+            Size = UDim2.new(0, 55, 0, 20),
+            BackgroundColor3 = THEME.Success,
+            BorderSizePixel = 0,
+            Text = "Execute",
+            Font = Enum.Font.GothamBold,
+            TextSize = 9,
+            TextColor3 = THEME.Text,
+            AutoButtonColor = false,
+            ZIndex = 1000006
+        })
+        ExecuteButton.Parent = InfoContainer
+        
+        local executeCorner = new("UICorner")
+        executeCorner.CornerRadius = UDim.new(0, 4)
+        executeCorner.Parent = ExecuteButton
+        
+        -- Execute functionality
+        ExecuteButton.MouseButton1Click:Connect(function()
+            ExecuteButton.Text = "Running..."
+            ExecuteButton.BackgroundColor3 = THEME.TextMuted
+            
+            spawn(function()
+                local success, result = pcall(function()
+                    if script.url then
+                        loadstring(game:HttpGet(script.url))()
+                    elseif script.LoadString then
+                        loadstring(script.LoadString)()
+                    else
+                        error("No valid script entry found")
+                    end
+                end)
+                
+                wait(1)
+                
+                if success then
+                    ExecuteButton.Text = "Success!"
+                    ExecuteButton.BackgroundColor3 = THEME.Success
+                    createNotification("Script Executed", "Script ran successfully", 3, "success")
+                else
+                    ExecuteButton.Text = "Failed!"
+                    ExecuteButton.BackgroundColor3 = THEME.Danger
+                    createNotification("Execution Failed", "Script failed to run", 3, "error")
+                    warn("❌ Script execution failed:", result)
+                end
+                
+                wait(2)
+                ExecuteButton.Text = "Execute"
+                ExecuteButton.BackgroundColor3 = THEME.Success
+            end)
+        end)
+        
+        -- Touch-friendly hover effects
+        local ClickButton = new("TextButton", {
+            Name = "ClickButton",
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundTransparency = 1,
+            Text = "",
+            ZIndex = 1000010
+        })
+        ClickButton.Parent = Card
+        
+        ClickButton.MouseEnter:Connect(function()
+            TweenService:Create(Card, THEME.FastTween, {
+                BackgroundColor3 = THEME.Surface
+            }):Play()
+        end)
+        
+        ClickButton.MouseLeave:Connect(function()
+            TweenService:Create(Card, THEME.FastTween, {
+                BackgroundColor3 = THEME.Card
+            }):Play()
+        end)
+        
+        return Card
+    end
+
+    -- Mobile-optimized home tab population
+    local function populateHomeTab(homeTab)
+        for _, child in pairs(homeTab:GetChildren()) do
+            if child:IsA("GuiObject") and child.Name ~= "UIListLayout" and child.Name ~= "UIPadding" then
+                child:Destroy()
+            end
+        end
+        
+        -- Mobile search bar
+        local searchFrame = new("Frame", {
+            Name = "SearchFrame",
+            Size = UDim2.new(1, 0, 0, 35), -- Smaller for mobile
+            BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+            BorderSizePixel = 0,
+            LayoutOrder = 1,
+            ZIndex = 1000004
+        })
+        searchFrame.Parent = homeTab
+        
+        local searchCorner = new("UICorner")
+        searchCorner.CornerRadius = UDim.new(0, 6)
+        searchCorner.Parent = searchFrame
+        
+        local searchBox = new("TextBox", {
+            Name = "SearchBox",
+            Position = UDim2.new(0, 12, 0, 0),
+            Size = UDim2.new(1, -24, 1, 0),
+            BackgroundTransparency = 1,
+            Text = "",
+            PlaceholderText = EMOJIS.SEARCH .. " Search scripts...",
+            Font = Enum.Font.Gotham,
+            TextSize = 12, -- Smaller for mobile
+            TextColor3 = THEME.Text,
+            PlaceholderColor3 = THEME.TextMuted,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            ClearTextOnFocus = false,
+            ZIndex = 1000005
+        })
+        searchBox.Parent = searchFrame
+        
+        -- Mobile script list (vertical layout)
+        local ScrollFrame = new("ScrollingFrame", {
+            Name = "ScriptScrollFrame",
+            Size = UDim2.new(1, 0, 1, -45),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ScrollBarThickness = 4, -- Thinner for mobile
+            ScrollBarImageColor3 = THEME.Primary,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y,
+            LayoutOrder = 2,
+            ZIndex = 1000004
+        })
+        ScrollFrame.Parent = homeTab
+        
+        -- Mobile list layout (vertical)
+        local ListLayout = new("UIListLayout", {
+            Padding = UDim.new(0, 8),
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            FillDirection = Enum.FillDirection.Vertical
+        })
+        ListLayout.Parent = ScrollFrame
+        
+        local Padding = new("UIPadding", {
+            PaddingTop = UDim.new(0, 10),
+            PaddingBottom = UDim.new(0, 10),
+            PaddingLeft = UDim.new(0, 8),
+            PaddingRight = UDim.new(0, 8)
+        })
+        Padding.Parent = ScrollFrame
+
+        -- Search functionality
+        searchBox.Changed:Connect(function(property)
+            if property == "Text" then
+                local searchText = searchBox.Text
+                
+                for _, card in pairs(ScrollFrame:GetChildren()) do
+                    if card:IsA("Frame") and card.Name ~= "UIListLayout" and card.Name ~= "UIPadding" then
+                        local scriptNameLabel = card:FindFirstChild("InfoContainer") and card.InfoContainer:FindFirstChild("ScriptName")
+                        local gameNameLabel = card:FindFirstChild("InfoContainer") and card.InfoContainer:FindFirstChild("GameName")
+                        local visible = false
+                        
+                        if searchText == "" then
+                            visible = true
+                        else
+                            local searchLower = searchText:lower()
+                            
+                            if scriptNameLabel and scriptNameLabel.Text:lower():find(searchLower) then
+                                visible = true
+                            end
+                            
+                            if gameNameLabel and gameNameLabel.Text:lower():find(searchLower) then
+                                visible = true
+                            end
+                            
+                            local keywords = card:GetAttribute("Keywords") or ""
+                            if keywords:lower():find(searchLower) then
+                                visible = true
+                            end
+                        end
+                        
+                        card.Visible = visible
+                    end
+                end
+            end
+        end)
+
+        -- Populate with scripts
+        local currentPlaceId = getCurrentPlaceId()
+        local currentGameData = DB()[currentPlaceId]
+        
+        local cardIndex = 0
+        
+        if currentGameData then
+            for _, script in pairs(currentGameData.scripts) do
+                local card = createScriptCard(ScrollFrame, {
+                    placeId = currentPlaceId,
+                    gameName = currentGameData.gameName
+                }, script)
+                card.LayoutOrder = cardIndex
+                card:SetAttribute("Keywords", script.keywords or "")
+                cardIndex = cardIndex + 1
+            end
+        end
+        
+        local universalData = DB()["Universal"]
+        if universalData then
+            for _, script in pairs(universalData.scripts) do
+                local card = createScriptCard(ScrollFrame, {
+                    placeId = "Universal",
+                    gameName = universalData.gameName
+                }, script)
+                card.LayoutOrder = cardIndex
+                card:SetAttribute("Keywords", script.keywords or "fly noclip speed universal movement")
+                cardIndex = cardIndex + 1
+            end
+        end
+        
+        for placeId, gameData in pairs(DB()) do
+            if placeId ~= currentPlaceId and placeId ~= "Universal" then
+                for _, script in pairs(gameData.scripts) do
+                    local card = createScriptCard(ScrollFrame, {
+                        placeId = placeId,
+                        gameName = gameData.gameName
+                    }, script)
+                    card.LayoutOrder = cardIndex
+                    card:SetAttribute("Keywords", script.keywords or "")
+                    cardIndex = cardIndex + 1
+                end
+            end
+        end
+    end
+
+    -- Mobile-optimized LoadScriptCards
+    function Window:LoadScriptCards()
+        if #Window._tabs == 0 then
+            local homeTab = Window:CreateTab("Home", "rbxassetid://10734950309", 1)
+            populateHomeTab(homeTab.Page)
+            
+            local updatesTab = Window:CreateTab("Updates", "rbxassetid://7733674079", 2)
+            updatesTab:CreateSection("Recent Updates")
+            updatesTab:CreateLabel("Version 2.2.0 Mobile - Latest", 14)
+            updatesTab:CreateLabel("• Mobile-optimized interface")
+            updatesTab:CreateLabel("• Touch-friendly controls")
+            updatesTab:CreateLabel("• Responsive design")
+            updatesTab:CreateLabel("• Mobile toggle button")
+            updatesTab:CreateLabel("• Optimized notifications")
+            updatesTab:CreateLabel("")
+            updatesTab:CreateLabel("Version 2.2.0 - Desktop", 14)
+            updatesTab:CreateLabel("• Fixed emoji display after obfuscation")
+            updatesTab:CreateLabel("• Fixed notification toggle functionality")
+            updatesTab:CreateLabel("• Removed duplicate tab names")
+            updatesTab:CreateLabel("• Added Discord button to Credits")
+            updatesTab:CreateLabel("• Updated button colors to match theme")
+            
+            local creditsTab = Window:CreateTab("Credits", "rbxassetid://7733955511", 3)
+            creditsTab:CreateSection("LYNK Script Hub v2.2 Mobile")
+            creditsTab:CreateLabel("")
+            creditsTab:CreateButton("Join Discord", function()
+                setclipboard("https://discord.gg/AzMbjqD7T3")
+                createNotification("Discord Link Copied", "Discord invite copied to clipboard", 4, "success")
+            end)
+            creditsTab:CreateLabel("")
+            creditsTab:CreateSection("Development Team")
+            creditsTab:CreateLabel("• @x_vvw - Lead Developer")
+            creditsTab:CreateLabel("• Script Hub Community")
+            creditsTab:CreateLabel("")
+            creditsTab:CreateSection("Mobile Features")
+            creditsTab:CreateLabel("• Touch-optimized interface")
+            creditsTab:CreateLabel("• Responsive design")
+            creditsTab:CreateLabel("• Mobile toggle button")
+            creditsTab:CreateLabel("• Gesture support")
+            creditsTab:CreateLabel("• Optimized performance")
+
+            local settingsTab = Window:CreateTab("Settings", "rbxassetid://10734950020", 4)
+            settingsTab:CreateSection("Mobile Settings")
+            
+            local notifToggle, getNotifState = settingsTab:CreateToggle("Enable Notifications", NOTIFICATIONS_ENABLED, function(enabled)
+                NOTIFICATIONS_ENABLED = enabled
+                if enabled then
+                    createNotification("Notifications Enabled", "You will now receive notifications", 3, "success")
+                else
+                    createNotification("Notifications Disabled", "Notifications have been turned off", 3, "info")
+                end
+            end)
+            
+            settingsTab:CreateSection("Database")
+            settingsTab:CreateButton(EMOJIS.REFRESH .. " Refresh Database", function()
+                createNotification("Database Refreshed", "Script database has been updated", 3, "success")
+            end)
+            
+            settingsTab:CreateSection("Theme")
+            settingsTab:CreateButton(EMOJIS.SETTINGS .. " Theme Settings", function()
+                createNotification("Coming Soon", "Theme customization will be available soon", 3, "info")
+            end)
+
+            spawn(function()
+                wait(0.1)
+                homeTab:Show()
+            end)
+        end
+    end
+
+    function Window:Destroy()
+        for i = #ActiveNotifications, 1, -1 do
+            local notif = ActiveNotifications[i]
+            if notif and notif.Parent then
+                notif:Destroy()
+            end
+            table.remove(ActiveNotifications, i)
+        end
+        
+        if mobileToggle and mobileToggle.Parent then
+            mobileToggle:Destroy()
+        end
+        
+        if screen and screen.Parent then
+            screen:Destroy()
+        end
+    end
+
+    setVisibility(false)
+
+    if Window._locked then
+        createKeySystem(Window)
+    else
+        Window:Show()
+    end
+
+    setmetatable(Window, {__index = Lynk})
+
+    return Window
+end
+
+return Lynk
